@@ -1,0 +1,45 @@
+import axios from "./axios";
+export type Id = string | number;
+
+export interface Request<T> {
+  jsonrpc: "2.0";
+  id: Id;
+  method: string;
+  params: T;
+}
+
+export interface Notification<T> {
+  jsonrpc: "2.0";
+  method: string;
+  params?: T;
+}
+
+export type Response<T, E = any> = {
+  jsonrpc: "2.0";
+  id: Id;
+} & ({ error: Error<E> } | { result: T });
+
+export interface Error<E = any> {
+  code: number;
+  message?: string;
+  data?: E;
+}
+
+export async function post<T>(
+  url: string,
+  method: string,
+  ...params: any
+): Promise<T> {
+  const response = await axios.post<Response<T>>(url, {
+    jsonrpc: "2.0",
+    // TODO: Generate a unique request id
+    id: 1,
+    method,
+    params,
+  });
+  if ("error" in response.data) {
+    throw response.data.error;
+  } else {
+    return response.data?.result;
+  }
+}
