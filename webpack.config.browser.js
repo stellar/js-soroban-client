@@ -4,13 +4,13 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
   entry: {
-    "stellar-sdk": "./src/browser.ts",
-    "stellar-sdk.min": "./src/browser.ts",
+    "soroban-sdk": "./src/browser.ts",
+    "soroban-sdk.min": "./src/browser.ts",
   },
   output: {
     filename: "[name].js",
     path: path.resolve(__dirname, "dist"),
-    library: "StellarSdk",
+    library: "SorobanSdk",
     umdNamedDefine: true,
   },
   resolve: {

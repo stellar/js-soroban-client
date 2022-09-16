@@ -9,7 +9,7 @@ module.exports = function(config) {
     browsers: ["FirefoxHeadless", "ChromeHeadless"],
 
     files: [
-      "dist/stellar-sdk.js",
+      "dist/soroban-sdk.js",
       "test/test-browser.js",
       "test/unit/**/*.js",
     ],

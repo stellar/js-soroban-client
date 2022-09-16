@@ -2,7 +2,7 @@
 
 import isEmpty from "lodash/isEmpty";
 import merge from "lodash/merge";
-import { FeeBumpTransaction, Transaction } from "stellar-base";
+import { FeeBumpTransaction, Transaction, xdr } from "stellar-base";
 import URI from "urijs";
 
 import * as jsonrpc from "./jsonrpc";
@@ -56,12 +56,10 @@ export class Server {
     }
   }
 
-  public async getTimebounds(
-    _seconds: number,
-    _isRetry: boolean = false,
-  ): Promise<Server.Timebounds> {
-    // TODO: Do we need this?
-    throw new Error("Not implemented");
+  public async getAccount(
+    address: string,
+  ): Promise<SorobanRpc.GetAccountResponse> {
+    return await jsonrpc.post(this.serverURL.toString(), "getAccount", address);
   }
 
   public async getHealth(): Promise<SorobanRpc.GetHealthResponse> {
@@ -71,121 +69,46 @@ export class Server {
     );
   }
 
-  public async getAccount(
-    _address: string,
-  ): Promise<SorobanRpc.GetAccountResponse> {
-    throw new Error("Not implemented");
+  public async getContractData(
+    contractId: string,
+    key: xdr.ScVal,
+  ): Promise<SorobanRpc.GetContractDataResponse> {
+    return await jsonrpc.post(
+      this.serverURL.toString(),
+      "getContractData",
+      contractId,
+      key.toXDR("base64"),
+    );
   }
 
-  /**
-   * Send a transaction to the network.
-   *
-   * By default this function calls {@link Server#checkMemoRequired}, you can
-   * skip this check by setting the option `skipMemoRequiredCheck` to `true`.
-   *
-   * If you submit any number of `manageOffer` operations, this will add an
-   * attribute to the response that will help you analyze what happened with
-   * your offers.
-   *
-   * Ex:
-   * ```javascript
-   * const res = {
-   *   ...response,
-   *   offerResults: [
-   *     {
-   *       // Exact ordered list of offers that executed, with the exception
-   *       // that the last one may not have executed entirely.
-   *       offersClaimed: [
-   *         sellerId: String,
-   *         offerId: String,
-   *         assetSold: {
-   *           type: 'native|credit_alphanum4|credit_alphanum12',
-   *
-   *           // these are only present if the asset is not native
-   *           assetCode: String,
-   *           issuer: String,
-   *         },
-   *
-   *         // same shape as assetSold
-   *         assetBought: {}
-   *       ],
-   *
-   *       // What effect your manageOffer op had
-   *       effect: "manageOfferCreated|manageOfferUpdated|manageOfferDeleted",
-   *
-   *       // Whether your offer immediately got matched and filled
-   *       wasImmediatelyFilled: Boolean,
-   *
-   *       // Whether your offer immediately got deleted, if for example the order was too small
-   *       wasImmediatelyDeleted: Boolean,
-   *
-   *       // Whether the offer was partially, but not completely, filled
-   *       wasPartiallyFilled: Boolean,
-   *
-   *       // The full requested amount of the offer is open for matching
-   *       isFullyOpen: Boolean,
-   *
-   *       // The total amount of tokens bought / sold during transaction execution
-   *       amountBought: Number,
-   *       amountSold: Number,
-   *
-   *       // if the offer was created, updated, or partially filled, this is
-   *       // the outstanding offer
-   *       currentOffer: {
-   *         offerId: String,
-   *         amount: String,
-   *         price: {
-   *           n: String,
-   *           d: String,
-   *         },
-   *
-   *         selling: {
-   *           type: 'native|credit_alphanum4|credit_alphanum12',
-   *
-   *           // these are only present if the asset is not native
-   *           assetCode: String,
-   *           issuer: String,
-   *         },
-   *
-   *         // same as `selling`
-   *         buying: {},
-   *       },
-   *
-   *       // the index of this particular operation in the op stack
-   *       operationIndex: Number
-   *     }
-   *   ]
-   * }
-   * ```
-   *
-   * For example, you'll want to examine `offerResults` to add affordances like
-   * these to your app:
-   * * If `wasImmediatelyFilled` is true, then no offer was created. So if you
-   *   normally watch the `Server.offers` endpoint for offer updates, you
-   *   instead need to check `Server.trades` to find the result of this filled
-   *   offer.
-   * * If `wasImmediatelyDeleted` is true, then the offer you submitted was
-   *   deleted without reaching the orderbook or being matched (possibly because
-   *   your amounts were rounded down to zero). So treat the just-submitted
-   *   offer request as if it never happened.
-   * * If `wasPartiallyFilled` is true, you can tell the user that
-   *   `amountBought` or `amountSold` have already been transferred.
-   *
-   * @see [Post
-   * Transaction](https://developers.stellar.org/api/resources/transactions/post/)
-   * @param {Transaction|FeeBumpTransaction} transaction - The transaction to submit.
-   * @param {object} [opts] Options object
-   * @param {boolean} [opts.skipMemoRequiredCheck] - Allow skipping memo
-   * required check, default: `false`. See
-   * [SEP0029](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0029.md).
-   * @returns {Promise} Promise that resolves or rejects with response from
-   * horizon.
-   */
+  public async getTransactionStatus(
+    hash: string,
+  ): Promise<SorobanRpc.GetTransactionStatusResponse> {
+    return await jsonrpc.post(
+      this.serverURL.toString(),
+      "getTransactionStatus",
+      hash,
+    );
+  }
+
+  public async simulateTransaction(
+    transaction: Transaction | FeeBumpTransaction,
+  ): Promise<SorobanRpc.SimulateTransactionResponse> {
+    return await jsonrpc.post(
+      this.serverURL.toString(),
+      "simulateTransaction",
+      transaction.toXDR(),
+    );
+  }
+
   public async sendTransaction(
-    _transaction: Transaction | FeeBumpTransaction,
-    _opts: Server.SubmitTransactionOptions = { skipMemoRequiredCheck: false },
-  ): Promise<SorobanRpc.SendTransactionResponse> {
-    throw new Error("Not Implemented");
+    transaction: Transaction | FeeBumpTransaction,
+  ): Promise<SorobanRpc.SimulateTransactionResponse> {
+    return await jsonrpc.post(
+      this.serverURL.toString(),
+      "sendTransaction",
+      transaction.toXDR(),
+    );
   }
 
   /**

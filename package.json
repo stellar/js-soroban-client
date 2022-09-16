@@ -1,7 +1,7 @@
 {
-  "name": "stellar-sdk",
+  "name": "soroban-sdk",
   "version": "10.1.2",
-  "description": "stellar-sdk is a library for working with the Stellar Horizon server.",
+  "description": "soroban-sdk is a library for working with the soroban-rpc server.",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "files": [
@@ -42,18 +42,19 @@
     ]
   },
   "keywords": [
-    "stellar"
+    "stellar",
+    "soroban"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/stellar/js-stellar-sdk.git"
+    "url": "https://github.com/stellar/js-soroban-sdk.git"
   },
   "author": "Stellar Development Foundation <hello@stellar.org>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/stellar/js-stellar-sdk/issues"
+    "url": "https://github.com/stellar/js-soroban-sdk/issues"
   },
-  "homepage": "https://github.com/stellar/js-stellar-sdk",
+  "homepage": "https://github.com/stellar/js-soroban-sdk",
   "devDependencies": {
     "@kollavarsham/gulp-coveralls": "0.2.8",
     "@stellar/prettier-config": "^1.0.1",

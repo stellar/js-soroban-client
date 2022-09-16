@@ -1,5 +1,7 @@
-import { AssetType, xdr } from "stellar-base";
+import { AssetType } from "stellar-base";
 import * as jsonrpc from "./jsonrpc";
+
+// TODO: Better parsing for hashes, and base64-encoded xdr
 
 /* tslint:disable-next-line:no-namespace */
 export namespace SorobanRpc {
@@ -17,17 +19,15 @@ export namespace SorobanRpc {
   }
 
   export interface Result {
-    xdr: xdr.ScVal;
+    xdr: string;
   }
 
   export interface Footprint {
-    readOnly: xdr.LedgerKey[];
-    readWrite: xdr.LedgerKey[];
+    readOnly: string[];
+    readWrite: string[];
   }
 
   export type TransactionStatus = "pending" | "success" | "error";
-
-  export type GetHealthResponse = "ok";
 
   export interface GetAccountResponse {
     id: string; // TODO: is this address a string?
@@ -35,8 +35,12 @@ export namespace SorobanRpc {
     balances: Balance[];
   }
 
+  export interface GetHealthResponse {
+    status: "healthy";
+  }
+
   export interface GetContractDataResponse {
-    xdr: xdr.ScVal;
+    xdr: string;
     lastModifiedLedgerSeq?: number;
     latestLedger?: number;
   }
