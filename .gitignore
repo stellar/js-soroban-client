@@ -8,3 +8,4 @@
 .DS_Store
 .idea/
 js-stellar-base/
+.envrc
