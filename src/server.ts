@@ -9,7 +9,7 @@ import * as jsonrpc from "./jsonrpc";
 
 import { SorobanRpc } from "./soroban_rpc";
 
-import axios from "./axios";
+import AxiosClient from "./axios";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -43,7 +43,7 @@ export class Server {
       customHeaders["X-App-Version"] = opts.appVersion;
     }
     if (!isEmpty(customHeaders)) {
-      axios.interceptors.request.use((config) => {
+      AxiosClient.interceptors.request.use((config) => {
         // merge the custom headers with an existing headers
         config.headers = merge(customHeaders, config.headers);
 

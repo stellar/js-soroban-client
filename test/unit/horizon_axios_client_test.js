@@ -1,5 +1,5 @@
-const SERVER_TIME_MAP = StellarSdk.SERVER_TIME_MAP;
-const getCurrentServerTime = StellarSdk.getCurrentServerTime;
+const SERVER_TIME_MAP = SorobanSdk.SERVER_TIME_MAP;
+const getCurrentServerTime = SorobanSdk.getCurrentServerTime;
 
 describe("getCurrentServerTime", () => {
   let clock;

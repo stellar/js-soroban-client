@@ -23,7 +23,7 @@ export interface ServerTime {
  */
 export const SERVER_TIME_MAP: Record<string, ServerTime> = {};
 
-const client = axios.create({
+const AxiosClient = axios.create({
   headers: {
     "X-Client-Name": "js-soroban-sdk",
     "X-Client-Version": version,
@@ -34,7 +34,7 @@ function _toSeconds(ms: number): number {
   return Math.floor(ms / 1000);
 }
 
-client.interceptors.response.use(function interceptorHorizonResponse(
+AxiosClient.interceptors.response.use(function interceptorHorizonResponse(
   response: AxiosResponse,
 ) {
   const hostname = URI(response.config.url!).hostname();
@@ -51,7 +51,7 @@ client.interceptors.response.use(function interceptorHorizonResponse(
   return response;
 });
 
-export default client;
+export default AxiosClient;
 
 /**
  * Given a hostname, get the current time of that server (i.e., use the last-

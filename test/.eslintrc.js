@@ -3,12 +3,13 @@ module.exports = {
     mocha: true
   },
   globals: {
-    StellarSdk: true,
+    AxiosClient: true,
+    SorobanSdk: true,
     axios: true,
     chai: true,
-    sinon: true,
     expect: true,
-    HorizonAxiosClient: true
+    serverUrl: true,
+    sinon: true
   },
   rules: {
     'no-unused-vars': 0

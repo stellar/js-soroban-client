@@ -1,17 +1,17 @@
 function buildTransaction(destination, operations = [], builderOpts = {}) {
   let txBuilderOpts = {
     fee: 100,
-    networkPassphrase: StellarSdk.Networks.TESTNET,
+    networkPassphrase: SorobanSdk.Networks.TESTNET,
     v1: true
   };
   Object.assign(txBuilderOpts, builderOpts);
-  let keypair = StellarSdk.Keypair.random();
-  let account = new StellarSdk.Account(keypair.publicKey(), "56199647068161");
-  let transaction = new StellarSdk.TransactionBuilder(account, txBuilderOpts)
+  let keypair = SorobanSdk.Keypair.random();
+  let account = new SorobanSdk.Account(keypair.publicKey(), "56199647068161");
+  let transaction = new SorobanSdk.TransactionBuilder(account, txBuilderOpts)
     .addOperation(
-      StellarSdk.Operation.payment({
+      SorobanSdk.Operation.payment({
         destination: destination,
-        asset: StellarSdk.Asset.native(),
+        asset: SorobanSdk.Asset.native(),
         amount: "100.50"
       })
     )
@@ -19,12 +19,12 @@ function buildTransaction(destination, operations = [], builderOpts = {}) {
   operations.forEach(op => transaction = transaction.addOperation(op))
 
   transaction = transaction.
-    setTimeout(StellarSdk.TimeoutInfinite)
+    setTimeout(SorobanSdk.TimeoutInfinite)
     .build();
   transaction.sign(keypair);
 
   if (builderOpts.feeBump) {
-    return StellarSdk.TransactionBuilder.buildFeeBumpTransaction(
+    return SorobanSdk.TransactionBuilder.buildFeeBumpTransaction(
       keypair,
       '200',
       transaction,
@@ -102,12 +102,12 @@ function mockAccountRequest(axiosMock, id, status, data = {}) {
     .once();
 }
 
-describe("server.js check-memo-required", function() {
+xdescribe("server.js check-memo-required", function() {
     beforeEach(function() {
-      this.server = new StellarSdk.Server(
+      this.server = new SorobanSdk.Server(
         "https://horizon-testnet.stellar.org"
       );
-      this.axiosMock = sinon.mock(HorizonAxiosClient);
+      this.axiosMock = sinon.mock(AxiosClient);
     });
 
     afterEach(function() {
@@ -125,7 +125,7 @@ describe("server.js check-memo-required", function() {
         .then(function() {
           expect.fail("promise should have failed");
         }, function(err) {
-          expect(err).to.be.instanceOf(StellarSdk.AccountRequiresMemoError);
+          expect(err).to.be.instanceOf(SorobanSdk.AccountRequiresMemoError);
           expect(err.accountId).to.eq(accountId);
           expect(err.operationIndex).to.eq(0);
           done();
@@ -145,7 +145,7 @@ describe("server.js check-memo-required", function() {
         .then(function() {
           expect.fail("promise should have failed");
         }, function(err) {
-          expect(err).to.be.instanceOf(StellarSdk.AccountRequiresMemoError);
+          expect(err).to.be.instanceOf(SorobanSdk.AccountRequiresMemoError);
           expect(err.accountId).to.eq(accountId);
           expect(err.operationIndex).to.eq(0);
           done();
@@ -195,7 +195,7 @@ describe("server.js check-memo-required", function() {
         .then(function() {
           expect.fail("promise should have failed");
         }, function(err) {
-          expect(err).to.be.instanceOf(StellarSdk.NetworkError);
+          expect(err).to.be.instanceOf(SorobanSdk.NetworkError);
           done();
         })
         .catch(function(err) {
@@ -208,9 +208,9 @@ describe("server.js check-memo-required", function() {
       mockAccountRequest(this.axiosMock, accountId, 200, {});
 
       let operations = [
-        StellarSdk.Operation.payment({
+        SorobanSdk.Operation.payment({
           destination: accountId,
-          asset: StellarSdk.Asset.native(),
+          asset: SorobanSdk.Asset.native(),
           amount: "100.50"
         })
       ];
@@ -237,34 +237,34 @@ describe("server.js check-memo-required", function() {
         "GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ"
       ];
 
-      const usd = new StellarSdk.Asset("USD", "GBBM6BKZPEHWYO3E3YKREDPQXMS4VK35YLNU7NFBRI26RAN7GI5POFBB");
-      const eur = new StellarSdk.Asset("EUR", "GDTNXRLOJD2YEBPKK7KCMR7J33AAG5VZXHAJTHIG736D6LVEFLLLKPDL");
-      const liquidityPoolAsset = new StellarSdk.LiquidityPoolAsset(eur, usd, 30);
+      const usd = new SorobanSdk.Asset("USD", "GBBM6BKZPEHWYO3E3YKREDPQXMS4VK35YLNU7NFBRI26RAN7GI5POFBB");
+      const eur = new SorobanSdk.Asset("EUR", "GDTNXRLOJD2YEBPKK7KCMR7J33AAG5VZXHAJTHIG736D6LVEFLLLKPDL");
+      const liquidityPoolAsset = new SorobanSdk.LiquidityPoolAsset(eur, usd, 30);
 
       let operations = [
-        StellarSdk.Operation.accountMerge({
+        SorobanSdk.Operation.accountMerge({
           destination: destinations[0]
         }),
-        StellarSdk.Operation.pathPaymentStrictReceive({
-          sendAsset: StellarSdk.Asset.native(),
+        SorobanSdk.Operation.pathPaymentStrictReceive({
+          sendAsset: SorobanSdk.Asset.native(),
           sendMax: "5.0000000",
           destination: destinations[1],
-          destAsset: StellarSdk.Asset.native(),
+          destAsset: SorobanSdk.Asset.native(),
           destAmount: "5.50",
           path: [usd, eur]
         }),
-        StellarSdk.Operation.pathPaymentStrictSend({
-          sendAsset: StellarSdk.Asset.native(),
+        SorobanSdk.Operation.pathPaymentStrictSend({
+          sendAsset: SorobanSdk.Asset.native(),
           sendAmount: "5.0000000",
           destination: destinations[2],
-          destAsset: StellarSdk.Asset.native(),
+          destAsset: SorobanSdk.Asset.native(),
           destMin: "5.50",
           path: [usd,eur]
         }),
-        StellarSdk.Operation.changeTrust({
+        SorobanSdk.Operation.changeTrust({
           asset: usd
         }),
-        StellarSdk.Operation.changeTrust({
+        SorobanSdk.Operation.changeTrust({
           asset: liquidityPoolAsset
         })
       ];
@@ -284,7 +284,7 @@ describe("server.js check-memo-required", function() {
     });
     it('checks for memo required by default', function(done) {
       let accountId = "GAYHAAKPAQLMGIJYMIWPDWCGUCQ5LAWY4Q7Q3IKSP57O7GUPD3NEOSEA";
-      let memo = StellarSdk.Memo.text('42');
+      let memo = SorobanSdk.Memo.text('42');
       let transaction = buildTransaction(accountId, [], { memo });
       this.server
         .checkMemoRequired(transaction)
