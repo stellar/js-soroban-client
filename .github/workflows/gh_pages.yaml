@@ -32,7 +32,7 @@ jobs:
       - name: Checkout GH pages
         uses: actions/checkout@v2
         with:
-          repository: stellar/js-stellar-sdk
+          repository: stellar/js-soroban-sdk
           ref: gh-pages
           path: jsdoc
 
