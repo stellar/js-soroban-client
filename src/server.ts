@@ -110,31 +110,6 @@ export class Server {
       transaction.toXDR(),
     );
   }
-
-  /**
-   * Check if any of the destination accounts requires a memo.
-   *
-   * This function implements a memo required check as defined in
-   * [SEP0029](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0029.md).
-   * It will load each account which is the destination and check if it has the
-   * data field `config.memo_required` set to `"MQ=="`.
-   *
-   * Each account is checked sequentially instead of loading multiple accounts
-   * at the same time from Horizon.
-   *
-   * @see
-   * [SEP0029](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0029.md)
-   * @param {Transaction} transaction - The transaction to check.
-   * @returns {Promise<void, Error>} - If any of the destination account
-   * requires a memo, the promise will throw {@link AccountRequiresMemoError}.
-   * @throws  {AccountRequiresMemoError}
-   */
-  public async checkMemoRequired(
-    _transaction: Transaction | FeeBumpTransaction,
-  ): Promise<void> {
-    // TODO: See if we need this
-    throw new Error("Not implemented");
-  }
 }
 
 export namespace Server {
@@ -143,14 +118,5 @@ export namespace Server {
     timeout?: number;
     appName?: string;
     appVersion?: string;
-  }
-
-  export interface Timebounds {
-    minTime: number;
-    maxTime: number;
-  }
-
-  export interface SubmitTransactionOptions {
-    skipMemoRequiredCheck?: boolean;
   }
 }

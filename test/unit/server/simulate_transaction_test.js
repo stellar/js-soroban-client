@@ -74,20 +74,11 @@ describe('Server#simulateTransaction', function() {
         done(err);
       });
   });
-  xit('adds metadata - tx was too small and was immediately deleted', function(done) {
-  });
-  xit('adds metadata, order immediately fills', function(done) {
-  });
-  xit('adds metadata, order is open', function(done) {
-  });
-  xit('adds metadata, partial fill', function(done) {
-  });
-  xit('doesnt add metadata to non-offers', function(done) {
-  });
-  xit('adds metadata about offers, even if some ops are not', function(done) {
-  });
-  xit('checks for memo required by default', function(done) {
-  });
-  xit('simulates fee bump transactions', function(done) {
-  });
+  xit('adds metadata - tx was too small and was immediately deleted');
+  xit('adds metadata, order immediately fills');
+  xit('adds metadata, order is open');
+  xit('adds metadata, partial fill');
+  xit('doesnt add metadata to non-offers');
+  xit('adds metadata about offers, even if some ops are not');
+  xit('simulates fee bump transactions');
 });
