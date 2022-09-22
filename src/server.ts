@@ -103,7 +103,7 @@ export class Server {
 
   public async sendTransaction(
     transaction: Transaction | FeeBumpTransaction,
-  ): Promise<SorobanRpc.SimulateTransactionResponse> {
+  ): Promise<SorobanRpc.SendTransactionResponse> {
     return await jsonrpc.post(
       this.serverURL.toString(),
       "sendTransaction",
