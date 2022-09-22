@@ -1,4 +1,6 @@
 import axios from "./axios";
+import { hasOwnProperty } from "./utils";
+
 export type Id = string | number;
 
 export interface Request<T> {
@@ -37,7 +39,7 @@ export async function post<T>(
     method,
     params,
   });
-  if ("error" in response.data) {
+  if (hasOwnProperty(response.data, "error")) {
     throw response.data.error;
   } else {
     return response.data?.result;
