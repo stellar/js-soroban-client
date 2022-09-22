@@ -1,6 +1,6 @@
 {
   "name": "soroban-sdk",
-  "version": "10.1.2",
+  "version": "1.0.0",
   "description": "soroban-sdk is a library for working with the soroban-rpc server.",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
