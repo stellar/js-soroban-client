@@ -46,23 +46,23 @@ export namespace SorobanRpc {
   }
 
   export interface GetTransactionStatusResponse {
-    id: Buffer;
+    id: string;
     status: TransactionStatus;
     results?: Result[];
     error?: jsonrpc.Error;
   }
 
   export interface RequestAirdropResponse {
-    transaction_id: Buffer;
+    transaction_id: string;
   }
 
   export interface SendTransactionResponse {
-    id: Buffer;
+    id: string;
     error?: jsonrpc.Error;
   }
 
   export interface SimulateTransactionResponse {
-    id: Buffer;
+    id: string;
     cost: Cost;
     footprint: Footprint;
     results?: Result[];
