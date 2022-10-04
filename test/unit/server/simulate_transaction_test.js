@@ -40,10 +40,10 @@ describe('Server#simulateTransaction', function() {
       cpuInsns: "10000",
       memBytes: "10000",
     },
-    footprint: {
+    footprint: new SorobanSdk.xdr.LedgerFootprint({
       readOnly: [],
       readWrite: [],
-    },
+    }).toXDR('base64'),
     results: [
       SorobanSdk.xdr.ScVal.scvU32(0).toXDR().toString('base64'),
     ],

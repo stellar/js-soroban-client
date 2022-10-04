@@ -22,11 +22,6 @@ export namespace SorobanRpc {
     xdr: string;
   }
 
-  export interface Footprint {
-    readOnly: string[];
-    readWrite: string[];
-  }
-
   export type TransactionStatus = "pending" | "success" | "error";
 
   export interface GetAccountResponse {
@@ -64,7 +59,7 @@ export namespace SorobanRpc {
   export interface SimulateTransactionResponse {
     id: string;
     cost: Cost;
-    footprint: Footprint;
+    footprint: string;
     results?: Result[];
     error?: jsonrpc.Error;
     latestLedger: number;
