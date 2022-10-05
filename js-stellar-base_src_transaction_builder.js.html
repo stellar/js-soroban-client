@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Home - Documentation</title>
+    <title>js-stellar-base/src/transaction_builder.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,185 +29,696 @@
 
 <div id="main">
     
+    <h1 class="page-title">js-stellar-base/src/transaction_builder.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { UnsignedHyper } from 'js-xdr';
+import BigNumber from 'bignumber.js';
+import clone from 'lodash/clone';
+import isUndefined from 'lodash/isUndefined';
+import isString from 'lodash/isString';
+import isArray from 'lodash/isArray';
 
+import xdr from './xdr';
+import { Transaction } from './transaction';
+import { FeeBumpTransaction } from './fee_bump_transaction';
+import { SignerKey } from './signerkey';
+import { Memo } from './memo';
+import { decodeAddressToMuxedAccount } from './util/decode_encode_muxed_account';
 
+/**
+ * Minimum base fee for transactions. If this fee is below the network
+ * minimum, the transaction will fail. The more operations in the
+ * transaction, the greater the required fee. Use {@link
+ * Server#fetchBaseFee} to get an accurate value of minimum transaction
+ * fee on the network.
+ *
+ * @constant
+ * @see [Fees](https://developers.stellar.org/docs/glossary/fees/)
+ */
+export const BASE_FEE = '100'; // Stroops
 
+/**
+ * @constant
+ * @see {@link TransactionBuilder#setTimeout}
+ * @see [Timeout](https://developers.stellar.org/api/resources/transactions/post/)
+ */
+export const TimeoutInfinite = 0;
 
+/**
+ * &lt;p>Transaction builder helps constructs a new `{@link Transaction}` using the
+ * given {@link Account} as the transaction's "source account". The transaction
+ * will use the current sequence number of the given account as its sequence
+ * number and increment the given account's sequence number by one. The given
+ * source account must include a private key for signing the transaction or an
+ * error will be thrown.&lt;/p>
+ *
+ * &lt;p>Operations can be added to the transaction via their corresponding builder
+ * methods, and each returns the TransactionBuilder object so they can be
+ * chained together. After adding the desired operations, call the `build()`
+ * method on the `TransactionBuilder` to return a fully constructed `{@link
+ * Transaction}` that can be signed. The returned transaction will contain the
+ * sequence number of the source account and include the signature from the
+ * source account.&lt;/p>
+ *
+ * &lt;p>&lt;strong>Be careful about unsubmitted transactions!&lt;/strong> When you build
+ * a transaction, stellar-sdk automatically increments the source account's
+ * sequence number. If you end up not submitting this transaction and submitting
+ * another one instead, it'll fail due to the sequence number being wrong. So if
+ * you decide not to use a built transaction, make sure to update the source
+ * account's sequence number with
+ * [Server.loadAccount](https://stellar.github.io/js-stellar-sdk/Server.html#loadAccount)
+ * before creating another transaction.&lt;/p>
+ *
+ * &lt;p>The following code example creates a new transaction with {@link
+ * Operation.createAccount} and {@link Operation.payment} operations. The
+ * Transaction's source account first funds `destinationA`, then sends a payment
+ * to `destinationB`. The built transaction is then signed by
+ * `sourceKeypair`.&lt;/p>
+ *
+ * ```
+ * var transaction = new TransactionBuilder(source, { fee, networkPassphrase: Networks.TESTNET })
+ * .addOperation(Operation.createAccount({
+ *     destination: destinationA,
+ *     startingBalance: "20"
+ * })) // &lt;- funds and creates destinationA
+ * .addOperation(Operation.payment({
+ *     destination: destinationB,
+ *     amount: "100",
+ *     asset: Asset.native()
+ * })) // &lt;- sends 100 XLM to destinationB
+ * .setTimeout(30)
+ * .build();
+ *
+ * transaction.sign(sourceKeypair);
+ * ```
+ *
+ * @constructor
+ *
+ * @param {Account} sourceAccount - source account for this transaction
+ * @param {object}  opts          - Options object
+ * @param {string}  opts.fee      - max fee you're willing to pay per
+ *     operation in this transaction (**in stroops**)
+ *
+ * @param {object}              [opts.timebounds] - timebounds for the
+ *     validity of this transaction
+ * @param {number|string|Date}  [opts.timebounds.minTime] - 64-bit UNIX
+ *     timestamp or Date object
+ * @param {number|string|Date}  [opts.timebounds.maxTime] - 64-bit UNIX
+ *     timestamp or Date object
+ * @param {object}              [opts.ledgerbounds] - ledger bounds for the
+ *     validity of this transaction
+ * @param {number}              [opts.ledgerbounds.minLedger] - number of the minimum
+ *     ledger sequence
+ * @param {number}              [opts.ledgerbounds.maxLedger] - number of the maximum
+ *     ledger sequence
+ * @param {string}              [opts.minAccountSequence] - number for
+ *     the minimum account sequence
+ * @param {number}              [opts.minAccountSequenceAge] - number of
+ *     seconds for the minimum account sequence age
+ * @param {number}              [opts.minAccountSequenceLedgerGap] - number of
+ *     ledgers for the minimum account sequence ledger gap
+ * @param {string[]}            [opts.extraSigners] - list of the extra signers
+ *     required for this transaction
+ * @param {Memo}                [opts.memo] - memo for the transaction
+ * @param {string}              [opts.networkPassphrase] passphrase of the
+ *     target Stellar network (e.g. "Public Global Stellar Network ; September
+ *     2015" for the pubnet)
+ */
+export class TransactionBuilder {
+  constructor(sourceAccount, opts = {}) {
+    if (!sourceAccount) {
+      throw new Error('must specify source account for the transaction');
+    }
 
+    if (isUndefined(opts.fee)) {
+      throw new Error('must specify fee for the transaction (in stroops)');
+    }
 
+    this.source = sourceAccount;
+    this.operations = [];
 
+    this.baseFee = opts.fee;
+    this.timebounds = clone(opts.timebounds) || null;
+    this.ledgerbounds = clone(opts.ledgerbounds) || null;
+    this.minAccountSequence = opts.minAccountSequence || null;
+    this.minAccountSequenceAge = opts.minAccountSequenceAge || null;
+    this.minAccountSequenceLedgerGap = opts.minAccountSequenceLedgerGap || null;
+    this.extraSigners = clone(opts.extraSigners) || null;
+    this.memo = opts.memo || Memo.none();
+    this.networkPassphrase = opts.networkPassphrase || null;
+  }
 
+  /**
+   * Adds an operation to the transaction.
+   *
+   * @param {xdr.Operation} operation   The xdr operation object, use {@link
+   *     Operation} static methods.
+   *
+   * @returns {TransactionBuilder}
+   */
+  addOperation(operation) {
+    this.operations.push(operation);
+    return this;
+  }
 
-    
+  /**
+   * Adds a memo to the transaction.
+   * @param {Memo} memo {@link Memo} object
+   * @returns {TransactionBuilder}
+   */
+  addMemo(memo) {
+    this.memo = memo;
+    return this;
+  }
 
+  /**
+   * Sets a timeout precondition on the transaction.
+   *
+   *  Because of the distributed nature of the Stellar network it is possible
+   *  that the status of your transaction will be determined after a long time
+   *  if the network is highly congested. If you want to be sure to receive the
+   *  status of the transaction within a given period you should set the {@link
+   *  TimeBounds} with `maxTime` on the transaction (this is what `setTimeout`
+   *  does internally; if there's `minTime` set but no `maxTime` it will be
+   *  added).
+   *
+   *  A call to `TransactionBuilder.setTimeout` is **required** if Transaction
+   *  does not have `max_time` set. If you don't want to set timeout, use
+   *  `{@link TimeoutInfinite}`. In general you should set `{@link
+   *  TimeoutInfinite}` only in smart contracts.
+   *
+   *  Please note that Horizon may still return &lt;code>504 Gateway Timeout&lt;/code>
+   *  error, even for short timeouts. In such case you need to resubmit the same
+   *  transaction again without making any changes to receive a status. This
+   *  method is using the machine system time (UTC), make sure it is set
+   *  correctly.
+   *
+   * @param {number} timeoutSeconds   Number of seconds the transaction is good.
+   *     Can't be negative. If the value is {@link TimeoutInfinite}, the
+   *     transaction is good indefinitely.
+   *
+   * @returns {TransactionBuilder}
+   *
+   * @see {@link TimeoutInfinite}
+   * @see https://developers.stellar.org/docs/tutorials/handling-errors/
+   */
+  setTimeout(timeoutSeconds) {
+    if (this.timebounds !== null &amp;&amp; this.timebounds.maxTime > 0) {
+      throw new Error(
+        'TimeBounds.max_time has been already set - setting timeout would overwrite it.'
+      );
+    }
 
-    <section class="readme">
-        <article><div align="center">
-  <img alt="Stellar" src="https://github.com/stellar/.github/raw/master/stellar-logo.png" width="558" />
-  <br/>
-  <strong>Creating equitable access to the global financial system</strong>
-  <h1>js-soroban-sdk</h1>
-</div>
+    if (timeoutSeconds &lt; 0) {
+      throw new Error('timeout cannot be negative');
+    }
 
-<p align="center">
-  <a href="https://badge.fury.io/js/soroban-sdk"><img src="https://badge.fury.io/js/soroban-sdk.svg" alt="npm version" height="18"></a>
-  <a href="https://github.com/stellar/js-soroban-sdk/actions/workflows/tests.yml"><img alt="Test Status" src="https://github.com/stellar/js-soroban-sdk/actions/workflows/tests.yml/badge.svg" /></a>
-  <a href="https://coveralls.io/github/stellar/js-soroban-sdk?branch=master"><img alt="Coverage Status" src="https://coveralls.io/repos/stellar/js-soroban-sdk/badge.svg?branch=master&service=github" /></a>
-</p>
+    if (timeoutSeconds > 0) {
+      const timeoutTimestamp = Math.floor(Date.now() / 1000) + timeoutSeconds;
+      if (this.timebounds === null) {
+        this.timebounds = { minTime: 0, maxTime: timeoutTimestamp };
+      } else {
+        this.timebounds = {
+          minTime: this.timebounds.minTime,
+          maxTime: timeoutTimestamp
+        };
+      }
+    } else {
+      this.timebounds = {
+        minTime: 0,
+        maxTime: 0
+      };
+    }
 
-<p>js-soroban-sdk is a Javascript library for communicating with a
-<a href="https://github.com/stellar/go/tree/master/services/soroban-rpc">Soroban RPC server</a>.
-It is used for building Stellar apps either on Node.js or in the browser.</p>
-<p>It provides:</p>
-<ul>
-<li>a networking layer API for soroban-rpc methods.</li>
-<li>facilities for building and signing transactions, for communicating with a
-soroban-rpc instance, and for submitting transactions or querying network
-history.</li>
-</ul>
-<h3>soroban-sdk vs stellar-base</h3><p>soroban-sdk is a high-level library that serves as client-side API for Horizon.
-<a href="https://github.com/stellar/js-stellar-base">stellar-base</a> is lower-level
-library for creating Stellar primitive constructs via XDR helpers and wrappers.</p>
-<p><strong>Most people will want soroban-sdk instead of stellar-base.</strong> You should only
-use stellar-base if you know what you're doing!</p>
-<p>If you add <code>soroban-sdk</code> to a project, <strong>do not add <code>stellar-base</code>!</strong> Mis-matching
-versions could cause weird, hard-to-find bugs. <code>soroban-sdk</code> automatically
-installs <code>stellar-base</code> and exposes all of its exports in case you need them.</p>
-<blockquote>
-<p><strong>Important!</strong> The Node.js version of the <code>stellar-base</code> (<code>soroban-sdk</code> dependency) package
-uses the <a href="https://www.npmjs.com/package/sodium-native"><code>sodium-native</code></a> package as
-an <a href="https://docs.npmjs.com/files/package.json#optionaldependencies">optional dependency</a>. <code>sodium-native</code> is
-a low level binding to <a href="https://github.com/jedisct1/libsodium">libsodium</a>,
-(an implementation of <a href="https://ed25519.cr.yp.to/">Ed25519</a> signatures).
-If installation of <code>sodium-native</code> fails, or it is unavailable, <code>stellar-base</code> (and <code>soroban-sdk</code>) will
-fallback to using the <a href="https://www.npmjs.com/package/tweetnacl"><code>tweetnacl</code></a> package implementation.</p>
-<p>If you are using <code>soroban-sdk</code>/<code>stellar-base</code> in a browser you can ignore
-this. However, for production backend deployments you should be
-using <code>sodium-native</code>. If <code>sodium-native</code> is successfully installed and working the
-<code>SorobanSdk.FastSigning</code> variable will return <code>true</code>.</p>
-</blockquote>
-<h2>Quick start</h2><p>Using npm to include js-soroban-sdk in your own project:</p>
-<pre class="prettyprint source lang-shell"><code>npm install --save soroban-sdk</code></pre><p>Alternatively, you can use cdnjs in a browser:</p>
-<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/soroban-sdk/{version}/soroban-sdk.js&quot;>&lt;/script>
-`</code></pre><h2>Install</h2><h3>To use as a module in a Node.js project</h3><ol>
-<li>Install it using npm:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>npm install --save soroban-sdk</code></pre><ol start="2">
-<li>require/import it in your JavaScript:</li>
-</ol>
-<pre class="prettyprint source lang-js"><code>var SorobanSdk = require('soroban-sdk');</code></pre><h3>To self host for use in the browser</h3><ol>
-<li>Install it using <a href="http://bower.io">bower</a>:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>bower install soroban-sdk</code></pre><ol start="2">
-<li>Include it in the browser:</li>
-</ol>
-<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;./bower_components/soroban-sdk/soroban-sdk.js&quot;>&lt;/script>
-&lt;script>
-  console.log(SorobanSdk);
-&lt;/script></code></pre><p>If you don't want to use or install Bower, you can copy built JS files from the
-<a href="https://github.com/stellar/bower-js-soroban-sdk">bower-js-soroban-sdk repo</a>.</p>
-<h3>To use the <a href="https://cdnjs.com/libraries/soroban-sdk">cdnjs</a> hosted script in the browser</h3><ol>
-<li>Instruct the browser to fetch the library from
-<a href="https://cdnjs.com/libraries/soroban-sdk">cdnjs</a>, a 3rd party service that
-hosts js libraries:</li>
-</ol>
-<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/soroban-sdk/{version}/soroban-sdk.js&quot;>&lt;/script>
-&lt;script>
-  console.log(SorobanSdk);
-&lt;/script></code></pre><p>Note that this method relies using a third party to host the JS library. This
-may not be entirely secure.</p>
-<p>Make sure that you are using the latest version number. They can be found on the
-<a href="https://github.com/stellar/js-soroban-sdk/releases">releases page in Github</a>.</p>
-<h3>To develop and test js-soroban-sdk itself</h3><ol>
-<li>Clone the repo:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>git clone https://github.com/stellar/js-soroban-sdk.git</code></pre><ol start="2">
-<li>Install dependencies inside js-soroban-sdk folder:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>cd js-soroban-sdk
-npm install</code></pre><ol start="3">
-<li>Install Node 14</li>
-</ol>
-<p>Because we support the latest maintenance version of Node, please install and develop on Node 14 so you don't get surprised when your code works locally but breaks in CI.</p>
-<p>Here's how to install <code>nvm</code> if you haven't: https://github.com/creationix/nvm</p>
-<pre class="prettyprint source lang-shell"><code>nvm install
+    return this;
+  }
 
-# if you've never installed 14 before you'll want to re-install yarn
-npm install -g yarn</code></pre><p>If you work on several projects that use different Node versions, you might it
-helpful to install this automatic version manager:
-https://github.com/wbyoung/avn</p>
-<ol start="4">
-<li>Observe the project's code style</li>
-</ol>
-<p>While you're making changes, make sure to run the linter-watcher to catch any
-   linting errors (in addition to making sure your text editor supports ESLint)</p>
-<pre class="prettyprint source lang-shell"><code>node_modules/.bin/gulp watch
-`</code></pre><h3>How to use with React-Native</h3><ol>
-<li>Add the following postinstall script:<pre class="prettyprint source"><code>yarn rn-nodeify --install url,events,https,http,util,stream,crypto,vm,buffer --hack --yarn</code></pre></li>
-<li><code>yarn add -D rn-nodeify</code></li>
-<li>Uncomment <code>require('crypto')</code> on shim.js</li>
-<li><code>react-native link react-native-randombytes</code></li>
-<li>Create file <code>rn-cli.config.js</code><pre class="prettyprint source"><code>module.exports = {
-resolver: {
- extraNodeModules: require(&quot;node-libs-react-native&quot;),
-},
-};</code></pre></li>
-<li>Add <code>import &quot;./shim&quot;;</code> to the top of <code>index.js</code></li>
-<li><code>yarn add soroban-sdk</code></li>
-</ol>
-<p>There is also a <a href="https://github.com/fnando/rn-soroban-sdk-sample">sample</a> that you can follow.</p>
-<h4>Using in an Expo managed workflow</h4><ol>
-<li>Add the following postinstall script:<pre class="prettyprint source"><code>yarn rn-nodeify --install process,url,events,https,http,util,stream,crypto,vm,buffer --hack --yarn</code></pre></li>
-<li><code>yarn add -D rn-nodeify</code></li>
-<li>Add <code>import &quot;./shim&quot;;</code> to the your app's entry point (by default <code>./App.js</code>)</li>
-<li><code>yarn add soroban-sdk</code></li>
-<li><code>expo install expo-random</code></li>
-</ol>
-<p>At this point, the stellar SDK will work, except that <code>SorobanSdk.Keypair.random()</code> will throw an error. So to work around this you can create your own method to generate a random keypair like this:</p>
-<pre class="prettyprint source lang-javascript"><code>import * as Random from 'expo-random';
-import SorobanSdk from 'soroban-sdk';
+  /**
+   * If you want to prepare a transaction which will become valid at some point
+   * in the future, or be invalid after some time, you can set a timebounds
+   * precondition. Internally this will set the `minTime`, and `maxTime`
+   * preconditions. Conflicts with `setTimeout`, so use one or the other.
+   *
+   * @param {Date|number} minEpochOrDate  Either a JS Date object, or a number
+   *     of UNIX epoch seconds. The transaction is valid after this timestamp.
+   *     Can't be negative. If the value is `0`, the transaction is valid
+   *     immediately.
+   * @param {Date|number} maxEpochOrDate  Either a JS Date object, or a number
+   *     of UNIX epoch seconds. The transaction is valid until this timestamp.
+   *     Can't be negative. If the value is `0`, the transaction is valid
+   *     indefinitely.
+   *
+   * @returns {TransactionBuilder}
+   */
+  setTimebounds(minEpochOrDate, maxEpochOrDate) {
+    // Force it to a date type
+    if (typeof minEpochOrDate === 'number') {
+      minEpochOrDate = new Date(minEpochOrDate * 1000);
+    }
+    if (typeof maxEpochOrDate === 'number') {
+      maxEpochOrDate = new Date(maxEpochOrDate * 1000);
+    }
 
-const generateRandomKeypair = () => {
-  const randomBytes = Random.getRandomBytes(32);
+    if (this.timebounds !== null) {
+      throw new Error(
+        'TimeBounds has been already set - setting timebounds would overwrite it.'
+      );
+    }
 
-  return SorobanSdk.Keypair.fromRawEd25519Seed(Buffer.from(randomBytes));
-};</code></pre><h2>Usage</h2><p>For information on how to use js-soroban-sdk, take a look at <a href="https://stellar.github.io/js-soroban-sdk/">the
-documentation</a>, or <a href="https://github.com/stellar/js-soroban-sdk/tree/master/docs/reference">the
-examples</a>.</p>
-<p>There is also Horizon REST API Documentation
-<a href="https://developers.stellar.org/api/introduction/">here</a>.</p>
-<h2>Testing</h2><p>To run all tests:</p>
-<pre class="prettyprint source lang-shell"><code>gulp test</code></pre><p>To run a specific set of tests:</p>
-<pre class="prettyprint source lang-shell"><code>gulp test:node
-gulp test:browser</code></pre><p>To generate and check the documentation site:</p>
-<pre class="prettyprint source lang-shell"><code># install the `serve` command if you don't have it already
-npm install -g serve
+    // Convert that date to the epoch seconds
+    const minTime = Math.floor(minEpochOrDate.valueOf() / 1000);
+    const maxTime = Math.floor(maxEpochOrDate.valueOf() / 1000);
+    if (minTime &lt; 0) {
+      throw new Error('min_time cannot be negative');
+    }
+    if (maxTime &lt; 0) {
+      throw new Error('max_time cannot be negative');
+    }
+    if (maxTime > 0 &amp;&amp; minTime > maxTime) {
+      throw new Error('min_time cannot be greater than max_time');
+    }
 
-# generate the docs files
-npm run docs
+    this.timebounds = { minTime, maxTime };
 
-# get these files working in a browser
-cd jsdoc && serve .
+    return this;
+  }
 
-# you'll be able to browse the docs at http://localhost:5000</code></pre><h2>Documentation</h2><p>Documentation for this repo lives in
-<a href="https://github.com/stellar/js-soroban-sdk/blob/master/docs/reference/readme.md">Developers site</a>.</p>
-<h2>Contributing</h2><p>For information on how to contribute, please refer to our
-<a href="https://github.com/stellar/js-soroban-sdk/blob/master/CONTRIBUTING.md">contribution guide</a>.</p>
-<h2>Publishing to npm</h2><pre class="prettyprint source"><code>npm version [&lt;newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease]</code></pre><p>A new version will be published to npm <strong>and</strong> Bower by GitHub actions.</p>
-<p>npm &gt;= 2.13.0 required. Read more about
-<a href="https://docs.npmjs.com/cli/version">npm version</a>.</p>
-<h2>License</h2><p>js-soroban-sdk is licensed under an Apache-2.0 license. See the
-<a href="https://github.com/stellar/js-soroban-sdk/blob/master/LICENSE">LICENSE</a> file
-for details.</p></article>
+  /**
+   * If you want to prepare a transaction which will only be valid within some
+   * range of ledgers, you can set a ledgerbounds precondition.
+   * Internally this will set the `minLedger` and `maxLedger` preconditions.
+   *
+   * @param {number} minLedger  The minimum ledger this transaction is valid at
+   *     or after. Cannot be negative. If the value is `0` (the default), the
+   *     transaction is valid immediately.
+   *
+   * @param {number} maxLedger  The maximum ledger this transaction is valid
+   *     before. Cannot be negative. If the value is `0`, the transaction is
+   *     valid indefinitely.
+   *
+   * @returns {TransactionBuilder}
+   */
+  setLedgerbounds(minLedger, maxLedger) {
+    if (this.ledgerbounds !== null) {
+      throw new Error(
+        'LedgerBounds has been already set - setting ledgerbounds would overwrite it.'
+      );
+    }
+
+    if (minLedger &lt; 0) {
+      throw new Error('min_ledger cannot be negative');
+    }
+    if (maxLedger &lt; 0) {
+      throw new Error('max_ledger cannot be negative');
+    }
+    if (maxLedger > 0 &amp;&amp; minLedger > maxLedger) {
+      throw new Error('min_ledger cannot be greater than max_ledger');
+    }
+
+    this.ledgerbounds = { minLedger, maxLedger };
+
+    return this;
+  }
+
+  /**
+   * If you want to prepare a transaction which will be valid only while the
+   * account sequence number is
+   *
+   *     minAccountSequence &lt;= sourceAccountSequence &lt; tx.seqNum
+   *
+   * Note that after execution the account's sequence number is always raised to
+   * `tx.seqNum`. Internally this will set the `minAccountSequence`
+   * precondition.
+   *
+   * @param {string} minAccountSequence   The minimum source account sequence
+   *     number this transaction is valid for. If the value is `0` (the
+   *     default), the transaction is valid when `sourceAccount's sequence
+   *     number == tx.seqNum- 1`.
+   *
+   * @returns {TransactionBuilder}
+   */
+  setMinAccountSequence(minAccountSequence) {
+    if (this.minAccountSequence !== null) {
+      throw new Error(
+        'min_account_sequence has been already set - setting min_account_sequence would overwrite it.'
+      );
+    }
+
+    this.minAccountSequence = minAccountSequence;
+
+    return this;
+  }
+
+  /**
+   * For the transaction to be valid, the current ledger time must be at least
+   * `minAccountSequenceAge` greater than sourceAccount's `sequenceTime`.
+   * Internally this will set the `minAccountSequenceAge` precondition.
+   *
+   * @param {number} durationInSeconds  The minimum amount of time between
+   *     source account sequence time and the ledger time when this transaction
+   *     will become valid. If the value is `0`, the transaction is unrestricted
+   *     by the account sequence age. Cannot be negative.
+   *
+   * @returns {TransactionBuilder}
+   */
+  setMinAccountSequenceAge(durationInSeconds) {
+    if (typeof durationInSeconds !== 'number') {
+      throw new Error('min_account_sequence_age must be a number');
+    }
+    if (this.minAccountSequenceAge !== null) {
+      throw new Error(
+        'min_account_sequence_age has been already set - setting min_account_sequence_age would overwrite it.'
+      );
+    }
+
+    if (durationInSeconds &lt; 0) {
+      throw new Error('min_account_sequence_age cannot be negative');
+    }
+
+    this.minAccountSequenceAge = durationInSeconds;
+
+    return this;
+  }
+
+  /**
+   * For the transaction to be valid, the current ledger number must be at least
+   * `minAccountSequenceLedgerGap` greater than sourceAccount's ledger sequence.
+   * Internally this will set the `minAccountSequenceLedgerGap` precondition.
+   *
+   * @param {number} gap  The minimum number of ledgers between source account
+   *     sequence and the ledger number when this transaction will become valid.
+   *     If the value is `0`, the transaction is unrestricted by the account
+   *     sequence ledger. Cannot be negative.
+   *
+   * @returns {TransactionBuilder}
+   */
+  setMinAccountSequenceLedgerGap(gap) {
+    if (this.minAccountSequenceLedgerGap !== null) {
+      throw new Error(
+        'min_account_sequence_ledger_gap has been already set - setting min_account_sequence_ledger_gap would overwrite it.'
+      );
+    }
+
+    if (gap &lt; 0) {
+      throw new Error('min_account_sequence_ledger_gap cannot be negative');
+    }
+
+    this.minAccountSequenceLedgerGap = gap;
+
+    return this;
+  }
+
+  /**
+   * For the transaction to be valid, there must be a signature corresponding to
+   * every Signer in this array, even if the signature is not otherwise required
+   * by the sourceAccount or operations. Internally this will set the
+   * `extraSigners` precondition.
+   *
+   * @param {string[]} extraSigners   required extra signers (as {@link StrKey}s)
+   *
+   * @returns {TransactionBuilder}
+   */
+  setExtraSigners(extraSigners) {
+    if (!isArray(extraSigners)) {
+      throw new Error('extra_signers must be an array of strings.');
+    }
+
+    if (this.extraSigners !== null) {
+      throw new Error(
+        'extra_signers has been already set - setting extra_signers would overwrite it.'
+      );
+    }
+
+    if (extraSigners.length > 2) {
+      throw new Error('extra_signers cannot be longer than 2 elements.');
+    }
+
+    this.extraSigners = clone(extraSigners);
+
+    return this;
+  }
+
+  /**
+   * Set network nassphrase for the Transaction that will be built.
+   *
+   * @param {string} networkPassphrase    passphrase of the target Stellar
+   *     network (e.g. "Public Global Stellar Network ; September 2015").
+   *
+   * @returns {TransactionBuilder}
+   */
+  setNetworkPassphrase(networkPassphrase) {
+    this.networkPassphrase = networkPassphrase;
+    return this;
+  }
+
+  /**
+   * This will build the transaction.
+   * It will also increment the source account's sequence number by 1.
+   * @returns {Transaction} This method will return the built {@link Transaction}.
+   */
+  build() {
+    const sequenceNumber = new BigNumber(this.source.sequenceNumber()).add(1);
+    const fee = new BigNumber(this.baseFee)
+      .mul(this.operations.length)
+      .toNumber();
+    const attrs = {
+      fee,
+      seqNum: xdr.SequenceNumber.fromString(sequenceNumber.toString()),
+      memo: this.memo ? this.memo.toXDRObject() : null
+    };
+
+    if (
+      this.timebounds === null ||
+      typeof this.timebounds.minTime === 'undefined' ||
+      typeof this.timebounds.maxTime === 'undefined'
+    ) {
+      throw new Error(
+        'TimeBounds has to be set or you must call setTimeout(TimeoutInfinite).'
+      );
+    }
+
+    if (isValidDate(this.timebounds.minTime)) {
+      this.timebounds.minTime = this.timebounds.minTime.getTime() / 1000;
+    }
+    if (isValidDate(this.timebounds.maxTime)) {
+      this.timebounds.maxTime = this.timebounds.maxTime.getTime() / 1000;
+    }
+
+    this.timebounds.minTime = UnsignedHyper.fromString(
+      this.timebounds.minTime.toString()
+    );
+    this.timebounds.maxTime = UnsignedHyper.fromString(
+      this.timebounds.maxTime.toString()
+    );
+
+    const timeBounds = new xdr.TimeBounds(this.timebounds);
+
+    if (this.hasV2Preconditions()) {
+      let ledgerBounds = null;
+      if (this.ledgerbounds !== null) {
+        ledgerBounds = new xdr.LedgerBounds(this.ledgerbounds);
+      }
+
+      let minSeqNum = this.minAccountSequence || '0';
+      minSeqNum = xdr.SequenceNumber.fromString(minSeqNum);
+
+      const minSeqAge = UnsignedHyper.fromString(
+        this.minAccountSequenceAge !== null
+          ? this.minAccountSequenceAge.toString()
+          : '0'
+      );
+
+      const minSeqLedgerGap = this.minAccountSequenceLedgerGap || 0;
+
+      const extraSigners =
+        this.extraSigners !== null
+          ? this.extraSigners.map(SignerKey.decodeAddress)
+          : [];
+
+      attrs.cond = xdr.Preconditions.precondV2(
+        new xdr.PreconditionsV2({
+          timeBounds,
+          ledgerBounds,
+          minSeqNum,
+          minSeqAge,
+          minSeqLedgerGap,
+          extraSigners
+        })
+      );
+    } else {
+      attrs.cond = xdr.Preconditions.precondTime(timeBounds);
+    }
+
+    attrs.sourceAccount = decodeAddressToMuxedAccount(this.source.accountId());
+    attrs.ext = new xdr.TransactionExt(0);
+
+    const xtx = new xdr.Transaction(attrs);
+    xtx.operations(this.operations);
+    const txEnvelope = new xdr.TransactionEnvelope.envelopeTypeTx(
+      new xdr.TransactionV1Envelope({ tx: xtx })
+    );
+
+    const tx = new Transaction(txEnvelope, this.networkPassphrase);
+
+    this.source.incrementSequenceNumber();
+
+    return tx;
+  }
+
+  hasV2Preconditions() {
+    return (
+      this.ledgerbounds !== null ||
+      this.minAccountSequence !== null ||
+      this.minAccountSequenceAge !== null ||
+      this.minAccountSequenceLedgerGap !== null ||
+      (this.extraSigners !== null &amp;&amp; this.extraSigners.length > 0)
+    );
+  }
+
+  /**
+   * Builds a {@link FeeBumpTransaction}, enabling you to resubmit an existing
+   * transaction with a higher fee.
+   *
+   * @param {Keypair|string}  feeSource - account paying for the transaction,
+   *     in the form of either a Keypair (only the public key is used) or
+   *     an account ID (in G... or M... form, but refer to `withMuxing`)
+   * @param {string}          baseFee   - max fee willing to pay per operation
+   *     in inner transaction (**in stroops**)
+   * @param {Transaction}     innerTx   - {@link Transaction} to be bumped by
+   *     the fee bump transaction
+   * @param {string}          networkPassphrase - passphrase of the target
+   *     Stellar network (e.g. "Public Global Stellar Network ; September 2015",
+   *     see {@link Networks})
+   *
+   * @todo Alongside the next major version bump, this type signature can be
+   *       changed to be less awkward: accept a MuxedAccount as the `feeSource`
+   *       rather than a keypair or string.
+   *
+   * @note Your fee-bump amount should be >= 10x the original fee.
+   * @see  https://developers.stellar.org/docs/glossary/fee-bumps/#replace-by-fee
+   *
+   * @returns {FeeBumpTransaction}
+   */
+  static buildFeeBumpTransaction(
+    feeSource,
+    baseFee,
+    innerTx,
+    networkPassphrase
+  ) {
+    const innerOps = innerTx.operations.length;
+    const innerBaseFeeRate = new BigNumber(innerTx.fee).div(innerOps);
+    const base = new BigNumber(baseFee);
+
+    // The fee rate for fee bump is at least the fee rate of the inner transaction
+    if (base.lessThan(innerBaseFeeRate)) {
+      throw new Error(
+        `Invalid baseFee, it should be at least ${innerBaseFeeRate} stroops.`
+      );
+    }
+
+    const minBaseFee = new BigNumber(BASE_FEE);
+
+    // The fee rate is at least the minimum fee
+    if (base.lessThan(minBaseFee)) {
+      throw new Error(
+        `Invalid baseFee, it should be at least ${minBaseFee} stroops.`
+      );
+    }
+
+    let innerTxEnvelope = innerTx.toEnvelope();
+    if (innerTxEnvelope.switch() === xdr.EnvelopeType.envelopeTypeTxV0()) {
+      const v0Tx = innerTxEnvelope.v0().tx();
+      const v1Tx = new xdr.Transaction({
+        sourceAccount: new xdr.MuxedAccount.keyTypeEd25519(
+          v0Tx.sourceAccountEd25519()
+        ),
+        fee: v0Tx.fee(),
+        seqNum: v0Tx.seqNum(),
+        cond: xdr.Preconditions.precondTime(v0Tx.timeBounds()),
+        memo: v0Tx.memo(),
+        operations: v0Tx.operations(),
+        ext: new xdr.TransactionExt(0)
+      });
+      innerTxEnvelope = new xdr.TransactionEnvelope.envelopeTypeTx(
+        new xdr.TransactionV1Envelope({
+          tx: v1Tx,
+          signatures: innerTxEnvelope.v0().signatures()
+        })
+      );
+    }
+
+    let feeSourceAccount;
+    if (isString(feeSource)) {
+      feeSourceAccount = decodeAddressToMuxedAccount(feeSource);
+    } else {
+      feeSourceAccount = feeSource.xdrMuxedAccount();
+    }
+
+    const tx = new xdr.FeeBumpTransaction({
+      feeSource: feeSourceAccount,
+      fee: xdr.Int64.fromString(base.mul(innerOps + 1).toString()),
+      innerTx: xdr.FeeBumpTransactionInnerTx.envelopeTypeTx(
+        innerTxEnvelope.v1()
+      ),
+      ext: new xdr.FeeBumpTransactionExt(0)
+    });
+    const feeBumpTxEnvelope = new xdr.FeeBumpTransactionEnvelope({
+      tx,
+      signatures: []
+    });
+    const envelope = new xdr.TransactionEnvelope.envelopeTypeTxFeeBump(
+      feeBumpTxEnvelope
+    );
+
+    return new FeeBumpTransaction(envelope, networkPassphrase);
+  }
+
+  /**
+   * Build a {@link Transaction} or {@link FeeBumpTransaction} from an
+   * xdr.TransactionEnvelope.
+   *
+   * @param {string|xdr.TransactionEnvelope} envelope - The transaction envelope
+   *     object or base64 encoded string.
+   * @param {string} networkPassphrase - The network passphrase of the target
+   *     Stellar network (e.g. "Public Global Stellar Network ; September
+   *     2015"), see {@link Networks}.
+   *
+   * @returns {Transaction|FeeBumpTransaction}
+   */
+  static fromXDR(envelope, networkPassphrase) {
+    if (typeof envelope === 'string') {
+      envelope = xdr.TransactionEnvelope.fromXDR(envelope, 'base64');
+    }
+
+    if (envelope.switch() === xdr.EnvelopeType.envelopeTypeTxFeeBump()) {
+      return new FeeBumpTransaction(envelope, networkPassphrase);
+    }
+
+    return new Transaction(envelope, networkPassphrase);
+  }
+}
+
+/**
+ * Checks whether a provided object is a valid Date.
+ * @argument {Date} d date object
+ * @returns {boolean}
+ */
+export function isValidDate(d) {
+  // isnan is okay here because it correctly checks for invalid date objects
+  // eslint-disable-next-line no-restricted-globals
+  return d instanceof Date &amp;&amp; !isNaN(d);
+}
+</code></pre>
+        </article>
     </section>
-
-
 
 
 

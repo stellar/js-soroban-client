@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Home - Documentation</title>
+    <title>js-stellar-base/src/operations/create_passive_sell_offer.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,185 +29,62 @@
 
 <div id="main">
     
+    <h1 class="page-title">js-stellar-base/src/operations/create_passive_sell_offer.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import isUndefined from 'lodash/isUndefined';
+import xdr from '../xdr';
 
+/**
+ * Returns a XDR CreatePasiveSellOfferOp. A "create passive offer" operation creates an
+ * offer that won't consume a counter offer that exactly matches this offer. This is
+ * useful for offers just used as 1:1 exchanges for path payments. Use manage offer
+ * to manage this offer after using this operation to create it.
+ * @function
+ * @alias Operation.createPassiveSellOffer
+ * @param {object} opts Options object
+ * @param {Asset} opts.selling - What you're selling.
+ * @param {Asset} opts.buying - What you're buying.
+ * @param {string} opts.amount - The total amount you're selling. If 0, deletes the offer.
+ * @param {number|string|BigNumber|Object} opts.price - Price of 1 unit of `selling` in terms of `buying`.
+ * @param {number} opts.price.n - If `opts.price` is an object: the price numerator
+ * @param {number} opts.price.d - If `opts.price` is an object: the price denominator
+ * @param {string} [opts.source] - The source account (defaults to transaction source).
+ * @throws {Error} Throws `Error` when the best rational approximation of `price` cannot be found.
+ * @returns {xdr.CreatePassiveSellOfferOp} Create Passive Sell Offer operation
+ */
+export function createPassiveSellOffer(opts) {
+  const attributes = {};
+  attributes.selling = opts.selling.toXDRObject();
+  attributes.buying = opts.buying.toXDRObject();
+  if (!this.isValidAmount(opts.amount)) {
+    throw new TypeError(this.constructAmountRequirementsError('amount'));
+  }
+  attributes.amount = this._toXDRAmount(opts.amount);
+  if (isUndefined(opts.price)) {
+    throw new TypeError('price argument is required');
+  }
+  attributes.price = this._toXDRPrice(opts.price);
+  const createPassiveSellOfferOp = new xdr.CreatePassiveSellOfferOp(attributes);
 
+  const opAttributes = {};
+  opAttributes.body = xdr.OperationBody.createPassiveSellOffer(
+    createPassiveSellOfferOp
+  );
+  this.setSourceAccount(opAttributes, opts);
 
-
-
-
-
-
-
-    
-
-
-    <section class="readme">
-        <article><div align="center">
-  <img alt="Stellar" src="https://github.com/stellar/.github/raw/master/stellar-logo.png" width="558" />
-  <br/>
-  <strong>Creating equitable access to the global financial system</strong>
-  <h1>js-soroban-sdk</h1>
-</div>
-
-<p align="center">
-  <a href="https://badge.fury.io/js/soroban-sdk"><img src="https://badge.fury.io/js/soroban-sdk.svg" alt="npm version" height="18"></a>
-  <a href="https://github.com/stellar/js-soroban-sdk/actions/workflows/tests.yml"><img alt="Test Status" src="https://github.com/stellar/js-soroban-sdk/actions/workflows/tests.yml/badge.svg" /></a>
-  <a href="https://coveralls.io/github/stellar/js-soroban-sdk?branch=master"><img alt="Coverage Status" src="https://coveralls.io/repos/stellar/js-soroban-sdk/badge.svg?branch=master&service=github" /></a>
-</p>
-
-<p>js-soroban-sdk is a Javascript library for communicating with a
-<a href="https://github.com/stellar/go/tree/master/services/soroban-rpc">Soroban RPC server</a>.
-It is used for building Stellar apps either on Node.js or in the browser.</p>
-<p>It provides:</p>
-<ul>
-<li>a networking layer API for soroban-rpc methods.</li>
-<li>facilities for building and signing transactions, for communicating with a
-soroban-rpc instance, and for submitting transactions or querying network
-history.</li>
-</ul>
-<h3>soroban-sdk vs stellar-base</h3><p>soroban-sdk is a high-level library that serves as client-side API for Horizon.
-<a href="https://github.com/stellar/js-stellar-base">stellar-base</a> is lower-level
-library for creating Stellar primitive constructs via XDR helpers and wrappers.</p>
-<p><strong>Most people will want soroban-sdk instead of stellar-base.</strong> You should only
-use stellar-base if you know what you're doing!</p>
-<p>If you add <code>soroban-sdk</code> to a project, <strong>do not add <code>stellar-base</code>!</strong> Mis-matching
-versions could cause weird, hard-to-find bugs. <code>soroban-sdk</code> automatically
-installs <code>stellar-base</code> and exposes all of its exports in case you need them.</p>
-<blockquote>
-<p><strong>Important!</strong> The Node.js version of the <code>stellar-base</code> (<code>soroban-sdk</code> dependency) package
-uses the <a href="https://www.npmjs.com/package/sodium-native"><code>sodium-native</code></a> package as
-an <a href="https://docs.npmjs.com/files/package.json#optionaldependencies">optional dependency</a>. <code>sodium-native</code> is
-a low level binding to <a href="https://github.com/jedisct1/libsodium">libsodium</a>,
-(an implementation of <a href="https://ed25519.cr.yp.to/">Ed25519</a> signatures).
-If installation of <code>sodium-native</code> fails, or it is unavailable, <code>stellar-base</code> (and <code>soroban-sdk</code>) will
-fallback to using the <a href="https://www.npmjs.com/package/tweetnacl"><code>tweetnacl</code></a> package implementation.</p>
-<p>If you are using <code>soroban-sdk</code>/<code>stellar-base</code> in a browser you can ignore
-this. However, for production backend deployments you should be
-using <code>sodium-native</code>. If <code>sodium-native</code> is successfully installed and working the
-<code>SorobanSdk.FastSigning</code> variable will return <code>true</code>.</p>
-</blockquote>
-<h2>Quick start</h2><p>Using npm to include js-soroban-sdk in your own project:</p>
-<pre class="prettyprint source lang-shell"><code>npm install --save soroban-sdk</code></pre><p>Alternatively, you can use cdnjs in a browser:</p>
-<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/soroban-sdk/{version}/soroban-sdk.js&quot;>&lt;/script>
-`</code></pre><h2>Install</h2><h3>To use as a module in a Node.js project</h3><ol>
-<li>Install it using npm:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>npm install --save soroban-sdk</code></pre><ol start="2">
-<li>require/import it in your JavaScript:</li>
-</ol>
-<pre class="prettyprint source lang-js"><code>var SorobanSdk = require('soroban-sdk');</code></pre><h3>To self host for use in the browser</h3><ol>
-<li>Install it using <a href="http://bower.io">bower</a>:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>bower install soroban-sdk</code></pre><ol start="2">
-<li>Include it in the browser:</li>
-</ol>
-<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;./bower_components/soroban-sdk/soroban-sdk.js&quot;>&lt;/script>
-&lt;script>
-  console.log(SorobanSdk);
-&lt;/script></code></pre><p>If you don't want to use or install Bower, you can copy built JS files from the
-<a href="https://github.com/stellar/bower-js-soroban-sdk">bower-js-soroban-sdk repo</a>.</p>
-<h3>To use the <a href="https://cdnjs.com/libraries/soroban-sdk">cdnjs</a> hosted script in the browser</h3><ol>
-<li>Instruct the browser to fetch the library from
-<a href="https://cdnjs.com/libraries/soroban-sdk">cdnjs</a>, a 3rd party service that
-hosts js libraries:</li>
-</ol>
-<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/soroban-sdk/{version}/soroban-sdk.js&quot;>&lt;/script>
-&lt;script>
-  console.log(SorobanSdk);
-&lt;/script></code></pre><p>Note that this method relies using a third party to host the JS library. This
-may not be entirely secure.</p>
-<p>Make sure that you are using the latest version number. They can be found on the
-<a href="https://github.com/stellar/js-soroban-sdk/releases">releases page in Github</a>.</p>
-<h3>To develop and test js-soroban-sdk itself</h3><ol>
-<li>Clone the repo:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>git clone https://github.com/stellar/js-soroban-sdk.git</code></pre><ol start="2">
-<li>Install dependencies inside js-soroban-sdk folder:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>cd js-soroban-sdk
-npm install</code></pre><ol start="3">
-<li>Install Node 14</li>
-</ol>
-<p>Because we support the latest maintenance version of Node, please install and develop on Node 14 so you don't get surprised when your code works locally but breaks in CI.</p>
-<p>Here's how to install <code>nvm</code> if you haven't: https://github.com/creationix/nvm</p>
-<pre class="prettyprint source lang-shell"><code>nvm install
-
-# if you've never installed 14 before you'll want to re-install yarn
-npm install -g yarn</code></pre><p>If you work on several projects that use different Node versions, you might it
-helpful to install this automatic version manager:
-https://github.com/wbyoung/avn</p>
-<ol start="4">
-<li>Observe the project's code style</li>
-</ol>
-<p>While you're making changes, make sure to run the linter-watcher to catch any
-   linting errors (in addition to making sure your text editor supports ESLint)</p>
-<pre class="prettyprint source lang-shell"><code>node_modules/.bin/gulp watch
-`</code></pre><h3>How to use with React-Native</h3><ol>
-<li>Add the following postinstall script:<pre class="prettyprint source"><code>yarn rn-nodeify --install url,events,https,http,util,stream,crypto,vm,buffer --hack --yarn</code></pre></li>
-<li><code>yarn add -D rn-nodeify</code></li>
-<li>Uncomment <code>require('crypto')</code> on shim.js</li>
-<li><code>react-native link react-native-randombytes</code></li>
-<li>Create file <code>rn-cli.config.js</code><pre class="prettyprint source"><code>module.exports = {
-resolver: {
- extraNodeModules: require(&quot;node-libs-react-native&quot;),
-},
-};</code></pre></li>
-<li>Add <code>import &quot;./shim&quot;;</code> to the top of <code>index.js</code></li>
-<li><code>yarn add soroban-sdk</code></li>
-</ol>
-<p>There is also a <a href="https://github.com/fnando/rn-soroban-sdk-sample">sample</a> that you can follow.</p>
-<h4>Using in an Expo managed workflow</h4><ol>
-<li>Add the following postinstall script:<pre class="prettyprint source"><code>yarn rn-nodeify --install process,url,events,https,http,util,stream,crypto,vm,buffer --hack --yarn</code></pre></li>
-<li><code>yarn add -D rn-nodeify</code></li>
-<li>Add <code>import &quot;./shim&quot;;</code> to the your app's entry point (by default <code>./App.js</code>)</li>
-<li><code>yarn add soroban-sdk</code></li>
-<li><code>expo install expo-random</code></li>
-</ol>
-<p>At this point, the stellar SDK will work, except that <code>SorobanSdk.Keypair.random()</code> will throw an error. So to work around this you can create your own method to generate a random keypair like this:</p>
-<pre class="prettyprint source lang-javascript"><code>import * as Random from 'expo-random';
-import SorobanSdk from 'soroban-sdk';
-
-const generateRandomKeypair = () => {
-  const randomBytes = Random.getRandomBytes(32);
-
-  return SorobanSdk.Keypair.fromRawEd25519Seed(Buffer.from(randomBytes));
-};</code></pre><h2>Usage</h2><p>For information on how to use js-soroban-sdk, take a look at <a href="https://stellar.github.io/js-soroban-sdk/">the
-documentation</a>, or <a href="https://github.com/stellar/js-soroban-sdk/tree/master/docs/reference">the
-examples</a>.</p>
-<p>There is also Horizon REST API Documentation
-<a href="https://developers.stellar.org/api/introduction/">here</a>.</p>
-<h2>Testing</h2><p>To run all tests:</p>
-<pre class="prettyprint source lang-shell"><code>gulp test</code></pre><p>To run a specific set of tests:</p>
-<pre class="prettyprint source lang-shell"><code>gulp test:node
-gulp test:browser</code></pre><p>To generate and check the documentation site:</p>
-<pre class="prettyprint source lang-shell"><code># install the `serve` command if you don't have it already
-npm install -g serve
-
-# generate the docs files
-npm run docs
-
-# get these files working in a browser
-cd jsdoc && serve .
-
-# you'll be able to browse the docs at http://localhost:5000</code></pre><h2>Documentation</h2><p>Documentation for this repo lives in
-<a href="https://github.com/stellar/js-soroban-sdk/blob/master/docs/reference/readme.md">Developers site</a>.</p>
-<h2>Contributing</h2><p>For information on how to contribute, please refer to our
-<a href="https://github.com/stellar/js-soroban-sdk/blob/master/CONTRIBUTING.md">contribution guide</a>.</p>
-<h2>Publishing to npm</h2><pre class="prettyprint source"><code>npm version [&lt;newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease]</code></pre><p>A new version will be published to npm <strong>and</strong> Bower by GitHub actions.</p>
-<p>npm &gt;= 2.13.0 required. Read more about
-<a href="https://docs.npmjs.com/cli/version">npm version</a>.</p>
-<h2>License</h2><p>js-soroban-sdk is licensed under an Apache-2.0 license. See the
-<a href="https://github.com/stellar/js-soroban-sdk/blob/master/LICENSE">LICENSE</a> file
-for details.</p></article>
+  return new xdr.Operation(opAttributes);
+}
+</code></pre>
+        </article>
     </section>
-
-
 
 
 
