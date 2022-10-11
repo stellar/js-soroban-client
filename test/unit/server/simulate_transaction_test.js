@@ -1,24 +1,24 @@
 describe('Server#simulateTransaction', function() {
-  let keypair = SorobanSdk.Keypair.random();
-  let account = new SorobanSdk.Account(keypair.publicKey(), '56199647068161');
+  let keypair = SorobanClient.Keypair.random();
+  let account = new SorobanClient.Account(keypair.publicKey(), '56199647068161');
   
   beforeEach(function() {
-    this.server = new SorobanSdk.Server(serverUrl);
+    this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
-    let transaction = new SorobanSdk.TransactionBuilder(account, {
+    let transaction = new SorobanClient.TransactionBuilder(account, {
       fee: 100,
-      networkPassphrase: SorobanSdk.Networks.TESTNET,
+      networkPassphrase: SorobanClient.Networks.TESTNET,
       v1: true
     })
       .addOperation(
-        SorobanSdk.Operation.payment({
+        SorobanClient.Operation.payment({
           destination:
             'GASOCNHNNLYFNMDJYQ3XFMI7BYHIOCFW3GJEOWRPEGK2TDPGTG2E5EDW',
-          asset: SorobanSdk.Asset.native(),
+          asset: SorobanClient.Asset.native(),
           amount: '100.50'
         })
       )
-      .setTimeout(SorobanSdk.TimeoutInfinite)
+      .setTimeout(SorobanClient.TimeoutInfinite)
       .build();
     transaction.sign(keypair);
 
@@ -40,12 +40,12 @@ describe('Server#simulateTransaction', function() {
       cpuInsns: "10000",
       memBytes: "10000",
     },
-    footprint: new SorobanSdk.xdr.LedgerFootprint({
+    footprint: new SorobanClient.xdr.LedgerFootprint({
       readOnly: [],
       readWrite: [],
     }).toXDR('base64'),
     results: [
-      SorobanSdk.xdr.ScVal.scvU32(0).toXDR().toString('base64'),
+      SorobanClient.xdr.ScVal.scvU32(0).toXDR().toString('base64'),
     ],
     latestLedger: 1,
   };

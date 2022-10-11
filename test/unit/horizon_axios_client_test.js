@@ -1,5 +1,5 @@
-const SERVER_TIME_MAP = SorobanSdk.SERVER_TIME_MAP;
-const getCurrentServerTime = SorobanSdk.getCurrentServerTime;
+const SERVER_TIME_MAP = SorobanClient.SERVER_TIME_MAP;
+const getCurrentServerTime = SorobanClient.getCurrentServerTime;
 
 describe("getCurrentServerTime", () => {
   let clock;

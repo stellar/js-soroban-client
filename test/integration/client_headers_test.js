@@ -27,7 +27,7 @@ describe("integration tests: client headers", function(done) {
         return;
       }
 
-      new SorobanSdk.Server(`http://localhost:${port}`, { allowHttp: true }).getHealth();
+      new SorobanClient.Server(`http://localhost:${port}`, { allowHttp: true }).getHealth();
     });
   });
 });

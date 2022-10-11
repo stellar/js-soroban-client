@@ -10,7 +10,7 @@ module.exports = {
   output: {
     filename: "[name].js",
     path: path.resolve(__dirname, "dist"),
-    library: "SorobanSdk",
+    library: "SorobanClient",
     umdNamedDefine: true,
   },
   resolve: {

@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
 
-window.axios = SorobanSdk.axios;
-window.AxiosClient = SorobanSdk.AxiosClient;
+window.axios = SorobanClient.axios;
+window.AxiosClient = SorobanClient.AxiosClient;
 window.serverUrl = 'https://horizon-live.stellar.org:1337/api/v1/jsonrpc';
