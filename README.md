@@ -56,6 +56,12 @@ Using npm to include js-soroban-client in your own project:
 npm install --save soroban-client
 ```
 
+Alternatively, you can use cdnjs in a browser:
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/soroban-client/{version}/soroban-client.js"></script>
+````
+
 ## Install
 
 ### To use as a module in a Node.js project
@@ -92,6 +98,25 @@ bower install soroban-client
 If you don't want to use or install Bower, you can copy built JS files from the
 [bower-js-soroban-client
 repo](https://github.com/stellar/bower-js-soroban-client).
+
+### To use the [cdnjs](https://cdnjs.com/libraries/soroban-client) hosted script in the browser
+
+1. Instruct the browser to fetch the library from
+   [cdnjs](https://cdnjs.com/libraries/soroban-client), a 3rd party service that
+   hosts js libraries:
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/soroban-client/{version}/soroban-client.js"></script>
+<script>
+  console.log(SorobanClient);
+</script>
+```
+
+Note that this method relies using a third party to host the JS library. This
+may not be entirely secure.
+
+Make sure that you are using the latest version number. They can be found on the
+[releases page in Github](https://github.com/stellar/js-soroban-client/releases).
 
 ### To develop and test js-soroban-client itself
 
