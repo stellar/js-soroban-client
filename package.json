@@ -1,6 +1,6 @@
 {
   "name": "soroban-client",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "soroban-client is a library for working with the soroban-rpc server.",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
