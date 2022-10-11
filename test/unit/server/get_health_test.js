@@ -2,7 +2,7 @@ const MockAdapter = require('axios-mock-adapter');
 
 describe('Server#getHealth', function() {
   beforeEach(function() {
-    this.server = new SorobanSdk.Server(serverUrl);
+    this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
   });
 

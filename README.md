@@ -46,7 +46,7 @@ installs `stellar-base` and exposes all of its exports in case you need them.
 > If you are using `soroban-client`/`stellar-base` in a browser you can ignore
 > this. However, for production backend deployments you should be
 > using `sodium-native`. If `sodium-native` is successfully installed and working the
-> `SorobanSdk.FastSigning` variable will return `true`.
+> `SorobanClient.FastSigning` variable will return `true`.
 
 ## Quick start
 
@@ -75,7 +75,7 @@ npm install --save soroban-client
 2. require/import it in your JavaScript:
 
 ```js
-var SorobanSdk = require('soroban-client');
+var SorobanClient = require('soroban-client');
 ```
 
 ### To self host for use in the browser
@@ -91,7 +91,7 @@ bower install soroban-client
 ```html
 <script src="./bower_components/soroban-client/soroban-client.js"></script>
 <script>
-  console.log(SorobanSdk);
+  console.log(SorobanClient);
 </script>
 ```
 
@@ -108,7 +108,7 @@ repo](https://github.com/stellar/bower-js-soroban-client).
 ```html
 <script src="https://cdnjs.cloudflare.com/ajax/libs/soroban-client/{version}/soroban-client.js"></script>
 <script>
-  console.log(SorobanSdk);
+  console.log(SorobanClient);
 </script>
 ```
 

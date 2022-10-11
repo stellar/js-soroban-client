@@ -4,7 +4,7 @@ module.exports = {
   },
   globals: {
     AxiosClient: true,
-    SorobanSdk: true,
+    SorobanClient: true,
     axios: true,
     chai: true,
     expect: true,

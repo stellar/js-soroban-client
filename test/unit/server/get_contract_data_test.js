@@ -2,7 +2,7 @@ const MockAdapter = require('axios-mock-adapter');
 
 describe('Server#getContractData', function() {
   beforeEach(function() {
-    this.server = new SorobanSdk.Server(serverUrl);
+    this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
   });
 
@@ -12,9 +12,9 @@ describe('Server#getContractData', function() {
   });
 
   let address = '0000000000000000000000000000000000000000000000000000000000000001';
-  let key = SorobanSdk.xdr.ScVal.scvObject(
-    SorobanSdk.xdr.ScObject.scoVec([
-      SorobanSdk.xdr.ScVal.scvSymbol("Admin")
+  let key = SorobanClient.xdr.ScVal.scvObject(
+    SorobanClient.xdr.ScObject.scoVec([
+      SorobanClient.xdr.ScVal.scvSymbol("Admin")
     ])
   );
 

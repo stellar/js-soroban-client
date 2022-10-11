@@ -1,10 +1,10 @@
 /* eslint-disable no-undef */
 
 require("babel-register");
-global.SorobanSdk = require("../lib/");
+global.SorobanClient = require("../lib/");
 
 global.axios = require("axios");
-global.AxiosClient = SorobanSdk.AxiosClient;
+global.AxiosClient = SorobanClient.AxiosClient;
 global.serverUrl = "https://horizon-live.stellar.org:1337/api/v1/jsonrpc";
 
 var chaiAsPromised = require("chai-as-promised");
