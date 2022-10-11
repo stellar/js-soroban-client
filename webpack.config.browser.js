@@ -4,8 +4,8 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
   entry: {
-    "soroban-sdk": "./src/browser.ts",
-    "soroban-sdk.min": "./src/browser.ts",
+    "soroban-client": "./src/browser.ts",
+    "soroban-client.min": "./src/browser.ts",
   },
   output: {
     filename: "[name].js",

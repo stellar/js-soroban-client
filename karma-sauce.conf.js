@@ -34,7 +34,7 @@ module.exports = function(config) {
 
   config.set({
     sauceLabs: {
-      testName: "js-soroban-sdk",
+      testName: "js-soroban-client",
       recordScreenshots: false,
       recordVideo: false,
     },
@@ -43,7 +43,7 @@ module.exports = function(config) {
     customLaunchers: customLaunchers,
     browsers: Object.keys(customLaunchers),
 
-    files: ["dist/soroban-sdk.js", "test/test-browser.js", "test/unit/**/*.js"],
+    files: ["dist/soroban-client.js", "test/test-browser.js", "test/unit/**/*.js"],
 
     preprocessors: {
       "test/**/*.js": ["webpack", "commonjs"],
