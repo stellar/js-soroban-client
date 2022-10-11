@@ -9,7 +9,7 @@ module.exports = function(config) {
     browsers: ["FirefoxHeadless", "ChromeHeadless"],
 
     files: [
-      "dist/soroban-sdk.js",
+      "dist/soroban-client.js",
       "test/test-browser.js",
       "test/unit/**/*.js",
     ],

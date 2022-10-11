@@ -25,7 +25,7 @@ export const SERVER_TIME_MAP: Record<string, ServerTime> = {};
 
 const AxiosClient = axios.create({
   headers: {
-    "X-Client-Name": "js-soroban-sdk",
+    "X-Client-Name": "js-soroban-client",
     "X-Client-Version": version,
   },
 });

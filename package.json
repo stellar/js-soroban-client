@@ -1,7 +1,7 @@
 {
-  "name": "soroban-sdk",
+  "name": "soroban-client",
   "version": "1.2.0",
-  "description": "soroban-sdk is a library for working with the soroban-rpc server.",
+  "description": "soroban-client is a library for working with the soroban-rpc server.",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "files": [
@@ -47,14 +47,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/stellar/js-soroban-sdk.git"
+    "url": "https://github.com/stellar/js-soroban-client.git"
   },
   "author": "Stellar Development Foundation <hello@stellar.org>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/stellar/js-soroban-sdk/issues"
+    "url": "https://github.com/stellar/js-soroban-client/issues"
   },
-  "homepage": "https://github.com/stellar/js-soroban-sdk",
+  "homepage": "https://github.com/stellar/js-soroban-client",
   "devDependencies": {
     "@kollavarsham/gulp-coveralls": "0.2.8",
     "@stellar/prettier-config": "^1.0.1",
