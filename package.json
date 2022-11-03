@@ -61,7 +61,7 @@
     "@stellar/tsconfig": "^1.0.1",
     "@stellar/tslint-config": "^1.0.3",
     "@types/detect-node": "^2.0.0",
-    "@types/lodash": "^4.14.130",
+    "@types/lodash": "4.14.186",
     "axios-mock-adapter": "^1.16.0",
     "babel-cli": "^6.26.0",
     "babel-core": "~6.26.3",
@@ -134,7 +134,7 @@
     "@types/urijs": "^1.19.6",
     "axios": "0.25.0",
     "es6-promise": "^4.2.4",
-    "lodash": "^4.17.21",
+    "lodash": "4.17.21",
     "stellar-base": "8.0.1-soroban.4",
     "urijs": "^1.19.1"
   }
