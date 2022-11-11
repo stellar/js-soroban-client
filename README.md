@@ -12,7 +12,7 @@
 </p>
 
 js-soroban-client is a Javascript library for communicating with a
-[Soroban RPC server](https://github.com/stellar/go/tree/master/services/soroban-rpc).
+[Soroban RPC server](https://github.com/stellar/go/tree/master/exp/services/soroban-rpc).
 It is used for building Stellar apps either on Node.js or in the browser.
 
 It provides:
