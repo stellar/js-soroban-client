@@ -35,6 +35,14 @@ export namespace SorobanRpc {
   }
 
   export interface GetContractDataResponse {
+    // xdr is a base-64 encoded {@link xdr.LedgerEntryData}
+    xdr: string;
+    lastModifiedLedgerSeq?: number;
+    latestLedger?: number;
+  }
+
+  export interface GetLedgerEntryResponse {
+    // xdr is a base-64 encoded {@link xdr.ScVal}
     xdr: string;
     lastModifiedLedgerSeq?: number;
     latestLedger?: number;

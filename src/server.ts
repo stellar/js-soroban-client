@@ -104,6 +104,29 @@ export class Server {
   }
 
   /**
+   * Reads the current value of ledger entries directly.
+   *
+   * Allows you to directly inspect the current state of a contract,
+   * contract's code, or any other ledger entry. This is a backup way to access
+   * your contract data which may not be available via events or
+   * simulateTransaction.
+   *
+   * To fetch contract wasm byte-code, use the ContractCode ledger entry key.
+   *
+   * @param {xdr.ScVal} key - The key of the contract data to load.
+   * @returns {Promise} Returns a promise to the {@link GetLedgerEntryResponse} object with the current value.
+   */
+  public async getLedgerEntry(
+    key: xdr.ScVal,
+  ): Promise<SorobanRpc.GetLedgerEntryResponse> {
+    return await jsonrpc.post(
+      this.serverURL.toString(),
+      "getLedgerEntry",
+      key.toXDR("base64"),
+    );
+  }
+
+  /**
    * Fetch the status, result, and/or error of a submitted transaction.
    *
    * When submitting a transaction, clients should poll this to tell when the
