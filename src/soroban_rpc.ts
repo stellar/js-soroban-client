@@ -25,7 +25,7 @@ export namespace SorobanRpc {
   export type TransactionStatus = "pending" | "success" | "error";
 
   export interface GetAccountResponse {
-    id: string; // TODO: is this address a string?
+    id: string;
     sequence: string;
     balances: Balance[];
   }
