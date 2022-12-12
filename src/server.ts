@@ -117,7 +117,7 @@ export class Server {
    * @returns {Promise<SorobanRpc.GetLedgerEntryResponse>} Returns a promise to the {@link SorobanRpc.GetLedgerEntryResponse} object with the current value.
    */
   public async getLedgerEntry(
-    key: xdr.ScVal,
+    key: xdr.LedgerKey,
   ): Promise<SorobanRpc.GetLedgerEntryResponse> {
     return await jsonrpc.post(
       this.serverURL.toString(),
