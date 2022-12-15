@@ -22,10 +22,6 @@ using modern Javascript, but `await` calls can also be rendered with promises.
 // 3. Access to JS Soroban Client (https://github.com/stellar/js-soroban-client)
 //    either through Node.js or in the browser.
 
-// This code can be run in the browser at https://laboratory.stellar.org
-// That site exposes a global SorobanClient object you can use.
-// To run this code in the Chrome, open the console tab in the DevTools.
-// The hotkey to open the DevTools console is Ctrl+Shift+J or (Cmd+Opt+J on Mac).
 const SorobanClient = require('soroban-client');
 
 // The source account is the account we will be signing and sending from.
