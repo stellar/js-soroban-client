@@ -42,7 +42,7 @@ export namespace SorobanRpc {
   /* Response for jsonrpc method `getContractData`
    */
   export interface GetContractDataResponse {
-    // xdr is a base-64 encoded {@link xdr.LedgerEntryData}
+    // xdr is a base-64 encoded {@link xdr.ScVal}
     xdr: string;
     lastModifiedLedgerSeq?: number;
     latestLedger?: number;
@@ -51,7 +51,7 @@ export namespace SorobanRpc {
   /* Response for jsonrpc method `getLedgerEntry`
    */
   export interface GetLedgerEntryResponse {
-    // xdr is a base-64 encoded {@link xdr.ScVal}
+    // xdr is a base-64 encoded {@link xdr.LedgerEntryData}
     xdr: string;
     lastModifiedLedgerSeq?: number;
     latestLedger?: number;

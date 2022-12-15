@@ -60,6 +60,11 @@ export class Server {
    * Needed to get the current sequence number for the account so you can build
    * a successful transaction with {@link TransactionBuilder}.
    *
+   * @example
+   * server.getAccount("GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4").then(account => {
+   *   console.log("sequence:", account.sequence);
+   * });
+   *
    * @param {string} address - The public address of the account to load.
    * @returns {Promise<SorobanRpc.GetAccountResponse>} Returns a promise to the {@link SorobanRpc.GetAccountResponse} object with populated sequence number.
    */
@@ -72,6 +77,11 @@ export class Server {
   /**
    * General node health check.
    *
+   * @example
+   * server.getHealth().then(health => {
+   *   console.log("status:", health.status);
+   * });
+   *
    * @returns {Promise<SorobanRpc.GetHealthResponse>} Returns a promise to the {@link SorobanRpc.GetHealthResponse} object with the status of the server ("healthy").
    */
   public async getHealth(): Promise<SorobanRpc.GetHealthResponse> {
@@ -83,6 +93,15 @@ export class Server {
 
   /**
    * Reads the current value of contract data ledger entries directly.
+   *
+   * @example
+   * const contractId = "0000000000000000000000000000000000000000000000000000000000000001";
+   * const key = xdr.ScVal.scvSymbol("counter");
+   * server.getContractData(contractId, key).then(data => {
+   *   console.log("value:", data.xdr);
+   *   console.log("lastModified:", data.lastModifiedLedgerSeq);
+   *   console.log("latestLedger:", data.latestLedger);
+   * });
    *
    * Allows you to directly inspect the current state of a contract. This is a backup way to access your contract data which may not be available via events or simulateTransaction.
    *
@@ -113,6 +132,18 @@ export class Server {
    *
    * To fetch contract wasm byte-code, use the ContractCode ledger entry key.
    *
+   * @example
+   * const contractId = "0000000000000000000000000000000000000000000000000000000000000001";
+   * const key = xdr.LedgerKey.contractData(new xdr.LedgerKeyContractData({
+   *   contractId: Buffer.from(contractId, "hex"),
+   *   key: xdr.ScVal.scvSymbol("counter"),
+   * }));
+   * server.getLedgerEntry(key).then(data => {
+   *   console.log("value:", data.xdr);
+   *   console.log("lastModified:", data.lastModifiedLedgerSeq);
+   *   console.log("latestLedger:", data.latestLedger);
+   * });
+   *
    * @param {xdr.ScVal} key - The key of the contract data to load.
    * @returns {Promise<SorobanRpc.GetLedgerEntryResponse>} Returns a promise to the {@link SorobanRpc.GetLedgerEntryResponse} object with the current value.
    */
@@ -132,6 +163,14 @@ export class Server {
    * When submitting a transaction, clients should poll this to tell when the
    * transaction has completed.
    *
+   * @example
+   * const transactionHash = "c4515e3bdc0897f21cc5dbec8c82cf0a936d4741cb74a8e158eb51b9fb00411a";
+   * server.getTransactionStatus(transactionHash).then(transaction => {
+   *   console.log("status:", transaction.status);
+   *   console.log("results:", transaction.results);
+   *   console.log("error:", transaction.error);
+   * });
+   *
    * @param {string} hash - The hash of the transaction to check. Encoded as a hex string.
    * @returns {Promise<SorobanRpc.GetTransactionStatusResponse>} Returns a promise to the {@link SorobanRpc.GetTransactionStatusResponse} object with the status, results, and error of the transaction.
    */
@@ -147,6 +186,43 @@ export class Server {
 
   /**
    * Submit a trial contract invocation to get back return values, expected ledger footprint, and expected costs.
+   *
+   * @example
+   * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
+   * const contract = new SorobanClient.Contract(contractId);
+   *
+   * // Right now, this is just the default fee for this example.
+   * const fee = 100;
+   *
+   * const transaction = new SorobanClient.TransactionBuilder(account, {
+   *     fee,
+   *     // Uncomment the following line to build transactions for the live network. Be
+   *     // sure to also change the horizon hostname.
+   *     // networkPassphrase: SorobanClient.Networks.PUBLIC,
+   *     networkPassphrase: SorobanClient.Networks.TESTNET
+   *   })
+   *   // Add a contract.increment soroban contract invocation operation
+   *   .addOperation(contract.call("increment"))
+   *   // Make this transaction valid for the next 30 seconds only
+   *   .setTimeout(30)
+   *   // Uncomment to add a memo (https://developers.stellar.org/docs/glossary/transactions/)
+   *   // .addMemo(SorobanClient.Memo.text('Hello world!'))
+   *   .build();
+   *
+   * // Sign this transaction with the secret key
+   * // NOTE: signing is transaction is network specific. Test network transactions
+   * // won't work in the public network. To switch networks, use the Network object
+   * // as explained above (look for SorobanClient.Network).
+   * const sourceKeypair = SorobanClient.Keypair.fromSecret(sourceSecretKey);
+   * transaction.sign(sourceKeypair);
+   *
+   * server.simulateTransaction(transaction).then(sim => {
+   *   console.log("cost:", sim.cost);
+   *   console.log("footprint:", sim.footprint);
+   *   console.log("results:", sim.results);
+   *   console.log("error:", sim.error);
+   *   console.log("latestLedger:", sim.latestLedger);
+   * });
    *
    * @param {Transaction | FeeBumpTransaction} transaction - The transaction to simulate. It should include exactly one operation, which must be a {@link InvokeHostFunctionOp}. Any provided footprint will be ignored.
    * @returns {Promise<SorobanRpc.SimulateTransactionResponse>} Returns a promise to the {@link SorobanRpc.SimulateTransactionResponse} object with the cost, result, footprint, and error of the transaction.
@@ -164,6 +240,42 @@ export class Server {
   /**
    * Submit a real transaction to the Stellar network. This is the only way to make changes "on-chain".
    * Unlike Horizon, Soroban-RPC does not wait for transaction completion. It simply validates the transaction and enqueues it. Clients should call {@link Server#getTransactionStatus} to learn about transaction success/failure.
+   *
+   * @example
+   * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
+   * const contract = new SorobanClient.Contract(contractId);
+   *
+   * // Right now, this is just the default fee for this example.
+   * const fee = 100;
+   *
+   * const transaction = new SorobanClient.TransactionBuilder(account, {
+   *     fee,
+   *     // Uncomment the following line to build transactions for the live network. Be
+   *     // sure to also change the horizon hostname.
+   *     // networkPassphrase: SorobanClient.Networks.PUBLIC,
+   *     networkPassphrase: SorobanClient.Networks.TESTNET
+   *   })
+   *   // Add a contract.increment soroban contract invocation operation
+   *   // Note: For real transactions you will need to include the footprint in
+   *   // the operation, as returned from simulateTransaction.
+   *   .addOperation(contract.call("increment"))
+   *   // Make this transaction valid for the next 30 seconds only
+   *   .setTimeout(30)
+   *   // Uncomment to add a memo (https://developers.stellar.org/docs/glossary/transactions/)
+   *   // .addMemo(SorobanClient.Memo.text('Hello world!'))
+   *   .build();
+   *
+   * // Sign this transaction with the secret key
+   * // NOTE: signing is transaction is network specific. Test network transactions
+   * // won't work in the public network. To switch networks, use the Network object
+   * // as explained above (look for SorobanClient.Network).
+   * const sourceKeypair = SorobanClient.Keypair.fromSecret(sourceSecretKey);
+   * transaction.sign(sourceKeypair);
+   *
+   * server.sendTransaction(transaction).then(result => {
+   *   console.log("id:", result.id);
+   *   console.log("error:", result.error);
+   * });
    *
    * @param {Transaction | FeeBumpTransaction} transaction - The transaction to submit.
    * @returns {Promise<SorobanRpc.SendTransactionResponse>} Returns a promise to the {@link SorobanRpc.SendTransactionResponse} object with the transaction id, status, and any error if available.
