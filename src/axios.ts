@@ -16,7 +16,7 @@ export interface ServerTime {
  * each entry will map the server domain to the last-known time and the local
  * time it was recorded, ex:
  *
- *     "horizon-testnet.stellar.org": {
+ *     "localhost:8000": {
  *       serverTime: 1552513039,
  *       localTimeRecorded: 1552513052
  *     }
@@ -57,7 +57,7 @@ export default AxiosClient;
  * Given a hostname, get the current time of that server (i.e., use the last-
  * recorded server time and offset it by the time since then.) If there IS no
  * recorded server time, or it's been 5 minutes since the last, return null.
- * @param {string} hostname Hostname of a Horizon server.
+ * @param {string} hostname Hostname of a Soroban-RPC server.
  * @returns {number} The UNIX timestamp (in seconds, not milliseconds)
  * representing the current time on that server, or `null` if we don't have
  * a record of that time.

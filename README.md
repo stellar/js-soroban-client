@@ -20,7 +20,7 @@ It provides:
 - a networking layer API for soroban-rpc methods.
 - facilities for building and signing transactions, for communicating with a
   soroban-rpc instance, and for submitting transactions or querying network
-  history.
+  state.
 
 ### soroban-client vs stellar-base
 

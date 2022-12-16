@@ -4,6 +4,8 @@ import * as jsonrpc from "./jsonrpc";
 // TODO: Better parsing for hashes, and base64-encoded xdr
 
 /* tslint:disable-next-line:no-namespace */
+/* @namespace SorobanRpc
+ */
 export namespace SorobanRpc {
   export interface Balance {
     asset_type: AssetType.credit4 | AssetType.credit12;
@@ -24,8 +26,11 @@ export namespace SorobanRpc {
 
   export type TransactionStatus = "pending" | "success" | "error";
 
+  /* Response for jsonrpc method `getAccount`
+   * @interface SorobanRpc.GetAccountResponse
+   */
   export interface GetAccountResponse {
-    id: string; // TODO: is this address a string?
+    id: string;
     sequence: string;
     balances: Balance[];
   }
@@ -34,7 +39,19 @@ export namespace SorobanRpc {
     status: "healthy";
   }
 
+  /* Response for jsonrpc method `getContractData`
+   */
   export interface GetContractDataResponse {
+    // xdr is a base-64 encoded {@link xdr.ScVal}
+    xdr: string;
+    lastModifiedLedgerSeq?: number;
+    latestLedger?: number;
+  }
+
+  /* Response for jsonrpc method `getLedgerEntry`
+   */
+  export interface GetLedgerEntryResponse {
+    // xdr is a base-64 encoded {@link xdr.LedgerEntryData}
     xdr: string;
     lastModifiedLedgerSeq?: number;
     latestLedger?: number;

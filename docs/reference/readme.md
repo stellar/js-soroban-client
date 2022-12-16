@@ -1,58 +1,29 @@
 ---
 title: Overview
 ---
-The JavaScript Stellar SDK facilitates integration with the [Stellar Horizon API server](https://github.com/stellar/go/tree/master/services/horizon) and submission of Stellar transactions, either on Node.js or in the browser. It has two main uses: [querying Horizon](#querying-horizon) and [building, signing, and submitting transactions to the Stellar network](#building-transactions).
+The JavaScript Soroban Client facilitates integration with the [Stellar Soroban-RPC API server](https://github.com/stellar/soroban-tools/tree/master/cmd/soroban-rpc) and submission of Stellar transactions, either on Node.js or in the browser. It has two main uses: [querying Soroban-RPC](#querying-soroban-rpc) and [building, signing, and submitting transactions to the Stellar network](#building-transactions).
 
-[Building and installing js-stellar-sdk](https://github.com/stellar/js-stellar-sdk)<br>
-[Examples of using js-stellar-sdk](./examples.md)
+[Building and installing js-soroban-client](https://github.com/stellar/js-soroban-client)<br>
+[Examples of using js-soroban-client](./examples.md)
 
-# Querying Horizon
-js-stellar-sdk gives you access to all the endpoints exposed by Horizon.
+# Querying Soroban-RPC
+js-soroban-client gives you access to all the endpoints exposed by Soroban-RPC.
 
 ## Building requests
-js-stellar-sdk uses the [Builder pattern](https://en.wikipedia.org/wiki/Builder_pattern) to create the requests to send
-to Horizon. Starting with a [server](https://stellar.github.io/js-stellar-sdk/Server.html) object, you can chain methods together to generate a query.
-(See the [Horizon reference](https://developers.stellar.org/api/) documentation for what methods are possible.)
+
+Starting with a [server](https://stellar.github.io/js-soroban-client/Server.html) object, you can call methods to query the server.
+(See the [Soroban-RPC reference](https://soroban.stellar.org/api/) documentation for what methods are possible.)
 ```js
-var StellarSdk = require('stellar-sdk');
-var server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
-// get a list of transactions that occurred in ledger 1400
-server.transactions()
-    .forLedger(1400)
-    .call().then(function(r){ console.log(r); });
+var SorobanClient = require('soroban-client');
+var server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
 
-// get a list of transactions submitted by a particular account
-server.transactions()
-    .forAccount('GASOCNHNNLYFNMDJYQ3XFMI7BYHIOCFW3GJEOWRPEGK2TDPGTG2E5EDW')
-    .call().then(function(r){ console.log(r); });
+// get the sequence number for an account
+server.getAccount(
+  'GASOCNHNNLYFNMDJYQ3XFMI7BYHIOCFW3GJEOWRPEGK2TDPGTG2E5EDW'
+).then(function(r){ console.log(r); });
 ```
 
-Once the request is built, it can be invoked with `.call()` or with `.stream()`. `call()` will return a
-[promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) to the response given by Horizon.
-
-## Streaming requests
-Many requests can be invoked with `stream()`. Instead of returning a promise like `call()` does, `.stream()` will return an `EventSource`.
-Horizon will start sending responses from either the beginning of time or from the point specified with `.cursor()`.
-(See the [Horizon reference](https://developers.stellar.org/api/introduction/streaming/) documentation to learn which endpoints support streaming.)
-
-For example, to log instances of transactions from a particular account:
-
-```javascript
-var StellarSdk = require('stellar-sdk')
-var server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
-var lastCursor=0; // or load where you left off
-
-var txHandler = function (txResponse) {
-    console.log(txResponse);
-};
-
-var es = server.transactions()
-    .forAccount(accountAddress)
-    .cursor(lastCursor)
-    .stream({
-        onmessage: txHandler
-    })
-```
+Methods return a [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) of the response from the Soroban-RPC server. If there is an error, the promise will throw an error.
 
 ## Handling responses
 
@@ -60,34 +31,22 @@ var es = server.transactions()
 The transaction endpoints will return some fields in raw [XDR](https://developers.stellar.org/api/introduction/xdr/)
 form. You can convert this XDR to JSON using the `.fromXDR()` method.
 
-An example of re-writing the txHandler from above to print the XDR fields as JSON:
+An example of using the `getLedgerEntry` method to read the current ledger entry for an account and print the XDR field as JSON:
 
 ```javascript
-var txHandler = function (txResponse) {
-    console.log( JSON.stringify(StellarSdk.xdr.TransactionEnvelope.fromXDR(txResponse.envelope_xdr, 'base64')) );
-    console.log( JSON.stringify(StellarSdk.xdr.TransactionResult.fromXDR(txResponse.result_xdr, 'base64')) );
-    console.log( JSON.stringify(StellarSdk.xdr.TransactionMeta.fromXDR(txResponse.result_meta_xdr, 'base64')) );
-};
+// Construct the LedgerKey we want to look up
+const key = SorobanClient.xdr.LedgerKey.account(
+  new SorobanClient.xdr.LedgerKeyAccount({
+    accountId: 'GASOCNHNNLYFNMDJYQ3XFMI7BYHIOCFW3GJEOWRPEGK2TDPGTG2E5EDW'
+  })
+);
 
+// Fetch the current LedgerKeyData from the server.
+server.getLedgerEntry(key).then(function (response) {
+  const parsed = SorobanClient.xdr.LedgerEntryData.fromXDR(response.xdr, 'base64');
+  console.log( JSON.stringify(parsed) );
+});
 ```
-
-
-### Following links
-The [HAL format](https://developers.stellar.org/api/introduction/response-format/) links returned with the Horizon response are converted into functions you can call on the returned object.
-This allows you to simply use `.next()` to page through results. It also makes fetching additional info, as in the following example, easy:
-
-```js
-server.payments()
-    .limit(1)
-    .call()
-    .then(function(response){
-        // will follow the transactions link returned by Horizon
-        response.records[0].transaction().then(function(txs){
-            console.log(txs);
-        });
-    });
-```
-
 
 # Transactions
 
@@ -96,38 +55,32 @@ server.payments()
 See the [Building Transactions](https://github.com/stellar/js-stellar-base/blob/master/docs/reference/building-transactions.md) guide for information about assembling a transaction.
 
 ## Submitting transactions
-Once you have built your transaction, you can submit it to the Stellar network with `Server.submitTransaction()`.
+Once you have built your transaction, you can send it to the Stellar network with `Server.sendTransaction()`.
 ```js
-const StellarSdk = require('stellar-sdk')
-const server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
+const SorobanClient = require('soroban-client')
+const server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
 
 (async function main() {
-    const account = await server.loadAccount(publicKey);
+    const account = await server.getAccount(publicKey);
 
-    /*
-        Right now, we have one function that fetches the base fee.
-        In the future, we'll have functions that are smarter about suggesting fees,
-        e.g.: `fetchCheapFee`, `fetchAverageFee`, `fetchPriorityFee`, etc.
-    */
-    const fee = await server.fetchBaseFee();
+    // Fee hardcoded for this example.
+    const fee = 100;
 
-    const transaction = new StellarSdk.TransactionBuilder(account, { fee, networkPassphrase: StellarSdk.Networks.TESTNET })
+    const contract = new SorobanClient.Contract(contractId);
+
+    const transaction = new SorobanClient.TransactionBuilder(account, { fee, networkPassphrase: SorobanClient.Networks.TESTNET })
         .addOperation(
-            // this operation funds the new account with XLM
-            StellarSdk.Operation.payment({
-                destination: "GASOCNHNNLYFNMDJYQ3XFMI7BYHIOCFW3GJEOWRPEGK2TDPGTG2E5EDW",
-                asset: StellarSdk.Asset.native(),
-                amount: "2"
-            })
+            // An operation to call increment on the contract
+            contract.call("increment")
         )
         .setTimeout(30)
         .build();
 
     // sign the transaction
-    transaction.sign(StellarSdk.Keypair.fromSecret(secretString));
+    transaction.sign(SorobanClient.Keypair.fromSecret(secretString));
 
     try {
-        const transactionResult = await server.submitTransaction(transaction);
+        const transactionResult = await server.sendTransaction(transaction);
         console.log(transactionResult);
     } catch (err) {
         console.error(err);
