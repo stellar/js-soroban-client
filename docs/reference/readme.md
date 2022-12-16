@@ -15,7 +15,7 @@ Starting with a [server](https://stellar.github.io/js-soroban-client/Server.html
 (See the [Soroban-RPC reference](https://soroban.stellar.org/api/) documentation for what methods are possible.)
 ```js
 var SorobanClient = require('soroban-client');
-var server = new SorobanClient.Server('https://soroban-rpc-testnet.stellar.org');
+var server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
 
 // get the sequence number for an account
 server.getAccount(
@@ -58,7 +58,7 @@ See the [Building Transactions](https://github.com/stellar/js-stellar-base/blob/
 Once you have built your transaction, you can send it to the Stellar network with `Server.sendTransaction()`.
 ```js
 const SorobanClient = require('soroban-client')
-const server = new SorobanClient.Server('https://soroban-rpc-testnet.stellar.org');
+const server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
 
 (async function main() {
     const account = await server.getAccount(publicKey);

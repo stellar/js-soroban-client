@@ -16,7 +16,7 @@ export interface ServerTime {
  * each entry will map the server domain to the last-known time and the local
  * time it was recorded, ex:
  *
- *     "soroban-rpc-testnet.stellar.org": {
+ *     "localhost:8000": {
  *       serverTime: 1552513039,
  *       localTimeRecorded: 1552513052
  *     }

@@ -35,9 +35,9 @@ const receiverPublicKey = 'GAIRISXKPLOWZBMFRPU5XRGUUX3VMA3ZEWKBM5MSNRU3CHV6P4PYZ
 
 const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
 
-// Configure SorobanClient to talk to the horizon instance hosted by Stellar.org
-// To use the live network, set the hostname to 'horizon.stellar.org'
-const server = new SorobanClient.Server('https://soroban-rpc-testnet.stellar.org');
+// Configure SorobanClient to talk to the soroban-rpc instance running on your
+// local machine.
+const server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
 
 (async function main() {
   // Transactions require a valid sequence number that is specific to this account.
@@ -52,7 +52,7 @@ const server = new SorobanClient.Server('https://soroban-rpc-testnet.stellar.org
   const transaction = new SorobanClient.TransactionBuilder(account, {
       fee,
       // Uncomment the following line to build transactions for the live network. Be
-      // sure to also change the horizon hostname.
+      // sure to also change the soroban-rpc hostname.
       // networkPassphrase: SorobanClient.Networks.PUBLIC,
       networkPassphrase: SorobanClient.Networks.TESTNET
     })

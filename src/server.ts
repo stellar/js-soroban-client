@@ -17,7 +17,7 @@ export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
  * Server handles the network connection to a [Soroban-RPC](https://soroban.stellar.org/docs)
  * instance and exposes an interface for requests to that instance.
  * @constructor
- * @param {string} serverURL Soroban-RPC Server URL (ex. `https://soroban-rpc-testnet.stellar.org`).
+ * @param {string} serverURL Soroban-RPC Server URL (ex. `http://localhost:8000/soroban/rpc`).
  * @param {object} [opts] Options object
  * @param {boolean} [opts.allowHttp] - Allow connecting to http servers, default: `false`. This must be set to false in production deployments! You can also use {@link Config} class to set this globally.
  * @param {string} [opts.appName] - Allow set custom header `X-App-Name`, default: `undefined`.
@@ -25,7 +25,7 @@ export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
  */
 export class Server {
   /**
-   * serverURL Soroban-RPC Server URL (ex. `https://soroban-rpc-testnet.stellar.org`).
+   * serverURL Soroban-RPC Server URL (ex. `http://localhost:8000/soroban/rpc`).
    */
   public readonly serverURL: URI;
 
