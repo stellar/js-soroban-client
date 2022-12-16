@@ -239,7 +239,10 @@ export class Server {
 
   /**
    * Submit a real transaction to the Stellar network. This is the only way to make changes "on-chain".
-   * Unlike Horizon, Soroban-RPC does not wait for transaction completion. It simply validates the transaction and enqueues it. Clients should call {@link Server#getTransactionStatus} to learn about transaction success/failure.
+   * Unlike Horizon, Soroban-RPC does not wait for transaction completion. It
+   * simply validates the transaction and enqueues it. Clients should call
+   * {@link Server#getTransactionStatus} to learn about transaction
+   * success/failure.
    *
    * @example
    * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
@@ -278,7 +281,9 @@ export class Server {
    * });
    *
    * @param {Transaction | FeeBumpTransaction} transaction - The transaction to submit.
-   * @returns {Promise<SorobanRpc.SendTransactionResponse>} Returns a promise to the {@link SorobanRpc.SendTransactionResponse} object with the transaction id, status, and any error if available.
+   * @returns {Promise<SorobanRpc.SendTransactionResponse>} Returns a promise
+   * to the {@link SorobanRpc.SendTransactionResponse} object with the transaction
+   * id, status, and any error if available.
    */
   public async sendTransaction(
     transaction: Transaction | FeeBumpTransaction,
