@@ -1,6 +1,6 @@
-const MockAdapter = require('axios-mock-adapter');
+const MockAdapter = require("axios-mock-adapter");
 
-describe('Server#getEvents', function() {
+describe("Server#getEvents", function() {
   beforeEach(function() {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
@@ -11,14 +11,18 @@ describe('Server#getEvents', function() {
     this.axiosMock.restore();
   });
 
-  it('requests the correct endpoint', function(done) {
+  it("requests the correct endpoint", function(done) {
     let result = { events: [] };
-    setupMock(this.axiosMock, {
-      endLedger: 2,
-      filters: [],
-      pagination: {},
-      startLedger: 1,
-    }, result);
+    setupMock(
+      this.axiosMock,
+      {
+        endLedger: 2,
+        filters: [],
+        pagination: {},
+        startLedger: 1,
+      },
+      result,
+    );
 
     this.server
       .getEvents(1, 2)
@@ -31,23 +35,27 @@ describe('Server#getEvents', function() {
       });
   });
 
-  it('can build wildcard filters', function(done) {
-    let result = filterEvents(getEventsResponseFixture, "*/*")
+  it("can build wildcard filters", function(done) {
+    let result = filterEvents(getEventsResponseFixture, "*/*");
 
-    setupMock(this.axiosMock, {
-      startLedger: 1,
-      endLedger: 10,
-      filters: [{
-        topics: [
-          [ "*", "*" ],
+    setupMock(
+      this.axiosMock,
+      {
+        startLedger: 1,
+        endLedger: 10,
+        filters: [
+          {
+            topics: [["*", "*"]],
+          },
         ],
-      }],
-      pagination: {},
-  }, result);
+        pagination: {},
+      },
+      result,
+    );
 
     this.server
-      .getEvents(1, 10, { 
-        topics: [ [ "*", "*" ] ]
+      .getEvents(1, 10, {
+        topics: [["*", "*"]],
       })
       .then(function(response) {
         expect(response).to.be.deep.equal(result);
@@ -57,117 +65,148 @@ describe('Server#getEvents', function() {
   });
 
   it("can build matching filters", function(done) {
-    let result = filterEvents(getEventsResponseFixture, 
-      "AAAABQAAAAh0cmFuc2Zlcg==/AAAAAQB6Mcc=");
+    let result = filterEvents(
+      getEventsResponseFixture,
+      "AAAABQAAAAh0cmFuc2Zlcg==/AAAAAQB6Mcc=",
+    );
 
-    setupMock(this.axiosMock, {
-          startLedger: 1,
-          endLedger: 10,
-          filters: [{
-            topics: [
-              [ "AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc=" ],
-            ],
-          }],
-          pagination: {},
-        }, result);
+    setupMock(
+      this.axiosMock,
+      {
+        startLedger: 1,
+        endLedger: 10,
+        filters: [
+          {
+            topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="]],
+          },
+        ],
+        pagination: {},
+      },
+      result,
+    );
 
     this.server
-    .getEvents(1, 10, { topics: [
-      [ "AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc=" ],
-    ]})
-    .then(function(response) {
-      expect(response).to.be.deep.equal(result);
-      done();
-    })
-    .catch(done);
+      .getEvents(1, 10, {
+        topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="]],
+      })
+      .then(function(response) {
+        expect(response).to.be.deep.equal(result);
+        done();
+      })
+      .catch(done);
+  });
+
+  it("can build mixed filters", function(done) {
+    let result = filterEventsByLedger(
+      filterEvents(getEventsResponseFixture, "AAAABQAAAAh0cmFuc2Zlcg==/*"),
+      1,
+      2,
+    );
+
+    setupMock(
+      this.axiosMock,
+      {
+        startLedger: 1,
+        endLedger: 2,
+        filters: [
+          {
+            topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "*"]],
+          },
+        ],
+        pagination: {},
+      },
+      result,
+    );
+
+    this.server
+      .getEvents(1, 2, {
+        topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "*"]],
+      })
+      .then(function(response) {
+        expect(response).to.be.deep.equal(result);
+        done();
+      })
+      .catch(done);
   });
 });
 
 function filterEvents(events, filter) {
-  return events.filter((e, i) => (
-    e.topic.length == filter.length &&
-    e.topic.every((s, j) => (s === filter[j] || s === "*"))
-  ));
+  return events.filter(
+    (e, i) =>
+      e.topic.length == filter.length &&
+      e.topic.every((s, j) => s === filter[j] || s === "*"),
+  );
 }
 
 function filterEventsByLedger(events, start, end) {
-  return events.filter(e => {
-    return e.ledger.parseInt() >= start && 
-      e.ledger.parseInt() <= end;
+  return events.filter((e) => {
+    return e.ledger.parseInt() >= start && e.ledger.parseInt() <= end;
   });
 }
 
 function setupMock(axiosMock, params, result) {
   axiosMock
     .expects("post")
-    .withArgs(serverUrl,
-      {
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'getEvents',
-        params: [params],
-      })
-    .returns(Promise.resolve({ data: { result }}));
+    .withArgs(serverUrl, {
+      jsonrpc: "2.0",
+      id: 1,
+      method: "getEvents",
+      params: [params],
+    })
+    .returns(Promise.resolve({ data: { result } }));
 }
 
 let getEventsResponseFixture = [
   {
-    "type": "system",
-    "ledger": "1",
-    "ledgerClosedAt": "2022-11-16T16:10:41Z",
-    "contractId": "e3e82a76cc316f6289fd1ffbdf315da0f2c6be9582b84b9983a402f02ea0fff7",
-    "id": "0164090849041387521-0000000003",
-    "pagingToken": "164090849041387521-3",
-    "topic": [
-      "AAAABQAAAAh0cmFuc2Zlcg==",
-      "AAAAAQB6Mcc="
-    ],
-    "value": {
-      "xdr": "AAAABQAAAApHaWJNb255UGxzAAA="
-    }
+    type: "system",
+    ledger: "1",
+    ledgerClosedAt: "2022-11-16T16:10:41Z",
+    contractId:
+      "e3e82a76cc316f6289fd1ffbdf315da0f2c6be9582b84b9983a402f02ea0fff7",
+    id: "0164090849041387521-0000000003",
+    pagingToken: "164090849041387521-3",
+    topic: ["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="],
+    value: {
+      xdr: "AAAABQAAAApHaWJNb255UGxzAAA=",
+    },
   },
   {
-    "type": "contract",
-    "ledger": "2",
-    "ledgerClosedAt": "2022-11-16T16:10:41Z",
-    "contractId": "e3e82a76cc316f6289fd1ffbdf315da0f2c6be9582b84b9983a402f02ea0fff7",
-    "id": "0164090849041387521-0000000003",
-    "pagingToken": "164090849041387521-3",
-    "topic": [
-      "AAAAAQB6Mcc=",
-      "AAAABQAAAAh0cmFuc2Zlcg==",
-    ],
-    "value": {
-      "xdr": "AAAABQAAAApHaWJNb255UGxzAAA="
-    }
+    type: "contract",
+    ledger: "2",
+    ledgerClosedAt: "2022-11-16T16:10:41Z",
+    contractId:
+      "e3e82a76cc316f6289fd1ffbdf315da0f2c6be9582b84b9983a402f02ea0fff7",
+    id: "0164090849041387521-0000000003",
+    pagingToken: "164090849041387521-3",
+    topic: ["AAAAAQB6Mcc=", "AAAABQAAAAh0cmFuc2Zlcg=="],
+    value: {
+      xdr: "AAAABQAAAApHaWJNb255UGxzAAA=",
+    },
   },
   {
-    "type": "system",
-    "ledger": "2",
-    "ledgerClosedAt": "2022-11-16T16:10:41Z",
-    "contractId": "a3e82a76cc316f6289fd1ffbdf315da0f2c6be9582b84b9983a402f02ea0fff7",
-    "id": "0164090849041387521-0000000003",
-    "pagingToken": "164090849041387521-3",
-    "topic": [
-      "AAAAAQB6Mcc="
-    ],
-    "value": {
-      "xdr": "AAAABQAAAApHaWJNb255UGxzAAA="
-    }
+    type: "system",
+    ledger: "2",
+    ledgerClosedAt: "2022-11-16T16:10:41Z",
+    contractId:
+      "a3e82a76cc316f6289fd1ffbdf315da0f2c6be9582b84b9983a402f02ea0fff7",
+    id: "0164090849041387521-0000000003",
+    pagingToken: "164090849041387521-3",
+    topic: ["AAAAAQB6Mcc="],
+    value: {
+      xdr: "AAAABQAAAApHaWJNb255UGxzAAA=",
+    },
   },
   {
-    "type": "contract",
-    "ledger": "3",
-    "ledgerClosedAt": "2022-12-14T01:01:20Z",
-    "contractId": "6ebe0114ae15f72f187f05d06dcb66b22bd97218755c9b4646b034ab961fc1d5",
-    "id": "0000000171798695936-0000000001",
-    "pagingToken": "0000000171798695936-0000000001",
-    "topic": [
-      "AAAABQAAAAdDT1VOVEVSAA==",
-      "AAAABQAAAAlpbmNyZW1lbnQAAAA="
-    ],
-    "value": {
-      "xdr": "AAAAAQAAAAE="
-    }
-  }
-]
+    type: "contract",
+    ledger: "3",
+    ledgerClosedAt: "2022-12-14T01:01:20Z",
+    contractId:
+      "6ebe0114ae15f72f187f05d06dcb66b22bd97218755c9b4646b034ab961fc1d5",
+    id: "0000000171798695936-0000000001",
+    pagingToken: "0000000171798695936-0000000001",
+    topic: ["AAAABQAAAAdDT1VOVEVSAA==", "AAAABQAAAAlpbmNyZW1lbnQAAAA="],
+    value: {
+      xdr: "AAAAAQAAAAE=",
+    },
+  },
+];
