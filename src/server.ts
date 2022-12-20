@@ -224,9 +224,9 @@ export class Server {
     ...filters: SorobanRpc.EventFilter[]
   ): Promise<SorobanRpc.GetEventsResponse> {
     // TODO: It'd be nice if we could do something to infer the types of filter
-    //       arguments a user wants, e.g. converting something like
-    //       "transfer/*/42" into the base64-encoded `ScVal` equivalents by
-    //       inferring that the first is an ScSymbol and the last is a U32.
+    // arguments a user wants, e.g. converting something like "transfer/*/42"
+    // into the base64-encoded `ScVal` equivalents by inferring that the first
+    // is an ScSymbol and the last is a U32.
     //
     // The difficulty comes in matching up the correct integer primitives.
     //
