@@ -171,8 +171,12 @@ export class Server {
    *   console.log("error:", transaction.error);
    * });
    *
-   * @param {string} hash - The hash of the transaction to check. Encoded as a hex string.
-   * @returns {Promise<SorobanRpc.GetTransactionStatusResponse>} Returns a promise to the {@link SorobanRpc.GetTransactionStatusResponse} object with the status, results, and error of the transaction.
+   * @param {string} hash - The hash of the transaction to check. Encoded as a
+   *    hex string.
+   *
+   * @returns {Promise<SorobanRpc.GetTransactionStatusResponse>} Returns a
+   *    promise to the {@link SorobanRpc.GetTransactionStatusResponse} object
+   *    with the status, results, and error of the transaction.
    */
   public async getTransactionStatus(
     hash: string,
@@ -185,7 +189,59 @@ export class Server {
   }
 
   /**
-   * Submit a trial contract invocation to get back return values, expected ledger footprint, and expected costs.
+   * Fetches all events that match a given set of filters.
+   *
+   * The given filters are combined only in a logical AND fashion, and all of
+   * the fields in each filter are optional.
+   *
+   * @example
+   * server.getEvents(
+   *    1000,
+   *    1010,
+   *    {
+   *      type: "contract",
+   *      contractIds: [ "deadb33f..." ],
+   *      topics: [ "AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc=", "*" ],
+   *    }, {
+   *      type: "system",
+   *      contractIds: [ "...c4f3b4b3..." ],
+   *      topics: [ "*" ],
+   *    }, {
+   *      contractIds: [ "...c4f3b4b3..." ],
+   *      topics: [ "AAAABQAAAAh0cmFuc2Zlcg==" ],
+   *    }, {
+   *      topics: [ "AAAAAQB6Mcc=" ],
+   *    },
+   * );
+   *
+   * @returns {Promise<SorobanRpc.GetEventsResponse>} a promise to the
+   *    {@link SorobanRpc.GetEventsResponse} object containing a paginatable set
+   *    of the events matching the given event filters.
+   */
+  public async getEvents(
+    startLedger: number,
+    endLedger: number,
+    ...filters: SorobanRpc.EventFilter[]
+  ): Promise<SorobanRpc.GetEventsResponse> {
+    // TODO: It'd be nice if we could do something to infer the types of filter
+    //       arguments a user wants, e.g. converting something like
+    //       "transfer/*/42" into the base64-encoded `ScVal` equivalents by
+    //       inferring that the first is an ScSymbol and the last is a U32.
+    //
+    // The difficulty comes in matching up the correct integer primitives.
+    //
+    // It also means this library will rely on the XDR definitions.
+    return await jsonrpc.post(this.serverURL.toString(), "getEvents", {
+      startLedger,
+      endLedger,
+      filters,
+      pagination: {},
+    });
+  }
+
+  /**
+   * Submit a trial contract invocation to get back return values, expected
+   * ledger footprint, and expected costs.
    *
    * @example
    * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
@@ -224,8 +280,12 @@ export class Server {
    *   console.log("latestLedger:", sim.latestLedger);
    * });
    *
-   * @param {Transaction | FeeBumpTransaction} transaction - The transaction to simulate. It should include exactly one operation, which must be a {@link InvokeHostFunctionOp}. Any provided footprint will be ignored.
-   * @returns {Promise<SorobanRpc.SimulateTransactionResponse>} Returns a promise to the {@link SorobanRpc.SimulateTransactionResponse} object with the cost, result, footprint, and error of the transaction.
+   * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
+   *    simulate. It should include exactly one operation, which must be a
+   *    {@link InvokeHostFunctionOp}. Any provided footprint will be ignored.
+   * @returns {Promise<SorobanRpc.SimulateTransactionResponse>} Returns a
+   *    promise to the {@link SorobanRpc.SimulateTransactionResponse} object
+   *    with the cost, result, footprint, and error of the transaction.
    */
   public async simulateTransaction(
     transaction: Transaction | FeeBumpTransaction,
@@ -238,11 +298,11 @@ export class Server {
   }
 
   /**
-   * Submit a real transaction to the Stellar network. This is the only way to make changes "on-chain".
-   * Unlike Horizon, Soroban-RPC does not wait for transaction completion. It
-   * simply validates the transaction and enqueues it. Clients should call
-   * {@link Server#getTransactionStatus} to learn about transaction
-   * success/failure.
+   * Submit a real transaction to the Stellar network. This is the only way to
+   * make changes "on-chain". Unlike Horizon, Soroban-RPC does not wait for
+   * transaction completion. It simply validates the transaction and enqueues
+   * it. Clients should call {@link Server#getTransactionStatus} to learn about
+   * transaction success/failure.
    *
    * @example
    * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
@@ -280,10 +340,11 @@ export class Server {
    *   console.log("error:", result.error);
    * });
    *
-   * @param {Transaction | FeeBumpTransaction} transaction - The transaction to submit.
-   * @returns {Promise<SorobanRpc.SendTransactionResponse>} Returns a promise
-   * to the {@link SorobanRpc.SendTransactionResponse} object with the transaction
-   * id, status, and any error if available.
+   * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
+   *    submit.
+   * @returns {Promise<SorobanRpc.SendTransactionResponse>} Returns a promise to
+   *    the {@link SorobanRpc.SendTransactionResponse} object with the
+   *    transaction id, status, and any error if available.
    */
   public async sendTransaction(
     transaction: Transaction | FeeBumpTransaction,
