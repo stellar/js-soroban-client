@@ -191,27 +191,31 @@ export class Server {
   /**
    * Fetches all events that match a given set of filters.
    *
-   * The given filters are combined only in a logical AND fashion, and all of
+   * The given filters are combined only in a logical OR fashion, and all of
    * the fields in each filter are optional.
    *
    * @example
    * server.getEvents(
    *    1000,
    *    1010,
-   *    {
+   *    [
+   *     {
    *      type: "contract",
    *      contractIds: [ "deadb33f..." ],
-   *      topics: [ "AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc=", "*" ],
-   *    }, {
+   *      topics: [[ "AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc=", "*" ]],
+   *     }, {
    *      type: "system",
    *      contractIds: [ "...c4f3b4b3..." ],
-   *      topics: [ "*" ],
-   *    }, {
+   *      topics: [[ "*" ], [ "*", "AAAAAQB6Mcc=" ]],
+   *     }, {
    *      contractIds: [ "...c4f3b4b3..." ],
-   *      topics: [ "AAAABQAAAAh0cmFuc2Zlcg==" ],
-   *    }, {
-   *      topics: [ "AAAAAQB6Mcc=" ],
-   *    },
+   *      topics: [[ "AAAABQAAAAh0cmFuc2Zlcg==" ]],
+   *     }, {
+   *      topics: [[ "AAAAAQB6Mcc=" ]],
+   *     }
+   *    ],
+   *    "0164090849041387521-0000000000",
+   *    10,
    * );
    *
    * @returns {Promise<SorobanRpc.GetEventsResponse>} a promise to the
@@ -221,7 +225,9 @@ export class Server {
   public async getEvents(
     startLedger: number,
     endLedger: number,
-    ...filters: SorobanRpc.EventFilter[]
+    filters?: SorobanRpc.EventFilter[],
+    cursor?: string,
+    limit?: number,
   ): Promise<SorobanRpc.GetEventsResponse> {
     // TODO: It'd be nice if we could do something to infer the types of filter
     // arguments a user wants, e.g. converting something like "transfer/*/42"
@@ -231,11 +237,19 @@ export class Server {
     // The difficulty comes in matching up the correct integer primitives.
     //
     // It also means this library will rely on the XDR definitions.
+    const pagination: SorobanRpc.Pagination = {};
+    if (cursor) {
+      pagination.cursor = cursor;
+    }
+    if (limit) {
+      pagination.limit = limit;
+    }
+
     return await jsonrpc.post(this.serverURL.toString(), "getEvents", {
       startLedger,
       endLedger,
-      filters,
-      pagination: {},
+      filters: filters ?? [],
+      pagination,
     });
   }
 

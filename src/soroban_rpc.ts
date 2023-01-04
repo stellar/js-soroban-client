@@ -86,6 +86,11 @@ export namespace SorobanRpc {
     };
   }
 
+  export interface Pagination {
+    cursor?: string;
+    limit?: number;
+  }
+
   export interface RequestAirdropResponse {
     transaction_id: string;
   }
