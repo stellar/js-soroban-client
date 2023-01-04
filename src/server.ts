@@ -191,8 +191,12 @@ export class Server {
   /**
    * Fetches all events that match a given set of filters.
    *
-   * The given filters are combined only in a logical OR fashion, and all of
-   * the fields in each filter are optional.
+   * The given filters (see {@link SorobanRpc.EventFilter} for detailed fields)
+   * are combined only in a logical OR fashion, and all of the fields in each
+   * filter are optional.
+   *
+   * To page through events, use the `pagingToken` field on the relevant
+   * {@link SorobanRpc.EventResponse} object to set the `cursor` parameter.
    *
    * @example
    * server.getEvents(
@@ -237,19 +241,14 @@ export class Server {
     // The difficulty comes in matching up the correct integer primitives.
     //
     // It also means this library will rely on the XDR definitions.
-    const pagination: SorobanRpc.Pagination = {};
-    if (cursor) {
-      pagination.cursor = cursor;
-    }
-    if (limit) {
-      pagination.limit = limit;
-    }
-
     return await jsonrpc.post(this.serverURL.toString(), "getEvents", {
       startLedger,
       endLedger,
       filters: filters ?? [],
-      pagination,
+      pagination: {
+        ...(cursor && { cursor }), // add fields only if defined
+        ...(limit && { limit }),
+      },
     });
   }
 
