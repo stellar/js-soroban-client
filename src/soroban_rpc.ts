@@ -64,6 +64,28 @@ export namespace SorobanRpc {
     error?: jsonrpc.Error;
   }
 
+  export interface EventFilter {
+    type?: string;
+    contractIds?: string[];
+    topics?: string[][];
+  }
+
+  export interface GetEventsResponse {
+    events?: EventResponse[];
+  }
+
+  export interface EventResponse {
+    ledger: string;
+    ledgerClosedAt: string;
+    contractId: string;
+    id: string;
+    pagingToken: string;
+    topic: string[];
+    value: {
+      xdr: string;
+    };
+  }
+
   export interface RequestAirdropResponse {
     transaction_id: string;
   }
