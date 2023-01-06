@@ -35,6 +35,10 @@
       "eslint --fix --max-warnings 0",
       "git add"
     ],
+    "test/**/*.js": [
+      "prettier --write",
+      "git add"
+    ],
     "**/*.ts": [
       "prettier --write",
       "tslint --fix",

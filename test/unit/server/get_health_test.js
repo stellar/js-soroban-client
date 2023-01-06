@@ -1,6 +1,6 @@
-const MockAdapter = require('axios-mock-adapter');
+const MockAdapter = require("axios-mock-adapter");
 
-describe('Server#getHealth', function() {
+describe("Server#getHealth", function() {
   beforeEach(function() {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
@@ -11,22 +11,19 @@ describe('Server#getHealth', function() {
     this.axiosMock.restore();
   });
 
-  it('requests the correct endpoint', function(done) {
+  it("requests the correct endpoint", function(done) {
     let result = {
       status: "healthy",
     };
 
     this.axiosMock
-      .expects('post')
-      .withArgs(
-        serverUrl,
-        {
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'getHealth',
-          params: [],
-        }
-      )
+      .expects("post")
+      .withArgs(serverUrl, {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "getHealth",
+        params: [],
+      })
       .returns(Promise.resolve({ data: { result } }));
 
     this.server
