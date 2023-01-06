@@ -3,7 +3,7 @@
 var cp = require('child_process');
 var coveralls = require('@kollavarsham/gulp-coveralls');
 var gulp = require('gulp');
-var isparta = require('isparta');
+var nyc = require('nyc');
 var plugins = require('gulp-load-plugins')();
 var webpack = require('webpack');
 var webpackStream = require('webpack-stream');
@@ -146,7 +146,7 @@ gulp.task(
       .src(['src/**/*.js'])
       .pipe(
         plugins.istanbul({
-          instrumenter: isparta.Instrumenter
+          instrumenter: nyc.Instrumenter
         })
       )
       .pipe(plugins.istanbul.hookRequire());
