@@ -48,6 +48,6 @@ module.exports = {
   },
   plugins: [
     // Ignore native modules (ed25519)
-    new webpack.IgnorePlugin(/ed25519/),
+    new webpack.IgnorePlugin({ resourceRegExp: /ed25519/}),
   ],
 };
