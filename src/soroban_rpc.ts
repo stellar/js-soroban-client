@@ -60,6 +60,9 @@ export namespace SorobanRpc {
   export interface GetTransactionStatusResponse {
     id: string;
     status: TransactionStatus;
+    envelopeXdr?: string;
+    resultXdr?: string;
+    resultMetaXdr?: string;
     results?: Result[];
     error?: jsonrpc.Error;
   }

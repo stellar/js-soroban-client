@@ -167,7 +167,9 @@ export class Server {
    * const transactionHash = "c4515e3bdc0897f21cc5dbec8c82cf0a936d4741cb74a8e158eb51b9fb00411a";
    * server.getTransactionStatus(transactionHash).then(transaction => {
    *   console.log("status:", transaction.status);
-   *   console.log("results:", transaction.results);
+   *   console.log("envelopeXdr:", transaction.envelopeXdr);
+   *   console.log("resultMetaXdr:", transaction.resultMetaXdr);
+   *   console.log("resultXdr:", transaction.resultXdr);
    *   console.log("error:", transaction.error);
    * });
    *
