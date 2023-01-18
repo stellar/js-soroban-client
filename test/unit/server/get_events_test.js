@@ -16,16 +16,16 @@ describe("Server#getEvents", function() {
     setupMock(
       this.axiosMock,
       {
-        endLedger: 2,
+        endLedger: "2",
         filters: [],
         pagination: {},
-        startLedger: 1,
+        startLedger: "1",
       },
       result,
     );
 
     this.server
-      .getEvents(1, 2)
+      .getEvents("1", "2")
       .then(function(response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -41,8 +41,8 @@ describe("Server#getEvents", function() {
     setupMock(
       this.axiosMock,
       {
-        startLedger: 1,
-        endLedger: 10,
+        startLedger: "1",
+        endLedger: "10",
         filters: [
           {
             topics: [["*", "*"]],
@@ -55,8 +55,8 @@ describe("Server#getEvents", function() {
 
     this.server
       .getEvents(
-        1, 
-        10, [{
+        "1", 
+        "10", [{
           topics: [["*", "*"]],
         }],
       )
@@ -76,8 +76,8 @@ describe("Server#getEvents", function() {
     setupMock(
       this.axiosMock,
       {
-        startLedger: 1,
-        endLedger: 10,
+        startLedger: "1",
+        endLedger: "10",
         filters: [
           {
             topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="]],
@@ -89,7 +89,7 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents(1, 10, [{
+      .getEvents("1", "10", [{
         topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="]],
       }])
       .then(function(response) {
@@ -109,8 +109,8 @@ describe("Server#getEvents", function() {
     setupMock(
       this.axiosMock,
       {
-        startLedger: 1,
-        endLedger: 2,
+        startLedger: "1",
+        endLedger: "2",
         filters: [
           {
             topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "*"]],
@@ -122,7 +122,7 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents(1, 2, [{
+      .getEvents("1", "2", [{
         topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "*"]],
       }])
       .then(function(response) {
@@ -142,8 +142,8 @@ describe("Server#getEvents", function() {
     setupMock(
       this.axiosMock,
       {
-        startLedger: 1,
-        endLedger: 2,
+        startLedger: "1",
+        endLedger: "2",
         filters: [
           {
             topics: [["*", "*"]],
@@ -159,8 +159,8 @@ describe("Server#getEvents", function() {
 
     this.server
       .getEvents(
-        1, 
-        2,
+        "1", 
+        "2",
         [{
           topics: [["*", "*"]]
         }],

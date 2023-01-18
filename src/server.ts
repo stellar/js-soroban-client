@@ -202,8 +202,8 @@ export class Server {
    *
    * @example
    * server.getEvents(
-   *    1000,
-   *    1010,
+   *    "1000",
+   *    "1010",
    *    [
    *     {
    *      type: "contract",
@@ -229,8 +229,8 @@ export class Server {
    *    of the events matching the given event filters.
    */
   public async getEvents(
-    startLedger: number,
-    endLedger: number,
+    startLedger: string,
+    endLedger: string,
     filters?: SorobanRpc.EventFilter[],
     cursor?: string,
     limit?: number,
