@@ -44,7 +44,7 @@ describe('Server#sendTransaction', function() {
           jsonrpc: '2.0',
           id: 1,
           method: 'sendTransaction',
-          params: [this.blob],
+          params: this.blob,
         }
       )
       .returns(Promise.resolve({ data: {id: 1, result: {id: this.hash, status: 'pending'}} }));

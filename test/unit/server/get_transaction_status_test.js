@@ -44,7 +44,7 @@ describe('Server#getTransactionStatus', function() {
           jsonrpc: '2.0',
           id: 1,
           method: 'getTransactionStatus',
-          params: [this.hash],
+          params: this.hash,
         }
       )
       .returns(Promise.resolve({ data: {id: 1, error: {code: 404}} }));

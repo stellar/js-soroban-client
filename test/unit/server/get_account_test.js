@@ -26,7 +26,7 @@ describe('Server#getAccount', function() {
           jsonrpc: '2.0',
           id: 1,
           method: 'getAccount',
-          params: [address],
+          params: address,
         }
       )
       .returns(Promise.resolve({ data: { result } }));

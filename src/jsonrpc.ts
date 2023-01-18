@@ -32,12 +32,16 @@ export async function post<T>(
   method: string,
   ...params: any
 ): Promise<T> {
+  let jsonParams = params;
+  if (params.length === 1) {
+    jsonParams = params[0];
+  }
   const response = await axios.post<Response<T>>(url, {
     jsonrpc: "2.0",
     // TODO: Generate a unique request id
     id: 1,
     method,
-    params,
+    params: jsonParams,
   });
   if (hasOwnProperty(response.data, "error")) {
     throw response.data.error;

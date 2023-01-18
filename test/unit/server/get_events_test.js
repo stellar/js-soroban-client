@@ -190,13 +190,14 @@ function filterEventsByLedger(events, start, end) {
 }
 
 function setupMock(axiosMock, params, result) {
+
   axiosMock
     .expects("post")
     .withArgs(serverUrl, {
       jsonrpc: "2.0",
       id: 1,
       method: "getEvents",
-      params: [params],
+      params: params,
     })
     .returns(Promise.resolve({ data: { result } }));
 }
