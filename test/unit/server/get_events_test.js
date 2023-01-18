@@ -25,7 +25,7 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents("1", "2")
+      .getEvents(1, 2)
       .then(function(response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -55,8 +55,8 @@ describe("Server#getEvents", function() {
 
     this.server
       .getEvents(
-        "1", 
-        "10", [{
+        1, 
+        10, [{
           topics: [["*", "*"]],
         }],
       )
@@ -89,7 +89,7 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents("1", "10", [{
+      .getEvents(1, 10, [{
         topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="]],
       }])
       .then(function(response) {
@@ -122,7 +122,7 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents("1", "2", [{
+      .getEvents(1, 2, [{
         topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "*"]],
       }])
       .then(function(response) {
@@ -159,8 +159,8 @@ describe("Server#getEvents", function() {
 
     this.server
       .getEvents(
-        "1", 
-        "2",
+        1, 
+        2,
         [{
           topics: [["*", "*"]]
         }],
@@ -190,7 +190,6 @@ function filterEventsByLedger(events, start, end) {
 }
 
 function setupMock(axiosMock, params, result) {
-
   axiosMock
     .expects("post")
     .withArgs(serverUrl, {

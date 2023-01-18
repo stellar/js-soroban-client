@@ -33,7 +33,12 @@ export async function post<T>(
   ...params: any
 ): Promise<T> {
   let jsonParams = params;
-  if (params.length === 1) {
+  if (
+    params.length === 1 &&
+    typeof params[0] === "object" && params[0] !== null
+  ) {
+    // if only one param and it's a js object, then pass the object.
+    // otherwise rpc server throws unmarshal error on jsonrpc params.
     jsonParams = params[0];
   }
   const response = await axios.post<Response<T>>(url, {

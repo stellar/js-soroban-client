@@ -229,8 +229,8 @@ export class Server {
    *    of the events matching the given event filters.
    */
   public async getEvents(
-    startLedger: string,
-    endLedger: string,
+    startLedger: number,
+    endLedger: number,
     filters?: SorobanRpc.EventFilter[],
     cursor?: string,
     limit?: number,
@@ -244,8 +244,8 @@ export class Server {
     //
     // It also means this library will rely on the XDR definitions.
     return await jsonrpc.post(this.serverURL.toString(), "getEvents", {
-      startLedger,
-      endLedger,
+      startLedger: String(startLedger),
+      endLedger: String(endLedger),
       filters: filters ?? [],
       pagination: {
         ...(cursor && { cursor }), // add fields only if defined
