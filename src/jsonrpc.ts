@@ -27,26 +27,42 @@ export interface Error<E = any> {
   data?: E;
 }
 
+/**
+ * Sends the jsonrpc 'params' as an array.
+ */
 export async function post<T>(
   url: string,
   method: string,
   ...params: any
 ): Promise<T> {
-  let jsonParams = params;
-  if (
-    params.length === 1 &&
-    typeof params[0] === "object" && params[0] !== null
-  ) {
-    // if only one param and it's a js object, then pass the object.
-    // otherwise rpc server throws unmarshal error on jsonrpc params.
-    jsonParams = params[0];
-  }
   const response = await axios.post<Response<T>>(url, {
     jsonrpc: "2.0",
     // TODO: Generate a unique request id
     id: 1,
     method,
-    params: jsonParams,
+    params,
+  });
+  if (hasOwnProperty(response.data, "error")) {
+    throw response.data.error;
+  } else {
+    return response.data?.result;
+  }
+}
+
+/**
+ * Sends the jsonrpc 'params' as the single 'param' obj, no array wrapper is applied.
+ */
+export async function postObject<T>(
+  url: string,
+  method: string,
+  param: any,
+): Promise<T> {
+  const response = await axios.post<Response<T>>(url, {
+    jsonrpc: "2.0",
+    // TODO: Generate a unique request id
+    id: 1,
+    method,
+    params: param,
   });
   if (hasOwnProperty(response.data, "error")) {
     throw response.data.error;

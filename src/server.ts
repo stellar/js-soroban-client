@@ -243,7 +243,7 @@ export class Server {
     // The difficulty comes in matching up the correct integer primitives.
     //
     // It also means this library will rely on the XDR definitions.
-    return await jsonrpc.post(this.serverURL.toString(), "getEvents", {
+    return await jsonrpc.postObject(this.serverURL.toString(), "getEvents", {
       startLedger: String(startLedger),
       endLedger: String(endLedger),
       filters: filters ?? [],
