@@ -39,15 +39,6 @@ export namespace SorobanRpc {
     status: "healthy";
   }
 
-  /* Response for jsonrpc method `getContractData`
-   */
-  export interface GetContractDataResponse {
-    // xdr is a base-64 encoded {@link xdr.ScVal}
-    xdr: string;
-    lastModifiedLedgerSeq?: number;
-    latestLedger?: number;
-  }
-
   /* Response for jsonrpc method `getLedgerEntry`
    */
   export interface GetLedgerEntryResponse {
