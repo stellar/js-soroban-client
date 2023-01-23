@@ -105,20 +105,23 @@ export class Server {
    *
    * Allows you to directly inspect the current state of a contract. This is a backup way to access your contract data which may not be available via events or simulateTransaction.
    *
-   * @deprecated Use {@link Server#getLedgerEntry} instead.
    * @param {string} contractId - The contract ID containing the data to load. Encoded as a hex string.
    * @param {xdr.ScVal} key - The key of the contract data to load.
-   * @returns {Promise<SorobanRpc.GetContractDataResponse>} Returns a promise to the {@link SorobanRpc.GetContractDataResponse} object with the current value.
+   * @returns {Promise<SorobanRpc.GetLedgerEntryResponse>} Returns a promise to the {@link SorobanRpc.GetLedgerEntryResponse} object with the current value.
    */
   public async getContractData(
     contractId: string,
     key: xdr.ScVal,
-  ): Promise<SorobanRpc.GetContractDataResponse> {
+  ): Promise<SorobanRpc.GetLedgerEntryResponse> {
     return await jsonrpc.post(
       this.serverURL.toString(),
-      "getContractData",
-      contractId,
-      key.toXDR("base64"),
+      "getLedgerEntry",
+      xdr.LedgerKey.contractData(
+        new xdr.LedgerKeyContractData({
+          contractId: Buffer.from(contractId, "hex"),
+          key,
+        }),
+      ).toXDR("base64"),
     );
   }
 

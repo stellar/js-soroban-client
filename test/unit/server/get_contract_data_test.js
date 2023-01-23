@@ -1,4 +1,5 @@
 const MockAdapter = require('axios-mock-adapter');
+let xdr = SorobanClient.xdr;
 
 describe('Server#getContractData', function() {
   beforeEach(function() {
@@ -31,8 +32,15 @@ describe('Server#getContractData', function() {
         {
           jsonrpc: '2.0',
           id: 1,
-          method: 'getContractData',
-          params: [address, key.toXDR('base64')]
+          method: 'getLedgerEntry',
+          params: [
+            xdr.LedgerKey.contractData(
+              new xdr.LedgerKeyContractData({
+                contractId: Buffer.from(address, "hex"),
+                key,
+              })
+            ).toXDR("base64")
+          ]
         }
       )
       .returns(Promise.resolve({ data: { result } }));
@@ -56,8 +64,15 @@ describe('Server#getContractData', function() {
         {
           jsonrpc: '2.0',
           id: 1,
-          method: 'getContractData',
-          params: [address, key.toXDR('base64')]
+          method: 'getLedgerEntry',
+          params: [
+            xdr.LedgerKey.contractData(
+              new xdr.LedgerKeyContractData({
+                contractId: Buffer.from(address, "hex"),
+                key,
+              })
+            ).toXDR("base64")
+          ]
         }
       )
       .returns(Promise.resolve({ data: { error: { code: 404 } } }));
