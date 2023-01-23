@@ -202,8 +202,8 @@ export class Server {
    *
    * @example
    * server.getEvents(
-   *    1000,
-   *    1010,
+   *    "1000",
+   *    "1010",
    *    [
    *     {
    *      type: "contract",
@@ -243,9 +243,9 @@ export class Server {
     // The difficulty comes in matching up the correct integer primitives.
     //
     // It also means this library will rely on the XDR definitions.
-    return await jsonrpc.post(this.serverURL.toString(), "getEvents", {
-      startLedger,
-      endLedger,
+    return await jsonrpc.postObject(this.serverURL.toString(), "getEvents", {
+      startLedger: String(startLedger),
+      endLedger: String(endLedger),
       filters: filters ?? [],
       pagination: {
         ...(cursor && { cursor }), // add fields only if defined

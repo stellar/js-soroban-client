@@ -16,10 +16,10 @@ describe("Server#getEvents", function() {
     setupMock(
       this.axiosMock,
       {
-        endLedger: 2,
+        endLedger: "2",
         filters: [],
         pagination: {},
-        startLedger: 1,
+        startLedger: "1",
       },
       result,
     );
@@ -41,8 +41,8 @@ describe("Server#getEvents", function() {
     setupMock(
       this.axiosMock,
       {
-        startLedger: 1,
-        endLedger: 10,
+        startLedger: "1",
+        endLedger: "10",
         filters: [
           {
             topics: [["*", "*"]],
@@ -76,8 +76,8 @@ describe("Server#getEvents", function() {
     setupMock(
       this.axiosMock,
       {
-        startLedger: 1,
-        endLedger: 10,
+        startLedger: "1",
+        endLedger: "10",
         filters: [
           {
             topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="]],
@@ -109,8 +109,8 @@ describe("Server#getEvents", function() {
     setupMock(
       this.axiosMock,
       {
-        startLedger: 1,
-        endLedger: 2,
+        startLedger: "1",
+        endLedger: "2",
         filters: [
           {
             topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "*"]],
@@ -142,8 +142,8 @@ describe("Server#getEvents", function() {
     setupMock(
       this.axiosMock,
       {
-        startLedger: 1,
-        endLedger: 2,
+        startLedger: "1",
+        endLedger: "2",
         filters: [
           {
             topics: [["*", "*"]],
@@ -196,7 +196,7 @@ function setupMock(axiosMock, params, result) {
       jsonrpc: "2.0",
       id: 1,
       method: "getEvents",
-      params: [params],
+      params: params,
     })
     .returns(Promise.resolve({ data: { result } }));
 }

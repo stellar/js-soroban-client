@@ -27,6 +27,9 @@ export interface Error<E = any> {
   data?: E;
 }
 
+/**
+ * Sends the jsonrpc 'params' as an array.
+ */
 export async function post<T>(
   url: string,
   method: string,
@@ -38,6 +41,28 @@ export async function post<T>(
     id: 1,
     method,
     params,
+  });
+  if (hasOwnProperty(response.data, "error")) {
+    throw response.data.error;
+  } else {
+    return response.data?.result;
+  }
+}
+
+/**
+ * Sends the jsonrpc 'params' as the single 'param' obj, no array wrapper is applied.
+ */
+export async function postObject<T>(
+  url: string,
+  method: string,
+  param: any,
+): Promise<T> {
+  const response = await axios.post<Response<T>>(url, {
+    jsonrpc: "2.0",
+    // TODO: Generate a unique request id
+    id: 1,
+    method,
+    params: param,
   });
   if (hasOwnProperty(response.data, "error")) {
     throw response.data.error;
