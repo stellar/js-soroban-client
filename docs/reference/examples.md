@@ -42,7 +42,7 @@ const server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
 (async function main() {
   // Transactions require a valid sequence number that is specific to this account.
   // We can fetch the current sequence number for the source account from Horizon.
-  const account = await server.loadAccount(sourcePublicKey);
+  const account = await server.getAccount(sourcePublicKey);
 
   // Right now, this is just the default fee for this example.
   const fee = 100;
