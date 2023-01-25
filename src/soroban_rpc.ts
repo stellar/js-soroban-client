@@ -26,15 +26,6 @@ export namespace SorobanRpc {
 
   export type TransactionStatus = "pending" | "success" | "error";
 
-  /* Response for jsonrpc method `getAccount`
-   * @interface SorobanRpc.GetAccountResponse
-   */
-  export interface GetAccountResponse {
-    id: string;
-    sequence: string;
-    balances: Balance[];
-  }
-
   export interface GetHealthResponse {
     status: "healthy";
   }

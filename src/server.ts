@@ -2,7 +2,7 @@
 
 import isEmpty from "lodash/isEmpty";
 import merge from "lodash/merge";
-import { FeeBumpTransaction, Transaction, xdr } from "stellar-base";
+import { Account, FeeBumpTransaction, StrKey, Transaction, xdr } from "stellar-base";
 import URI from "urijs";
 
 import * as jsonrpc from "./jsonrpc";
@@ -66,12 +66,26 @@ export class Server {
    * });
    *
    * @param {string} address - The public address of the account to load.
-   * @returns {Promise<SorobanRpc.GetAccountResponse>} Returns a promise to the {@link SorobanRpc.GetAccountResponse} object with populated sequence number.
+   * @returns {Promise<Account>} Returns a promise to the {@link Account} object with populated sequence number.
    */
   public async getAccount(
     address: string,
-  ): Promise<SorobanRpc.GetAccountResponse> {
-    return await jsonrpc.post(this.serverURL.toString(), "getAccount", address);
+  ): Promise<Account> {
+    const { xdr: ledgerEntryData } = await jsonrpc.post(
+      this.serverURL.toString(),
+      "getLedgerEntry",
+      xdr.LedgerKey.account(
+        new xdr.LedgerKeyAccount({
+          accountId: xdr.PublicKey.publicKeyTypeEd25519(
+            StrKey.decodeEd25519PublicKey(address),
+          ),
+        }),
+      ).toXDR("base64")
+    );
+    const accountEntry = xdr.LedgerEntryData.fromXDR(ledgerEntryData, "base64").account();
+    const {high, low} = accountEntry.seqNum();
+    const sequence = (BigInt(high) * BigInt(4294967296)) + BigInt(low);
+    return new Account(address, sequence.toString());
   }
 
   /**
