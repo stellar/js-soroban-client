@@ -1,6 +1,8 @@
 const MockAdapter = require('axios-mock-adapter');
 
 describe('Server#getAccount', function() {
+  const { Account, StrKey, xdr } = SorobanClient;
+
   beforeEach(function() {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
@@ -12,11 +14,10 @@ describe('Server#getAccount', function() {
   });
 
   it('requests the correct method', function(done) {
-    let address = 'GBS43BF24ENNS3KPACUZVKK2VYPOZVBQO2CISGZ777RYGOPYC2FT6S3K';
-    let result = {
-      id: address,
-      sequence: "1",
-    };
+    const address = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
+    const accountId = xdr.PublicKey.publicKeyTypeEd25519(
+      StrKey.decodeEd25519PublicKey(address),
+    );
 
     this.axiosMock
       .expects('post')
@@ -25,13 +26,19 @@ describe('Server#getAccount', function() {
         {
           jsonrpc: '2.0',
           id: 1,
-          method: 'getAccount',
-          params: [address],
+          method: 'getLedgerEntry',
+          params: [xdr.LedgerKey.account(
+            new xdr.LedgerKeyAccount({
+              accountId,
+            }),
+          ).toXDR("base64")],
         }
       )
-      .returns(Promise.resolve({ data: { result } }));
+      .returns(Promise.resolve({ data: { result: {
+        xdr: "AAAAAAAAAABzdv3ojkzWHMD7KUoXhrPx0GH18vHKV0ZfqpMiEblG1g3gtpoE608YAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAQAAAAAY9D8iA",
+      }} }));
 
-    const expected = new SorobanClient.Account(result.id, result.sequence);
+    const expected = new Account(address, "1");
     this.server
       .getAccount(address)
       .then(function(response) {
