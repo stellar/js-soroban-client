@@ -37,12 +37,15 @@ const contractId = '000000000000000000000000000000000000000000000000000000000000
 
 // Configure SorobanClient to talk to the soroban-rpc instance running on your
 // local machine.
-const server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
+const server = new SorobanClient.Server(
+  'http://localhost:8000/soroban/rpc',
+  { allowHttp: true }
+);
 
 (async function main() {
   // Transactions require a valid sequence number that is specific to this account.
   // We can fetch the current sequence number for the source account from Horizon.
-  const account = await server.loadAccount(sourcePublicKey);
+  const account = await server.getAccount(sourcePublicKey);
 
   // Right now, this is just the default fee for this example.
   const fee = 100;
@@ -54,7 +57,7 @@ const server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
       // Uncomment the following line to build transactions for the live network. Be
       // sure to also change the soroban-rpc hostname.
       // networkPassphrase: SorobanClient.Networks.PUBLIC,
-      networkPassphrase: SorobanClient.Networks.TESTNET
+      networkPassphrase: SorobanClient.Networks.STANDALONE
     })
     // Add a contract.increment soroban contract invocation operation
     .addOperation(contract.call("increment"))
@@ -78,16 +81,16 @@ const server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
   // to wait, polling getTransactionStatus until the transaction completes.
   try {
     let response = await server.sendTransaction(transaction);
-    console.log('Sent! Transaction ID:', console.log(response.id);
+    console.log('Sent! Transaction ID:', console.log(response.id));
     // Poll this until the status is not "pending"
-    while (result.status === "pending") {
+    while (response.status === "pending") {
       // See if the transaction is complete
-      response = await server.getTransactionStatus(result.id);
+      response = await server.getTransactionStatus(response.id);
       // Wait a second
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     console.log('Transaction status:', response.status);
-    console.log(JSON.stringify(response.result));
+    console.log(JSON.stringify(response));
   } catch (e) {
     console.log('An error has occured:');
     console.log(e);
