@@ -68,7 +68,7 @@ const server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
 
     const contract = new SorobanClient.Contract(contractId);
 
-    const transaction = new SorobanClient.TransactionBuilder(account, { fee, networkPassphrase: SorobanClient.Networks.TESTNET })
+    const transaction = new SorobanClient.TransactionBuilder(account, { fee, networkPassphrase: SorobanClient.Networks.STANDALONE })
         .addOperation(
             // An operation to call increment on the contract
             contract.call("increment")
