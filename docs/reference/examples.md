@@ -54,7 +54,7 @@ const server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
       // Uncomment the following line to build transactions for the live network. Be
       // sure to also change the soroban-rpc hostname.
       // networkPassphrase: SorobanClient.Networks.PUBLIC,
-      networkPassphrase: SorobanClient.Networks.TESTNET
+      networkPassphrase: SorobanClient.Networks.STANDALONE
     })
     // Add a contract.increment soroban contract invocation operation
     .addOperation(contract.call("increment"))
