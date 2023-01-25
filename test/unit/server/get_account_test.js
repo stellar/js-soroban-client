@@ -31,10 +31,11 @@ describe('Server#getAccount', function() {
       )
       .returns(Promise.resolve({ data: { result } }));
 
+    const expected = new SorobanClient.Account(result.id, result.sequence);
     this.server
       .getAccount(address)
       .then(function(response) {
-        expect(response).to.be.deep.equal(result);
+        expect(response).to.be.deep.equal(expected);
         done();
       })
       .catch(function(err) {
