@@ -5,11 +5,10 @@ import merge from "lodash/merge";
 import { Account, FeeBumpTransaction, StrKey, Transaction, xdr } from "stellar-base";
 import URI from "urijs";
 
-import * as jsonrpc from "./jsonrpc";
-
-import { SorobanRpc } from "./soroban_rpc";
-
 import AxiosClient from "./axios";
+import { addFootprint } from "./footprint";
+import * as jsonrpc from "./jsonrpc";
+import { SorobanRpc } from "./soroban_rpc";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -341,6 +340,63 @@ export class Server {
       "simulateTransaction",
       transaction.toXDR(),
     );
+  }
+
+  /**
+   * Submit a trial contract invocation, then add the expected
+   * ledger footprint into the transaction so it is ready for signing & sending.
+   *
+   * @example
+   * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
+   * const contract = new SorobanClient.Contract(contractId);
+   *
+   * // Right now, this is just the default fee for this example.
+   * const fee = 100;
+   *
+   * const transaction = new SorobanClient.TransactionBuilder(account, {
+   *     fee,
+   *     // Uncomment the following line to build transactions for the live network. Be
+   *     // sure to also change the horizon hostname.
+   *     // networkPassphrase: SorobanClient.Networks.PUBLIC,
+   *     networkPassphrase: SorobanClient.Networks.TESTNET
+   *   })
+   *   // Add a contract.increment soroban contract invocation operation
+   *   .addOperation(contract.call("increment"))
+   *   // Make this transaction valid for the next 30 seconds only
+   *   .setTimeout(30)
+   *   // Uncomment to add a memo (https://developers.stellar.org/docs/glossary/transactions/)
+   *   // .addMemo(SorobanClient.Memo.text('Hello world!'))
+   *   .build();
+   *
+   * preparedTransaction = await server.prepareTransaction(transaction);
+   *
+   * // Sign this transaction with the secret key
+   * // NOTE: signing is transaction is network specific. Test network transactions
+   * // won't work in the public network. To switch networks, use the Network object
+   * // as explained above (look for SorobanClient.Network).
+   * const sourceKeypair = SorobanClient.Keypair.fromSecret(sourceSecretKey);
+   * preparedTransaction.sign(sourceKeypair);
+   *
+   * server.sendTransaction(transaction).then(result => {
+   *   console.log("id:", result.id);
+   *   console.log("status:", result.status);
+   *   console.log("error:", result.error);
+   * });
+   *
+   * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
+   *    prepare. It should include exactly one operation, which must be a
+   *    {@link InvokeHostFunctionOp}. Any provided footprint will be overwritten.
+   * @returns {Promise<Transaction | FeeBumpTransaction>} Returns a copy of the
+   *    transaction, with the expected ledger footprint added.
+   */
+  public async prepareTransaction(
+    transaction: Transaction | FeeBumpTransaction,
+  ): Promise<Transaction | FeeBumpTransaction> {
+    let [{ passphrase }, { footprint }] = await Promise.all([
+      this.getNetwork(),
+      this.simulateTransaction(transaction),
+    ])
+    return addFootprint(transaction, passphrase, footprint);
   }
 
   /**
