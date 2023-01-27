@@ -272,6 +272,20 @@ export class Server {
   }
 
   /**
+   * Fetches metadata about the network which Soroban-RPC is connected to.
+   *
+   * @example
+   * server.getNetwork();
+   *
+   * @returns {Promise<SorobanRpc.GetNetworkResponse>} a promise to the
+   *    {@link SorobanRpc.GetNetworkResponse} object containing metadata
+   *    about the current network this soroban-rpc server is connected to.
+   */
+  public async getNetwork(): Promise<SorobanRpc.GetNetworkResponse> {
+    return await jsonrpc.post(this.serverURL.toString(), "getNetwork");
+  }
+
+  /**
    * Submit a trial contract invocation to get back return values, expected
    * ledger footprint, and expected costs.
    *

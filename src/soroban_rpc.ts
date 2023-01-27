@@ -39,6 +39,18 @@ export namespace SorobanRpc {
     latestLedger?: number;
   }
 
+  /* Response for jsonrpc method `getNetwork`
+   */
+  export interface GetNetworkResponse {
+    friendbotUrl?: string;
+    latestLedgerHash: string;
+    latestLedgerSeq: number;
+    latestLedgerTime: string;
+    passphrase: string;
+    protocolVersion: string;
+  }
+
+
   export interface GetTransactionStatusResponse {
     id: string;
     status: TransactionStatus;
