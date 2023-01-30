@@ -300,7 +300,7 @@ export class Server {
    *     // Uncomment the following line to build transactions for the live network. Be
    *     // sure to also change the horizon hostname.
    *     // networkPassphrase: SorobanClient.Networks.PUBLIC,
-   *     networkPassphrase: SorobanClient.Networks.TESTNET
+   *     networkPassphrase: SorobanClient.Networks.STANDALONE
    *   })
    *   // Add a contract.increment soroban contract invocation operation
    *   .addOperation(contract.call("increment"))
@@ -421,7 +421,7 @@ export class Server {
    *     // Uncomment the following line to build transactions for the live network. Be
    *     // sure to also change the horizon hostname.
    *     // networkPassphrase: SorobanClient.Networks.PUBLIC,
-   *     networkPassphrase: SorobanClient.Networks.TESTNET
+   *     networkPassphrase: SorobanClient.Networks.STANDALONE
    *   })
    *   // Add a contract.increment soroban contract invocation operation
    *   // Note: For real transactions you will need to include the footprint in
