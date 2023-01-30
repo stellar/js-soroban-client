@@ -68,13 +68,18 @@ const server = new SorobanClient.Server('http://localhost:8000/soroban/rpc');
 
     const contract = new SorobanClient.Contract(contractId);
 
-    const transaction = new SorobanClient.TransactionBuilder(account, { fee, networkPassphrase: SorobanClient.Networks.TESTNET })
+    let transaction = new SorobanClient.TransactionBuilder(account, { fee, networkPassphrase: SorobanClient.Networks.TESTNET })
         .addOperation(
             // An operation to call increment on the contract
             contract.call("increment")
         )
         .setTimeout(30)
         .build();
+
+    // Simulate the transaction to discover the storage footprint, and update the
+    // transaction to include it. If you already know the storage footprint you
+    // can use `addFootprint` to add it yourself, skipping this step.
+    transaction = await server.prepareTransaction(transaction);
 
     // sign the transaction
     transaction.sign(SorobanClient.Keypair.fromSecret(secretString));
