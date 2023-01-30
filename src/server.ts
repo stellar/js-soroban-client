@@ -391,9 +391,12 @@ export class Server {
    */
   public async prepareTransaction(
     transaction: Transaction | FeeBumpTransaction,
+    networkPassphrase?: string,
   ): Promise<Transaction | FeeBumpTransaction> {
     let [{ passphrase }, { footprint }] = await Promise.all([
-      this.getNetwork(),
+      networkPassphrase
+        ? Promise.resolve({ passphrase: networkPassphrase })
+        : this.getNetwork(),
       this.simulateTransaction(transaction),
     ])
     return addFootprint(transaction, passphrase, footprint);
