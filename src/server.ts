@@ -393,12 +393,12 @@ export class Server {
     transaction: Transaction | FeeBumpTransaction,
     networkPassphrase?: string,
   ): Promise<Transaction | FeeBumpTransaction> {
-    let [{ passphrase }, { footprint }] = await Promise.all([
+    const [{ passphrase }, { footprint }] = await Promise.all([
       networkPassphrase
         ? Promise.resolve({ passphrase: networkPassphrase })
         : this.getNetwork(),
       this.simulateTransaction(transaction),
-    ])
+    ]);
     return addFootprint(transaction, passphrase, footprint);
   }
 

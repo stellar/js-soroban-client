@@ -50,7 +50,6 @@ export namespace SorobanRpc {
     protocolVersion: string;
   }
 
-
   export interface GetTransactionStatusResponse {
     id: string;
     status: TransactionStatus;
