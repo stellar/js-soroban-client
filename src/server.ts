@@ -274,7 +274,11 @@ export class Server {
    * Fetches metadata about the network which Soroban-RPC is connected to.
    *
    * @example
-   * server.getNetwork();
+   * server.getNetwork().then(network => {
+   *   console.log("friendbotUrl:", network.friendbotUrl);
+   *   console.log("passphrase:", network.passphrase);
+   *   console.log("protocolVersion:", network.protocolVersion);
+   * });
    *
    * @returns {Promise<SorobanRpc.GetNetworkResponse>} a promise to the
    *    {@link SorobanRpc.GetNetworkResponse} object containing metadata
@@ -386,6 +390,9 @@ export class Server {
    * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
    *    prepare. It should include exactly one operation, which must be a
    *    {@link InvokeHostFunctionOp}. Any provided footprint will be overwritten.
+   * @param {string} [networkPassphrase] - Explicitly provide a network
+   *    passphrase. If not passed, the current network passphrase will be requested
+   *    from the server via `getNetwork`.
    * @returns {Promise<Transaction | FeeBumpTransaction>} Returns a copy of the
    *    transaction, with the expected ledger footprint added.
    */
