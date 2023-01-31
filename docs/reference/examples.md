@@ -52,7 +52,7 @@ const server = new SorobanClient.Server(
 
   const contract = new SorobanClient.Contract(contractId);
 
-  const transaction = new SorobanClient.TransactionBuilder(account, {
+  let transaction = new SorobanClient.TransactionBuilder(account, {
       fee,
       // Uncomment the following line to build transactions for the live network. Be
       // sure to also change the soroban-rpc hostname.
@@ -66,6 +66,11 @@ const server = new SorobanClient.Server(
     // Uncomment to add a memo (https://developers.stellar.org/docs/glossary/transactions/)
     // .addMemo(SorobanClient.Memo.text('Hello world!'))
     .build();
+
+  // Simulate the transaction to discover the storage footprint, and update the
+  // transaction to include it. If you already know the storage footprint you
+  // can use `addFootprint` to add it yourself, skipping this step.
+  transaction = await server.prepareTransaction(transaction);
 
   // Sign this transaction with the secret key
   // NOTE: signing is transaction is network specific. Test network transactions
