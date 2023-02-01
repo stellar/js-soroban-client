@@ -7,6 +7,7 @@ import URI from "urijs";
 
 import AxiosClient from "./axios";
 import { addFootprint } from "./footprint";
+import { Friendbot } from "./friendbot";
 import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
 
@@ -466,6 +467,45 @@ export class Server {
       "sendTransaction",
       transaction.toXDR(),
     );
+  }
+
+  /**
+   * Use the friendbot faucet to create and fund a new account. If friendbot is
+   * not configured on this network, this method will throw an error. The
+   * method will return true if the account was created and funded successfully,
+   * or false if the account already existed. If the request fails, this method
+   * will throw an error.
+   *
+   * @example
+   * server.requestAirdrop("GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4").then(accountCreated => {
+   *   console.log("accountCreated:", accountCreated);
+   * }).catch(error => {
+   *   console.error("error:", error);
+   * });
+   *
+   * @param {string | Account} address - The address or account we want to create and fund.
+   * @param {string} [friendbotUrl] - The optional explicit address for
+   *    friendbot. If not provided, the client will call the Soroban-RPC `getNetwork`
+   *    method to attempt to find this network's friendbot url.
+   * @returns {Promise<boolean>} Returns a promise to a boolean value
+   *    indicating whether the account was created or already existed.
+   */
+  public async requestAirdrop(
+    address: string | Pick<Account, "accountId">,
+    friendbotUrl?: string,
+  ): Promise<boolean> {
+    const account = typeof address === "string" ? address : address.accountId();
+    if (!friendbotUrl) {
+      const network = await this.getNetwork();
+      friendbotUrl = network.friendbotUrl;
+    }
+    if (!friendbotUrl) {
+      throw new Error("No friendbot URL configured for current network");
+    }
+    const response = await AxiosClient.post<Friendbot.Response>(
+      `${friendbotUrl}?addr=${encodeURIComponent(account)}`
+    );
+    return !!response.data?.successful;
   }
 }
 
