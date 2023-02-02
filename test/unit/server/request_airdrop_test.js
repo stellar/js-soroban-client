@@ -130,7 +130,7 @@ describe('Server#requestAirdrop', function() {
       });
   });
 
-  it('throws if there the request fails', function(done) {
+  it('throws if the request fails', function(done) {
     const friendbotUrl = 'https://friendbot.stellar.org';
     const accountId = "GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4";
     mockGetNetwork.call(this, friendbotUrl);

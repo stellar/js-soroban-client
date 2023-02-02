@@ -495,10 +495,7 @@ export class Server {
     friendbotUrl?: string,
   ): Promise<boolean> {
     const account = typeof address === "string" ? address : address.accountId();
-    if (!friendbotUrl) {
-      const network = await this.getNetwork();
-      friendbotUrl = network.friendbotUrl;
-    }
+    friendbotUrl = friendbotUrl || (await this.getNetwork()).friendbotUrl;
     if (!friendbotUrl) {
       throw new Error("No friendbot URL configured for current network");
     }
