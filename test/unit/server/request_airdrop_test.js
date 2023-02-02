@@ -1,6 +1,8 @@
 const MockAdapter = require('axios-mock-adapter');
 
 describe('Server#requestAirdrop', function() {
+  const { Account, StrKey, xdr } = SorobanClient;
+
   beforeEach(function() {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
@@ -33,7 +35,7 @@ describe('Server#requestAirdrop', function() {
 
   it('returns true when the account is created', function(done) {
     const friendbotUrl = 'https://friendbot.stellar.org';
-    const accountId = "GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4";
+    const accountId = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
     mockGetNetwork.call(this, friendbotUrl);
 
     this.axiosMock
@@ -44,7 +46,7 @@ describe('Server#requestAirdrop', function() {
     this.server
       .requestAirdrop(accountId)
       .then(function(response) {
-        expect(response).to.be.equal(true);
+        expect(response).to.be.deep.equal(new Account(accountId, '1'));
         done();
       })
       .catch(function(err) {
@@ -54,18 +56,41 @@ describe('Server#requestAirdrop', function() {
 
   it('returns false if the account already exists', function(done) {
     const friendbotUrl = 'https://friendbot.stellar.org';
-    const accountId = "GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4";
+    const accountId = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
     mockGetNetwork.call(this, friendbotUrl);
 
     this.axiosMock
       .expects('post')
       .withArgs(`${friendbotUrl}?addr=${accountId}`)
-      .returns(Promise.resolve({ data: { successful: false } }));
+      .returns(Promise.reject({ response: { status: 400 } }));
+
+    this.axiosMock
+      .expects('post')
+      .withArgs(
+        serverUrl,
+        {
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'getLedgerEntry',
+          params: [
+            xdr.LedgerKey.account(
+              new xdr.LedgerKeyAccount({
+                accountId: xdr.PublicKey.publicKeyTypeEd25519(
+                  StrKey.decodeEd25519PublicKey(accountId),
+                ),
+              }),
+            ).toXDR("base64")
+          ],
+        }
+      )
+      .returns(Promise.resolve({ data: { result: {
+        xdr: "AAAAAAAAAABzdv3ojkzWHMD7KUoXhrPx0GH18vHKV0ZfqpMiEblG1g3gtpoE608YAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAQAAAAAY9D8iA",
+      }}}));
 
     this.server
       .requestAirdrop(accountId)
       .then(function(response) {
-        expect(response).to.be.equal(false);
+        expect(response).to.be.deep.equal(new Account(accountId, '1'));
         done();
       })
       .catch(function(err) {
@@ -75,7 +100,7 @@ describe('Server#requestAirdrop', function() {
 
   it('uses custom friendbotUrl if passed', function(done) {
     const friendbotUrl = 'https://custom-friendbot.stellar.org';
-    const accountId = "GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4";
+    const accountId = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
 
     this.axiosMock
       .expects('post')
@@ -85,7 +110,7 @@ describe('Server#requestAirdrop', function() {
     this.server
       .requestAirdrop(accountId, friendbotUrl)
       .then(function(response) {
-        expect(response).to.be.equal(true);
+        expect(response).to.be.deep.equal(new Account(accountId, '1'));
         done();
       })
       .catch(function(err) {
@@ -105,12 +130,12 @@ describe('Server#requestAirdrop', function() {
 
     this.server
       .requestAirdrop(accountId)
-      .then(function(response) {
-        expect(response).to.be.equal(true);
-        done();
+      .then(function(_) {
+        done(new Error("Should have thrown"));
       })
       .catch(function(err) {
-        done(err);
+        expect(err.message).to.be.equal("accountId is invalid");
+        done();
       });
   });
 
@@ -132,7 +157,7 @@ describe('Server#requestAirdrop', function() {
 
   it('throws if the request fails', function(done) {
     const friendbotUrl = 'https://friendbot.stellar.org';
-    const accountId = "GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4";
+    const accountId = 'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
     mockGetNetwork.call(this, friendbotUrl);
 
     this.axiosMock

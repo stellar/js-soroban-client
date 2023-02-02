@@ -2,7 +2,13 @@
 
 import isEmpty from "lodash/isEmpty";
 import merge from "lodash/merge";
-import { Account, FeeBumpTransaction, StrKey, Transaction, xdr } from "stellar-base";
+import {
+  Account,
+  FeeBumpTransaction,
+  StrKey,
+  Transaction,
+  xdr,
+} from "stellar-base";
 import URI from "urijs";
 
 import AxiosClient from "./axios";
@@ -68,9 +74,7 @@ export class Server {
    * @param {string} address - The public address of the account to load.
    * @returns {Promise<Account>} Returns a promise to the {@link Account} object with populated sequence number.
    */
-  public async getAccount(
-    address: string,
-  ): Promise<Account> {
+  public async getAccount(address: string): Promise<Account> {
     const { xdr: ledgerEntryData } = await jsonrpc.post(
       this.serverURL.toString(),
       "getLedgerEntry",
@@ -80,11 +84,14 @@ export class Server {
             StrKey.decodeEd25519PublicKey(address),
           ),
         }),
-      ).toXDR("base64")
+      ).toXDR("base64"),
     );
-    const accountEntry = xdr.LedgerEntryData.fromXDR(ledgerEntryData, "base64").account();
-    const {high, low} = accountEntry.seqNum();
-    const sequence = (BigInt(high) * BigInt(4294967296)) + BigInt(low);
+    const accountEntry = xdr.LedgerEntryData.fromXDR(
+      ledgerEntryData,
+      "base64",
+    ).account();
+    const { high, low } = accountEntry.seqNum();
+    const sequence = BigInt(high) * BigInt(4294967296) + BigInt(low);
     return new Account(address, sequence.toString());
   }
 
@@ -487,22 +494,29 @@ export class Server {
    * @param {string} [friendbotUrl] - The optional explicit address for
    *    friendbot. If not provided, the client will call the Soroban-RPC `getNetwork`
    *    method to attempt to find this network's friendbot url.
-   * @returns {Promise<boolean>} Returns a promise to a boolean value
-   *    indicating whether the account was created or already existed.
+   * @returns {Promise<Account>} Returns a promise to the {@link Account} object with populated sequence number.
    */
   public async requestAirdrop(
     address: string | Pick<Account, "accountId">,
     friendbotUrl?: string,
-  ): Promise<boolean> {
+  ): Promise<Account> {
     const account = typeof address === "string" ? address : address.accountId();
     friendbotUrl = friendbotUrl || (await this.getNetwork()).friendbotUrl;
     if (!friendbotUrl) {
       throw new Error("No friendbot URL configured for current network");
     }
-    const response = await AxiosClient.post<Friendbot.Response>(
-      `${friendbotUrl}?addr=${encodeURIComponent(account)}`
-    );
-    return !!response.data?.successful;
+    try {
+      await AxiosClient.post<Friendbot.Response>(
+        `${friendbotUrl}?addr=${encodeURIComponent(account)}`,
+      );
+      return new Account(account, "1");
+    } catch (error) {
+      if (error.response?.status === 400) {
+        // Account already exists, load the sequence number
+        return this.getAccount(account);
+      }
+      throw error;
+    }
   }
 }
 
