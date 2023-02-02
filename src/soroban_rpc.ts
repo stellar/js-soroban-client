@@ -20,10 +20,6 @@ export namespace SorobanRpc {
     memBytes: string;
   }
 
-  export interface Result {
-    xdr: string;
-  }
-
   export type TransactionStatus = "pending" | "success" | "error";
 
   export interface GetHealthResponse {
@@ -53,7 +49,7 @@ export namespace SorobanRpc {
     envelopeXdr?: string;
     resultXdr?: string;
     resultMetaXdr?: string;
-    results?: Result[];
+    results?: Array<{ xdr: string }>;
     error?: jsonrpc.Error;
   }
 
@@ -91,8 +87,11 @@ export namespace SorobanRpc {
   export interface SimulateTransactionResponse {
     id: string;
     cost: Cost;
-    footprint: string;
-    results?: Result[];
+    results?: Array<{
+      xdr: string;
+      footprint: string;
+      auth: string[];
+    }>;
     error?: jsonrpc.Error;
     latestLedger: number;
   }

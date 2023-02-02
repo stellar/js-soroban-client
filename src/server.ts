@@ -2,13 +2,19 @@
 
 import isEmpty from "lodash/isEmpty";
 import merge from "lodash/merge";
-import { Account, FeeBumpTransaction, StrKey, Transaction, xdr } from "stellar-base";
+import {
+  Account,
+  FeeBumpTransaction,
+  StrKey,
+  Transaction,
+  xdr,
+} from "stellar-base";
 import URI from "urijs";
 
 import AxiosClient from "./axios";
-import { addFootprint } from "./footprint";
 import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
+import { prepareTransaction } from "./transaction";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -67,9 +73,7 @@ export class Server {
    * @param {string} address - The public address of the account to load.
    * @returns {Promise<Account>} Returns a promise to the {@link Account} object with populated sequence number.
    */
-  public async getAccount(
-    address: string,
-  ): Promise<Account> {
+  public async getAccount(address: string): Promise<Account> {
     const { xdr: ledgerEntryData } = await jsonrpc.post(
       this.serverURL.toString(),
       "getLedgerEntry",
@@ -79,11 +83,14 @@ export class Server {
             StrKey.decodeEd25519PublicKey(address),
           ),
         }),
-      ).toXDR("base64")
+      ).toXDR("base64"),
     );
-    const accountEntry = xdr.LedgerEntryData.fromXDR(ledgerEntryData, "base64").account();
-    const {high, low} = accountEntry.seqNum();
-    const sequence = (BigInt(high) * BigInt(4294967296)) + BigInt(low);
+    const accountEntry = xdr.LedgerEntryData.fromXDR(
+      ledgerEntryData,
+      "base64",
+    ).account();
+    const { high, low } = accountEntry.seqNum();
+    const sequence = BigInt(high) * BigInt(4294967296) + BigInt(low);
     return new Account(address, sequence.toString());
   }
 
@@ -290,7 +297,7 @@ export class Server {
 
   /**
    * Submit a trial contract invocation to get back return values, expected
-   * ledger footprint, and expected costs.
+   * ledger footprint, expected authorizations, and expected costs.
    *
    * @example
    * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
@@ -323,7 +330,6 @@ export class Server {
    *
    * server.simulateTransaction(transaction).then(sim => {
    *   console.log("cost:", sim.cost);
-   *   console.log("footprint:", sim.footprint);
    *   console.log("results:", sim.results);
    *   console.log("error:", sim.error);
    *   console.log("latestLedger:", sim.latestLedger);
@@ -334,7 +340,7 @@ export class Server {
    *    {@link InvokeHostFunctionOp}. Any provided footprint will be ignored.
    * @returns {Promise<SorobanRpc.SimulateTransactionResponse>} Returns a
    *    promise to the {@link SorobanRpc.SimulateTransactionResponse} object
-   *    with the cost, result, footprint, and error of the transaction.
+   *    with the cost, result, footprint, auth, and error of the transaction.
    */
   public async simulateTransaction(
     transaction: Transaction | FeeBumpTransaction,
@@ -347,8 +353,8 @@ export class Server {
   }
 
   /**
-   * Submit a trial contract invocation, then add the expected
-   * ledger footprint into the transaction so it is ready for signing & sending.
+   * Submit a trial contract invocation, then add the expected ledger footprint
+   * and auth into the transaction so it is ready for signing & sending.
    *
    * @example
    * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
@@ -400,13 +406,19 @@ export class Server {
     transaction: Transaction | FeeBumpTransaction,
     networkPassphrase?: string,
   ): Promise<Transaction | FeeBumpTransaction> {
-    const [{ passphrase }, { footprint }] = await Promise.all([
+    const [{ passphrase }, { error, results }] = await Promise.all([
       networkPassphrase
         ? Promise.resolve({ passphrase: networkPassphrase })
         : this.getNetwork(),
       this.simulateTransaction(transaction),
     ]);
-    return addFootprint(transaction, passphrase, footprint);
+    if (error) {
+      throw error;
+    }
+    if (!results) {
+      throw new Error("transaction simulation failed");
+    }
+    return prepareTransaction(transaction, passphrase, results);
   }
 
   /**
@@ -431,8 +443,8 @@ export class Server {
    *     networkPassphrase: SorobanClient.Networks.STANDALONE
    *   })
    *   // Add a contract.increment soroban contract invocation operation
-   *   // Note: For real transactions you will need to include the footprint in
-   *   // the operation, as returned from simulateTransaction.
+   *   // Note: For real transactions you will need to include the footprint
+   *   // and auth in the operation, as returned from simulateTransaction.
    *   .addOperation(contract.call("increment"))
    *   // Make this transaction valid for the next 30 seconds only
    *   .setTimeout(30)
