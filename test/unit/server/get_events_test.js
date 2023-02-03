@@ -54,12 +54,11 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents(
-        1, 
-        10, [{
+      .getEvents(1, 10, [
+        {
           topics: [["*", "*"]],
-        }],
-      )
+        },
+      ])
       .then(function(response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -89,9 +88,11 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents(1, 10, [{
-        topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="]],
-      }])
+      .getEvents(1, 10, [
+        {
+          topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="]],
+        },
+      ])
       .then(function(response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -122,9 +123,11 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents(1, 2, [{
-        topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "*"]],
-      }])
+      .getEvents(1, 2, [
+        {
+          topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "*"]],
+        },
+      ])
       .then(function(response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -151,7 +154,7 @@ describe("Server#getEvents", function() {
         ],
         pagination: {
           limit: 10,
-          cursor: "0164090849041387521-0000000000"
+          cursor: "0164090849041387521-0000000000",
         },
       },
       result,
@@ -159,11 +162,13 @@ describe("Server#getEvents", function() {
 
     this.server
       .getEvents(
-        1, 
+        1,
         2,
-        [{
-          topics: [["*", "*"]]
-        }],
+        [
+          {
+            topics: [["*", "*"]],
+          },
+        ],
         "0164090849041387521-0000000000",
         10,
       )
@@ -172,7 +177,7 @@ describe("Server#getEvents", function() {
         done();
       })
       .catch(done);
-  })
+  });
 });
 
 function filterEvents(events, filter) {
