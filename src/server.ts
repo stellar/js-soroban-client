@@ -477,10 +477,10 @@ export class Server {
   }
 
   /**
-   * Use the friendbot faucet to create and fund a new account. If friendbot is
-   * not configured on this network, this method will throw an error. The
-   * method will return an Account object for the created account. If the
-   * request fails, this method will throw an error.
+   * Use the friendbot faucet to create and fund a new account. The method will
+   * return an Account object for the created account, or if the account already
+   * existed. If friendbot is not configured on this network, this method will
+   * throw an error.  If the request fails, this method will throw an error.
    *
    * @example
    * server.requestAirdrop("GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4").then(accountCreated => {
