@@ -505,10 +505,15 @@ export class Server {
       throw new Error("No friendbot URL configured for current network");
     }
     try {
-      await AxiosClient.post<Friendbot.Response>(
+      const response = await AxiosClient.post<Friendbot.Response>(
         `${friendbotUrl}?addr=${encodeURIComponent(account)}`,
       );
-      return new Account(account, "1");
+      const meta = xdr.TransactionMeta.fromXDR(
+        response.data.result_meta_xdr,
+        "base64",
+      );
+      const sequence = findCreatedAccountSequenceInTransactionMeta(meta);
+      return new Account(account, sequence);
     } catch (error) {
       if (error.response?.status === 400) {
         // Account already exists, load the sequence number
@@ -517,6 +522,69 @@ export class Server {
       throw error;
     }
   }
+}
+
+function findCreatedAccountSequenceInTransactionMeta(
+  meta: xdr.TransactionMeta,
+): string {
+  let operations: xdr.OperationMeta[] = [];
+  switch (meta.switch()) {
+    case 0:
+      operations = meta.operations();
+      break;
+    case 1:
+      operations = meta.v1().operations();
+      break;
+    case 2:
+      operations = meta.v2().operations();
+      break;
+    case 3:
+      operations = meta.v3().operations();
+      break;
+    default:
+      throw new Error("Unexpected transaction meta switch value");
+  }
+
+  for (const op of operations) {
+    for (const c of op.changes()) {
+      if (c.switch() !== xdr.LedgerEntryChangeType.ledgerEntryCreated()) {
+        continue;
+      }
+      const data = c.created().data();
+      if (data.switch() !== xdr.LedgerEntryType.account()) {
+        continue;
+      }
+      const account = data.account();
+      const seqNum = account.seqNum();
+      return bigIntFromBytes(
+        !seqNum.unsigned,
+        seqNum.high,
+        seqNum.low,
+      ).toString();
+    }
+  }
+  throw new Error("No account created in transaction");
+}
+
+function bigIntFromBytes(
+  signed: boolean,
+  ...bytes: Array<number | bigint>
+): bigint {
+  let sign = BigInt(1);
+  if (signed && bytes[0] === 0x80) {
+    // top bit is set, negative number.
+    sign = BigInt(-1);
+    // tslint:disable-next-line:no-bitwise
+    bytes[0] &= 0x7f;
+  }
+  let b = BigInt(0);
+  for (const byte of bytes) {
+    // tslint:disable-next-line:no-bitwise
+    b <<= BigInt(8);
+    // tslint:disable-next-line:no-bitwise
+    b |= BigInt(byte);
+  }
+  return b * sign;
 }
 
 export namespace Server {
