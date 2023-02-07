@@ -516,8 +516,10 @@ export class Server {
       return new Account(account, sequence);
     } catch (error) {
       if (error.response?.status === 400) {
-        // Account already exists, load the sequence number
-        return this.getAccount(account);
+        if (error.response.detail?.includes("createAccountAlreadyExist")) {
+          // Account already exists, load the sequence number
+          return this.getAccount(account);
+        }
       }
       throw error;
     }

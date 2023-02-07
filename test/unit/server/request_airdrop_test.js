@@ -3,6 +3,44 @@ const MockAdapter = require("axios-mock-adapter");
 describe("Server#requestAirdrop", function() {
   const { Account, StrKey, xdr } = SorobanClient;
 
+  function accountLedgerEntryData(accountId, sequence) {
+    return new xdr.LedgerEntryData.account(
+      new xdr.AccountEntry({
+        accountId: xdr.AccountId.publicKeyTypeEd25519(
+          StrKey.decodeEd25519PublicKey(accountId),
+        ),
+        balance: xdr.Int64.fromString("1"),
+        seqNum: xdr.SequenceNumber.fromString(sequence),
+        numSubEntries: 0,
+        inflationDest: null,
+        flags: 0,
+        homeDomain: "",
+        // Taken from a real response. idk.
+        thresholds: Buffer.from("AQAAAA==", "base64"),
+        signers: [],
+        ext: new xdr.AccountEntryExt(0),
+      }),
+    );
+  }
+
+  // Create a mock transaction meta for the account we're going to request an airdrop for
+  function transactionMetaFor(accountId, sequence) {
+    const meta = new xdr.TransactionMeta(0, [
+      new xdr.OperationMeta({
+        changes: [
+          xdr.LedgerEntryChange.ledgerEntryCreated(
+            new xdr.LedgerEntry({
+              lastModifiedLedgerSeq: 0,
+              data: accountLedgerEntryData(accountId, sequence),
+              ext: new xdr.LedgerEntryExt(0),
+            }),
+          ),
+        ],
+      }),
+    ]);
+    return meta;
+  }
+
   beforeEach(function() {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
@@ -36,15 +74,18 @@ describe("Server#requestAirdrop", function() {
       "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI";
     mockGetNetwork.call(this, friendbotUrl);
 
+    const result_meta_xdr = transactionMetaFor(accountId, "1234").toXDR(
+      "base64",
+    );
     this.axiosMock
       .expects("post")
       .withArgs(`${friendbotUrl}?addr=${accountId}`)
-      .returns(Promise.resolve({ data: { successful: true } }));
+      .returns(Promise.resolve({ data: { result_meta_xdr } }));
 
     this.server
       .requestAirdrop(accountId)
       .then(function(response) {
-        expect(response).to.be.deep.equal(new Account(accountId, "1"));
+        expect(response).to.be.deep.equal(new Account(accountId, "1234"));
         done();
       })
       .catch(function(err) {
@@ -61,7 +102,15 @@ describe("Server#requestAirdrop", function() {
     this.axiosMock
       .expects("post")
       .withArgs(`${friendbotUrl}?addr=${accountId}`)
-      .returns(Promise.reject({ response: { status: 400 } }));
+      .returns(
+        Promise.reject({
+          response: {
+            status: 400,
+            detail:
+              "createAccountAlreadyExist (AAAAAAAAAGT/////AAAAAQAAAAAAAAAA/////AAAAAA=)",
+          },
+        }),
+      );
 
     this.axiosMock
       .expects("post")
@@ -83,8 +132,7 @@ describe("Server#requestAirdrop", function() {
         Promise.resolve({
           data: {
             result: {
-              xdr:
-                "AAAAAAAAAABzdv3ojkzWHMD7KUoXhrPx0GH18vHKV0ZfqpMiEblG1g3gtpoE608YAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAQAAAAAY9D8iA",
+              xdr: accountLedgerEntryData(accountId, "1234").toXDR("base64"),
             },
           },
         }),
@@ -93,7 +141,7 @@ describe("Server#requestAirdrop", function() {
     this.server
       .requestAirdrop(accountId)
       .then(function(response) {
-        expect(response).to.be.deep.equal(new Account(accountId, "1"));
+        expect(response).to.be.deep.equal(new Account(accountId, "1234"));
         done();
       })
       .catch(function(err) {
@@ -106,15 +154,18 @@ describe("Server#requestAirdrop", function() {
     const accountId =
       "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI";
 
+    const result_meta_xdr = transactionMetaFor(accountId, "1234").toXDR(
+      "base64",
+    );
     this.axiosMock
       .expects("post")
       .withArgs(`${friendbotUrl}?addr=${accountId}`)
-      .returns(Promise.resolve({ data: { successful: true } }));
+      .returns(Promise.resolve({ data: { result_meta_xdr } }));
 
     this.server
       .requestAirdrop(accountId, friendbotUrl)
       .then(function(response) {
-        expect(response).to.be.deep.equal(new Account(accountId, "1"));
+        expect(response).to.be.deep.equal(new Account(accountId, "1234"));
         done();
       })
       .catch(function(err) {
@@ -122,7 +173,7 @@ describe("Server#requestAirdrop", function() {
       });
   });
 
-  it("encodes the address to avoid any injection", function(done) {
+  it("rejects invalid addresses", function(done) {
     const friendbotUrl = "https://friendbot.stellar.org";
     const accountId = "addr&injected=1";
     mockGetNetwork.call(this, friendbotUrl);
@@ -130,7 +181,21 @@ describe("Server#requestAirdrop", function() {
     this.axiosMock
       .expects("post")
       .withArgs(`${friendbotUrl}?addr=addr%26injected%3D1`)
-      .returns(Promise.resolve({ data: { successful: true } }));
+      .returns(
+        Promise.reject({
+          response: {
+            status: 400,
+            type: "https://stellar.org/horizon-errors/bad_request",
+            title: "Bad Request",
+            detail: "The request you sent was invalid in some way.",
+            extras: {
+              invalid_field: "addr",
+              reason:
+                "base32 decode failed: illegal base32 data at input byte 7",
+            },
+          },
+        }),
+      );
 
     this.server
       .requestAirdrop(accountId)
@@ -138,7 +203,7 @@ describe("Server#requestAirdrop", function() {
         done(new Error("Should have thrown"));
       })
       .catch(function(err) {
-        expect(err.message).to.be.equal("accountId is invalid");
+        expect(err.response.extras.reason).to.include("base32 decode failed");
         done();
       });
   });
