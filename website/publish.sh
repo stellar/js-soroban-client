@@ -9,7 +9,7 @@ git fetch
 git rebase
 rm -Rf *
 cd ../js-stellar-lib/website
-npm run-script docs
+yarn docs
 cp -R docs/* ../../js-stellar-lib-gh-pages/
 rm -Rf docs/
 cd ../../js-stellar-lib-gh-pages
