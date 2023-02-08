@@ -130,7 +130,7 @@ git clone https://github.com/stellar/js-soroban-client.git
 
 ```shell
 cd js-soroban-client
-npm install
+yarn install
 ```
 
 3. Install Node 14
@@ -143,7 +143,7 @@ Here's how to install `nvm` if you haven't: https://github.com/creationix/nvm
 nvm install
 
 # if you've never installed 14 before you'll want to re-install yarn
-npm install -g yarn
+yarn install -g yarn
 ```
 
 If you work on several projects that use different Node versions, you might it
@@ -184,10 +184,10 @@ To generate and check the documentation site:
 
 ```shell
 # install the `serve` command if you don't have it already
-npm install -g serve
+yarn install -g serve
 
 # generate the docs files
-npm run docs
+yarn docs
 
 # get these files working in a browser
 cd jsdoc && serve .
