@@ -7989,10 +7989,10 @@ statuses@~1.5.0:
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.5.0.tgz#161c7dac177659fd9811f43771fa99381478628c"
   integrity sha512-OpZ3zP+jT1PI7I8nemJX4AKmAX070ZkYPVWV/AaKTJl+tXCTGyVdC1a4SL8RUQYEwk/f34ZX8UTykN68FwrqAA==
 
-stellar-base@8.0.1-soroban.6:
-  version "8.0.1-soroban.6"
-  resolved "https://registry.yarnpkg.com/stellar-base/-/stellar-base-8.0.1-soroban.6.tgz#cf5c07224c2fda7df12f659cc2ae5890dbe1590d"
-  integrity sha512-LQhre31jzZBNXTaiUfkLlEcC2g2TQOrKJEsY1rbsUv9urlvUsTTIGRmvaw2TH8406FOJZolBtizN/VnZqLqnvg==
+stellar-base@8.2.2-soroban.10:
+  version "8.2.2-soroban.10"
+  resolved "https://registry.yarnpkg.com/stellar-base/-/stellar-base-8.2.2-soroban.10.tgz#2eb5910375a1eadfb20e2fab3539e9c4c11c0adf"
+  integrity sha512-n+5Rn94u6hsKC0nxVLQrTqiTJJNgqMmZPmFiDrLFzgaVsEUkGJTZYBlDD5MCrA/65oxW4pFzP72Fh8bvBDD2jA==
   dependencies:
     base32.js "^0.1.0"
     bignumber.js "^4.0.0"
