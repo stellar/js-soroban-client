@@ -12,6 +12,7 @@ import {
 import URI from "urijs";
 
 import AxiosClient from "./axios";
+import { Friendbot } from "./friendbot";
 import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
 import { prepareTransaction } from "./transaction";
@@ -479,6 +480,118 @@ export class Server {
       transaction.toXDR(),
     );
   }
+
+  /**
+   * Use the friendbot faucet to create and fund a new account. The method will
+   * return an Account object for the created account, or if the account already
+   * existed. If friendbot is not configured on this network, this method will
+   * throw an error.  If the request fails, this method will throw an error.
+   *
+   * @example
+   * server.requestAirdrop("GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4").then(accountCreated => {
+   *   console.log("accountCreated:", accountCreated);
+   * }).catch(error => {
+   *   console.error("error:", error);
+   * });
+   *
+   * @param {string | Account} address - The address or account we want to create and fund.
+   * @param {string} [friendbotUrl] - The optional explicit address for
+   *    friendbot. If not provided, the client will call the Soroban-RPC `getNetwork`
+   *    method to attempt to find this network's friendbot url.
+   * @returns {Promise<Account>} Returns a promise to the {@link Account} object with populated sequence number.
+   */
+  public async requestAirdrop(
+    address: string | Pick<Account, "accountId">,
+    friendbotUrl?: string,
+  ): Promise<Account> {
+    const account = typeof address === "string" ? address : address.accountId();
+    friendbotUrl = friendbotUrl || (await this.getNetwork()).friendbotUrl;
+    if (!friendbotUrl) {
+      throw new Error("No friendbot URL configured for current network");
+    }
+    try {
+      const response = await AxiosClient.post<Friendbot.Response>(
+        `${friendbotUrl}?addr=${encodeURIComponent(account)}`,
+      );
+      const meta = xdr.TransactionMeta.fromXDR(
+        response.data.result_meta_xdr,
+        "base64",
+      );
+      const sequence = findCreatedAccountSequenceInTransactionMeta(meta);
+      return new Account(account, sequence);
+    } catch (error) {
+      if (error.response?.status === 400) {
+        if (error.response.detail?.includes("createAccountAlreadyExist")) {
+          // Account already exists, load the sequence number
+          return this.getAccount(account);
+        }
+      }
+      throw error;
+    }
+  }
+}
+
+function findCreatedAccountSequenceInTransactionMeta(
+  meta: xdr.TransactionMeta,
+): string {
+  let operations: xdr.OperationMeta[] = [];
+  switch (meta.switch()) {
+    case 0:
+      operations = meta.operations();
+      break;
+    case 1:
+      operations = meta.v1().operations();
+      break;
+    case 2:
+      operations = meta.v2().operations();
+      break;
+    case 3:
+      operations = meta.v3().operations();
+      break;
+    default:
+      throw new Error("Unexpected transaction meta switch value");
+  }
+
+  for (const op of operations) {
+    for (const c of op.changes()) {
+      if (c.switch() !== xdr.LedgerEntryChangeType.ledgerEntryCreated()) {
+        continue;
+      }
+      const data = c.created().data();
+      if (data.switch() !== xdr.LedgerEntryType.account()) {
+        continue;
+      }
+      const account = data.account();
+      const seqNum = account.seqNum();
+      return bigIntFromBytes(
+        !seqNum.unsigned,
+        seqNum.high,
+        seqNum.low,
+      ).toString();
+    }
+  }
+  throw new Error("No account created in transaction");
+}
+
+function bigIntFromBytes(
+  signed: boolean,
+  ...bytes: Array<number | bigint>
+): bigint {
+  let sign = BigInt(1);
+  if (signed && bytes[0] === 0x80) {
+    // top bit is set, negative number.
+    sign = BigInt(-1);
+    // tslint:disable-next-line:no-bitwise
+    bytes[0] &= 0x7f;
+  }
+  let b = BigInt(0);
+  for (const byte of bytes) {
+    // tslint:disable-next-line:no-bitwise
+    b <<= BigInt(8);
+    // tslint:disable-next-line:no-bitwise
+    b |= BigInt(byte);
+  }
+  return b * sign;
 }
 
 export namespace Server {
