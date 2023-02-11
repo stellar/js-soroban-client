@@ -16,7 +16,6 @@ describe("Server#getEvents", function() {
     setupMock(
       this.axiosMock,
       {
-        endLedger: "2",
         filters: [],
         pagination: {},
         startLedger: "1",
@@ -25,7 +24,7 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents(1, 2)
+      .getEvents({ startLedger: 1 })
       .then(function(response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -42,7 +41,6 @@ describe("Server#getEvents", function() {
       this.axiosMock,
       {
         startLedger: "1",
-        endLedger: "10",
         filters: [
           {
             topics: [["*", "*"]],
@@ -54,11 +52,14 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents(1, 10, [
-        {
-          topics: [["*", "*"]],
-        },
-      ])
+      .getEvents({
+        startLedger: 1,
+        filters: [
+          {
+            topics: [["*", "*"]],
+          },
+        ],
+      })
       .then(function(response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -76,7 +77,6 @@ describe("Server#getEvents", function() {
       this.axiosMock,
       {
         startLedger: "1",
-        endLedger: "10",
         filters: [
           {
             topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="]],
@@ -88,11 +88,14 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents(1, 10, [
-        {
-          topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="]],
-        },
-      ])
+      .getEvents({
+        startLedger: 1,
+        filters: [
+          {
+            topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="]],
+          },
+        ],
+      })
       .then(function(response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -104,14 +107,12 @@ describe("Server#getEvents", function() {
     let result = filterEventsByLedger(
       filterEvents(getEventsResponseFixture, "AAAABQAAAAh0cmFuc2Zlcg==/*"),
       1,
-      2,
     );
 
     setupMock(
       this.axiosMock,
       {
         startLedger: "1",
-        endLedger: "2",
         filters: [
           {
             topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "*"]],
@@ -123,11 +124,14 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents(1, 2, [
-        {
-          topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "*"]],
-        },
-      ])
+      .getEvents({
+        startLedger: 1,
+        filters: [
+          {
+            topics: [["AAAABQAAAAh0cmFuc2Zlcg==", "*"]],
+          },
+        ],
+      })
       .then(function(response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -139,14 +143,11 @@ describe("Server#getEvents", function() {
     let result = filterEventsByLedger(
       filterEvents(getEventsResponseFixture, "*/*"),
       1,
-      2,
     );
 
     setupMock(
       this.axiosMock,
       {
-        startLedger: "1",
-        endLedger: "2",
         filters: [
           {
             topics: [["*", "*"]],
@@ -161,17 +162,15 @@ describe("Server#getEvents", function() {
     );
 
     this.server
-      .getEvents(
-        1,
-        2,
-        [
+      .getEvents({
+        filters: [
           {
             topics: [["*", "*"]],
           },
         ],
-        "0164090849041387521-0000000000",
-        10,
-      )
+        cursor: "0164090849041387521-0000000000",
+        limit: 10,
+      })
       .then(function(response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -188,9 +187,9 @@ function filterEvents(events, filter) {
   );
 }
 
-function filterEventsByLedger(events, start, end) {
+function filterEventsByLedger(events, start) {
   return events.filter((e) => {
-    return e.ledger.parseInt() >= start && e.ledger.parseInt() <= end;
+    return e.ledger.parseInt() >= start;
   });
 }
 
