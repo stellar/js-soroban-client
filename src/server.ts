@@ -21,7 +21,7 @@ export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
 export interface GetEventsRequest {
   startLedger?: number;
-  filters?: SorobanRpc.EventFilter[];
+  filters: SorobanRpc.EventFilter[];
   cursor?: string;
   limit?: number;
 }
