@@ -15,6 +15,7 @@ export {
   SERVER_TIME_MAP,
   getCurrentServerTime,
 } from "./axios";
+export * from "./transaction";
 
 // expose classes and functions from stellar-base
 export * from "stellar-base";
