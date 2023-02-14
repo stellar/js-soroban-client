@@ -139,7 +139,7 @@
     "axios": "0.25.0",
     "es6-promise": "^4.2.4",
     "lodash": "4.17.21",
-    "stellar-base": "8.0.1-soroban.6",
+    "stellar-base": "8.2.2-soroban.10",
     "urijs": "^1.19.1"
   }
 }
