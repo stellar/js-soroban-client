@@ -19,6 +19,13 @@ import { SorobanRpc } from "./soroban_rpc";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
+export interface GetEventsRequest {
+  startLedger?: number;
+  filters: SorobanRpc.EventFilter[];
+  cursor?: string;
+  limit?: number;
+}
+
 /**
  * Server handles the network connection to a [Soroban-RPC](https://soroban.stellar.org/docs)
  * instance and exposes an interface for requests to that instance.
@@ -225,10 +232,9 @@ export class Server {
    * {@link SorobanRpc.EventResponse} object to set the `cursor` parameter.
    *
    * @example
-   * server.getEvents(
-   *    "1000",
-   *    "1010",
-   *    [
+   * server.getEvents({
+   *    startLedger: "1000",
+   *    filters: [
    *     {
    *      type: "contract",
    *      contractIds: [ "deadb33f..." ],
@@ -244,20 +250,15 @@ export class Server {
    *      topics: [[ "AAAAAQB6Mcc=" ]],
    *     }
    *    ],
-   *    "0164090849041387521-0000000000",
-   *    10,
-   * );
+   *    limit: 10,
+   * });
    *
    * @returns {Promise<SorobanRpc.GetEventsResponse>} a promise to the
    *    {@link SorobanRpc.GetEventsResponse} object containing a paginatable set
    *    of the events matching the given event filters.
    */
   public async getEvents(
-    startLedger: number,
-    endLedger: number,
-    filters?: SorobanRpc.EventFilter[],
-    cursor?: string,
-    limit?: number,
+    request: GetEventsRequest,
   ): Promise<SorobanRpc.GetEventsResponse> {
     // TODO: It'd be nice if we could do something to infer the types of filter
     // arguments a user wants, e.g. converting something like "transfer/*/42"
@@ -268,13 +269,12 @@ export class Server {
     //
     // It also means this library will rely on the XDR definitions.
     return await jsonrpc.postObject(this.serverURL.toString(), "getEvents", {
-      startLedger: String(startLedger),
-      endLedger: String(endLedger),
-      filters: filters ?? [],
+      filters: request.filters ?? [],
       pagination: {
-        ...(cursor && { cursor }), // add fields only if defined
-        ...(limit && { limit }),
+        ...(request.cursor && { cursor: request.cursor }), // add fields only if defined
+        ...(request.limit && { limit: request.limit }),
       },
+      ...(request.startLedger && { startLedger: String(request.startLedger) }),
     });
   }
 
