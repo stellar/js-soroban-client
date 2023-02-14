@@ -8,7 +8,7 @@ import {
 } from "stellar-base";
 
 // TODO: Transaction is immutable, so we need to re-build it here. :(
-export function prepareTransaction(
+export function assembleTransaction(
   raw: Transaction | FeeBumpTransaction,
   networkPassphrase: string,
   simulated: Array<null | {
@@ -18,7 +18,7 @@ export function prepareTransaction(
 ): Transaction {
   if ("innerTransaction" in raw) {
     // TODO: Handle feebump transactions
-    return prepareTransaction(
+    return assembleTransaction(
       raw.innerTransaction,
       networkPassphrase,
       simulated,

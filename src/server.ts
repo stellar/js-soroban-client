@@ -15,7 +15,7 @@ import AxiosClient from "./axios";
 import { Friendbot } from "./friendbot";
 import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
-import { prepareTransaction } from "./transaction";
+import { assembleTransaction } from "./transaction";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -419,7 +419,7 @@ export class Server {
     if (!results) {
       throw new Error("transaction simulation failed");
     }
-    return prepareTransaction(transaction, passphrase, results);
+    return assembleTransaction(transaction, passphrase, results);
   }
 
   /**
