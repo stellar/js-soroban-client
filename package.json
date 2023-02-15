@@ -1,6 +1,6 @@
 {
   "name": "soroban-client",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "soroban-client is a library for working with the soroban-rpc server.",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -139,7 +139,7 @@
     "axios": "0.25.0",
     "es6-promise": "^4.2.4",
     "lodash": "4.17.21",
-    "stellar-base": "8.2.2-soroban.10",
+    "stellar-base": "8.2.2-soroban.11",
     "urijs": "^1.19.1"
   }
 }
