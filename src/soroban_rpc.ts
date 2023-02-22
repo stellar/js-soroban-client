@@ -20,7 +20,7 @@ export namespace SorobanRpc {
     memBytes: string;
   }
 
-  export type TransactionStatus = "pending" | "success" | "error";
+  export type TransactionStatus = "SUCCESS" | "NOT_FOUND" | "FAILED";
 
   export interface GetHealthResponse {
     status: "healthy";
@@ -43,14 +43,18 @@ export namespace SorobanRpc {
     protocolVersion: string;
   }
 
-  export interface GetTransactionStatusResponse {
-    id: string;
+  export interface GetTransactionResponse {
     status: TransactionStatus;
-    envelopeXdr?: string;
+    latestLedger: string;
+    latestLedgerCloseTime: string;
+    oldestLedger: string;
+    oldestLedgerCloseTime: string;
+    id: string;
+
+    applicationOrder?: number;
     resultXdr?: string;
-    resultMetaXdr?: string;
-    results?: Array<{ xdr: string }>;
-    error?: jsonrpc.Error;
+    ledger?: string;
+    createdAt?: string;
   }
 
   export interface EventFilter {

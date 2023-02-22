@@ -83,12 +83,12 @@ const server = new SorobanClient.Server(
 
   // Submit the transaction to the Soroban-RPC server. The Soroban-RPC server
   // will then submit the transaction into the network for us. Then we will have
-  // to wait, polling getTransactionStatus until the transaction completes.
+  // to wait, polling getTransaction until the transaction completes.
   try {
     let response = await server.sendTransaction(transaction);
     console.log('Sent! Transaction ID:', console.log(response.id));
     // Poll this until the status is not "pending"
-    while (response.status === "pending") {
+    while (response.status === "NOT_FOUND") {
       // See if the transaction is complete
       response = await server.getTransactionStatus(response.id);
       // Wait a second

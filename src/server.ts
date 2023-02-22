@@ -196,27 +196,24 @@ export class Server {
    *
    * @example
    * const transactionHash = "c4515e3bdc0897f21cc5dbec8c82cf0a936d4741cb74a8e158eb51b9fb00411a";
-   * server.getTransactionStatus(transactionHash).then(transaction => {
+   * server.getTransaction(transactionHash).then(transaction => {
    *   console.log("status:", transaction.status);
-   *   console.log("envelopeXdr:", transaction.envelopeXdr);
-   *   console.log("resultMetaXdr:", transaction.resultMetaXdr);
    *   console.log("resultXdr:", transaction.resultXdr);
-   *   console.log("error:", transaction.error);
    * });
    *
    * @param {string} hash - The hash of the transaction to check. Encoded as a
    *    hex string.
    *
-   * @returns {Promise<SorobanRpc.GetTransactionStatusResponse>} Returns a
-   *    promise to the {@link SorobanRpc.GetTransactionStatusResponse} object
-   *    with the status, results, and error of the transaction.
+   * @returns {Promise<SorobanRpc.GetTransactionResponse>} Returns a
+   *    promise to the {@link SorobanRpc.GetTransactionResponse} object
+   *    with the status, results, and ledger details of the transaction.
    */
-  public async getTransactionStatus(
+  public async getTransaction(
     hash: string,
-  ): Promise<SorobanRpc.GetTransactionStatusResponse> {
+  ): Promise<SorobanRpc.GetTransactionResponse> {
     return await jsonrpc.post(
       this.serverURL.toString(),
-      "getTransactionStatus",
+      "getTransaction",
       hash,
     );
   }
@@ -426,7 +423,7 @@ export class Server {
    * Submit a real transaction to the Stellar network. This is the only way to
    * make changes "on-chain". Unlike Horizon, Soroban-RPC does not wait for
    * transaction completion. It simply validates the transaction and enqueues
-   * it. Clients should call {@link Server#getTransactionStatus} to learn about
+   * it. Clients should call {@link Server#getTransaction} to learn about
    * transaction success/failure.
    *
    * @example

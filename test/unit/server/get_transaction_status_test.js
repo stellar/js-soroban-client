@@ -1,4 +1,4 @@
-describe("Server#getTransactionStatus", function() {
+describe("Server#getTransaction", function() {
   let keypair = SorobanClient.Keypair.random();
   let account = new SorobanClient.Account(
     keypair.publicKey(),
@@ -44,13 +44,13 @@ describe("Server#getTransactionStatus", function() {
       .withArgs(serverUrl, {
         jsonrpc: "2.0",
         id: 1,
-        method: "getTransactionStatus",
+        method: "getTransaction",
         params: [this.hash],
       })
       .returns(Promise.resolve({ data: { id: 1, error: { code: 404 } } }));
 
     this.server
-      .getTransactionStatus(this.hash)
+      .getTransaction(this.hash)
       .then(function(_response) {
         done(new Error("Expected error"));
       })
@@ -63,7 +63,7 @@ describe("Server#getTransactionStatus", function() {
       });
   });
 
-  xit("transaction pending", function(done) {});
+  xit("transaction not found", function(done) {});
 
   xit("transaction success", function(done) {});
 
