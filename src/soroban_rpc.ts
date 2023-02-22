@@ -20,8 +20,6 @@ export namespace SorobanRpc {
     memBytes: string;
   }
 
-  export type TransactionStatus = "pending" | "success" | "error";
-
   export interface GetHealthResponse {
     status: "healthy";
   }
@@ -43,14 +41,21 @@ export namespace SorobanRpc {
     protocolVersion: string;
   }
 
-  export interface GetTransactionStatusResponse {
-    id: string;
-    status: TransactionStatus;
-    envelopeXdr?: string;
+  export type GetTransactionStatus = "SUCCESS" | "NOT_FOUND" | "FAILED";
+
+  export interface GetTransactionResponse {
+    status: GetTransactionStatus;
+    latestLedger: number;
+    latestLedgerCloseTime: number;
+    oldestLedger: number;
+    oldestLedgerCloseTime: number;
+
+    // the fields below are set if status is SUCCESS
+    applicationOrder?: number;
+    feeBump?: boolean;
     resultXdr?: string;
-    resultMetaXdr?: string;
-    results?: Array<{ xdr: string }>;
-    error?: jsonrpc.Error;
+    ledger?: number;
+    createdAt?: number;
   }
 
   export interface EventFilter {
@@ -79,9 +84,19 @@ export namespace SorobanRpc {
     transaction_id: string;
   }
 
+  export type SendTransactionStatus =
+    | "PENDING"
+    | "DUPLICATE"
+    | "TRY_AGAIN_LATER"
+    | "ERROR";
+
   export interface SendTransactionResponse {
-    id: string;
-    error?: jsonrpc.Error;
+    status: SendTransactionStatus;
+    // errorResultXdr is only set when status is ERROR
+    errorResultXdr?: string;
+    transactionHash: string;
+    latestLedger: number;
+    latestLedgerCloseTime: number;
   }
 
   export interface SimulateTransactionResponse {

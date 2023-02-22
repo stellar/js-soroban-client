@@ -1,4 +1,4 @@
-describe("Server#getTransactionStatus", function() {
+describe("Server#getTransaction", function() {
   let keypair = SorobanClient.Keypair.random();
   let account = new SorobanClient.Account(
     keypair.publicKey(),
@@ -39,28 +39,27 @@ describe("Server#getTransactionStatus", function() {
   });
 
   it("transaction not found", function(done) {
+    const result = {
+      status: "NOT_FOUND",
+      latestLedger: 100,
+      latestLedgerCloseTime: 12345,
+      oldestLedger: 50,
+      oldestLedgerCloseTime: 500,
+    };
     this.axiosMock
       .expects("post")
       .withArgs(serverUrl, {
         jsonrpc: "2.0",
         id: 1,
-        method: "getTransactionStatus",
+        method: "getTransaction",
         params: [this.hash],
       })
-      .returns(Promise.resolve({ data: { id: 1, error: { code: 404 } } }));
+      .returns(Promise.resolve({ data: { id: 1, result } }));
 
-    this.server
-      .getTransactionStatus(this.hash)
-      .then(function(_response) {
-        done(new Error("Expected error"));
-      })
-      .catch(function(err) {
-        done(
-          err.code == 404
-            ? null
-            : new Error("Expected error code 404, got: " + err.code),
-        );
-      });
+    this.server.getTransaction(this.hash).then(function(response) {
+      expect(response).to.be.deep.equal(result);
+      done();
+    });
   });
 
   xit("transaction pending", function(done) {});
