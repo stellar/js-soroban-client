@@ -49,7 +49,7 @@ describe("Server#sendTransaction", function() {
       })
       .returns(
         Promise.resolve({
-          data: { id: 1, result: { id: this.hash, status: "pending" } },
+          data: { id: 1, result: { id: this.hash, status: "PENDING" } },
         }),
       );
 

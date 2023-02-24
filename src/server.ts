@@ -189,34 +189,31 @@ export class Server {
   }
 
   /**
-   * Fetch the status, result, and/or error of a submitted transaction.
+   * Fetch the details of a submitted transaction.
    *
    * When submitting a transaction, clients should poll this to tell when the
    * transaction has completed.
    *
    * @example
    * const transactionHash = "c4515e3bdc0897f21cc5dbec8c82cf0a936d4741cb74a8e158eb51b9fb00411a";
-   * server.getTransactionStatus(transactionHash).then(transaction => {
+   * server.getTransaction(transactionHash).then(transaction => {
    *   console.log("status:", transaction.status);
-   *   console.log("envelopeXdr:", transaction.envelopeXdr);
-   *   console.log("resultMetaXdr:", transaction.resultMetaXdr);
    *   console.log("resultXdr:", transaction.resultXdr);
-   *   console.log("error:", transaction.error);
    * });
    *
    * @param {string} hash - The hash of the transaction to check. Encoded as a
    *    hex string.
    *
-   * @returns {Promise<SorobanRpc.GetTransactionStatusResponse>} Returns a
-   *    promise to the {@link SorobanRpc.GetTransactionStatusResponse} object
-   *    with the status, results, and error of the transaction.
+   * @returns {Promise<SorobanRpc.GetTransactionResponse>} Returns a
+   *    promise to the {@link SorobanRpc.GetTransactionResponse} object
+   *    with the status, result, and other details about the transaction.
    */
-  public async getTransactionStatus(
+  public async getTransaction(
     hash: string,
-  ): Promise<SorobanRpc.GetTransactionStatusResponse> {
+  ): Promise<SorobanRpc.GetTransactionResponse> {
     return await jsonrpc.post(
       this.serverURL.toString(),
-      "getTransactionStatus",
+      "getTransaction",
       hash,
     );
   }
@@ -389,9 +386,9 @@ export class Server {
    * preparedTransaction.sign(sourceKeypair);
    *
    * server.sendTransaction(transaction).then(result => {
-   *   console.log("id:", result.id);
+   *   console.log("transactionHash:", result.transactionHash);
    *   console.log("status:", result.status);
-   *   console.log("error:", result.error);
+   *   console.log("errorResultXdr:", result.errorResultXdr);
    * });
    *
    * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
@@ -461,8 +458,9 @@ export class Server {
    * transaction.sign(sourceKeypair);
    *
    * server.sendTransaction(transaction).then(result => {
-   *   console.log("id:", result.id);
-   *   console.log("error:", result.error);
+   *   console.log("transactionHash:", result.transactionHash);
+   *   console.log("status:", result.status);
+   *   console.log("errorResultXdr:", result.errorResultXdr);
    * });
    *
    * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
