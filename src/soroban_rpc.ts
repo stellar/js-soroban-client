@@ -53,7 +53,9 @@ export namespace SorobanRpc {
     // the fields below are set if status is SUCCESS
     applicationOrder?: number;
     feeBump?: boolean;
+    envelopeXdr?: string;
     resultXdr?: string;
+    resultMetaXdr?: string;
     ledger?: number;
     createdAt?: number;
   }
@@ -94,7 +96,7 @@ export namespace SorobanRpc {
     status: SendTransactionStatus;
     // errorResultXdr is only set when status is ERROR
     errorResultXdr?: string;
-    transactionHash: string;
+    hash: string;
     latestLedger: number;
     latestLedgerCloseTime: number;
   }

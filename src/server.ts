@@ -198,6 +198,8 @@ export class Server {
    * const transactionHash = "c4515e3bdc0897f21cc5dbec8c82cf0a936d4741cb74a8e158eb51b9fb00411a";
    * server.getTransaction(transactionHash).then(transaction => {
    *   console.log("status:", transaction.status);
+   *   console.log("envelopeXdr:", transaction.envelopeXdr);
+   *   console.log("resultMetaXdr:", transaction.resultMetaXdr);
    *   console.log("resultXdr:", transaction.resultXdr);
    * });
    *
@@ -386,7 +388,7 @@ export class Server {
    * preparedTransaction.sign(sourceKeypair);
    *
    * server.sendTransaction(transaction).then(result => {
-   *   console.log("transactionHash:", result.transactionHash);
+   *   console.log("hash:", result.hash);
    *   console.log("status:", result.status);
    *   console.log("errorResultXdr:", result.errorResultXdr);
    * });
@@ -458,7 +460,7 @@ export class Server {
    * transaction.sign(sourceKeypair);
    *
    * server.sendTransaction(transaction).then(result => {
-   *   console.log("transactionHash:", result.transactionHash);
+   *   console.log("hash:", result.hash);
    *   console.log("status:", result.status);
    *   console.log("errorResultXdr:", result.errorResultXdr);
    * });
