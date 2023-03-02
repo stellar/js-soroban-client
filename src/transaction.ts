@@ -55,7 +55,7 @@ export function assembleTransaction(
       if (!(footprint instanceof xdr.LedgerFootprint)) {
         footprint = xdr.LedgerFootprint.fromXDR(footprint.toString(), "base64");
       }
-      const auth = sim.auth.map((a) =>
+      const auth = (sim.auth ?? []).map((a) =>
         a instanceof xdr.ContractAuth
           ? a
           : xdr.ContractAuth.fromXDR(a.toString(), "base64"),
