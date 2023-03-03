@@ -51,11 +51,11 @@ export function assembleTransaction(
       if (!sim) {
         throw new Error("missing simulated operation");
       }
-      let footprint = sim.footprint;
+      let footprint = sim.footprint ?? rawOp.footprint;
       if (!(footprint instanceof xdr.LedgerFootprint)) {
         footprint = xdr.LedgerFootprint.fromXDR(footprint.toString(), "base64");
       }
-      const auth = (sim.auth ?? []).map((a) =>
+      const auth = (sim.auth ?? rawOp.auth).map((a) =>
         a instanceof xdr.ContractAuth
           ? a
           : xdr.ContractAuth.fromXDR(a.toString(), "base64"),

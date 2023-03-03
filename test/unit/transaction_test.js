@@ -78,5 +78,15 @@ describe("assembleTransaction", () => {
 
       expect(result.operations[0].auth.length).to.equal(1);
     });
+
+    it("handles transactions with no auth or footprint", () => {
+      const txn = emptyTransaction();
+
+      const result = SorobanClient.assembleTransaction(txn, networkPassphrase, [
+        {},
+      ]);
+
+      expect(result.operations[0].auth.length).to.equal(0);
+    });
   });
 });
