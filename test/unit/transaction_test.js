@@ -78,5 +78,37 @@ describe("assembleTransaction", () => {
 
       expect(result.operations[0].auth.length).to.equal(1);
     });
+
+    it("throws for non-invokehost-fn ops", () => {
+      const txn = new SorobanClient.TransactionBuilder(source, {
+        fee: 100,
+        networkPassphrase,
+        v1: true,
+      })
+        .addOperation(
+          SorobanClient.Operation.changeTrust({
+            asset: SorobanClient.Asset.native(),
+          }),
+        )
+        .setTimeout(SorobanClient.TimeoutInfinite)
+        .build();
+
+      try {
+        SorobanClient.assembleTransaction(txn, networkPassphrase, [null]);
+        expect.fail();
+      } catch (err) {
+        expect(err.toString()).to.equal("Error: Unsupported operation type");
+      }
+    });
+
+    it("handles transactions with no auth or footprint", () => {
+      const txn = emptyTransaction();
+
+      const result = SorobanClient.assembleTransaction(txn, networkPassphrase, [
+        {},
+      ]);
+
+      expect(result.operations[0].auth.length).to.equal(0);
+    });
   });
 });
