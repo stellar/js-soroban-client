@@ -14,11 +14,9 @@ describe("Server#getContractData", function() {
 
   let address =
     "0000000000000000000000000000000000000000000000000000000000000001";
-  let key = SorobanClient.xdr.ScVal.scvObject(
-    SorobanClient.xdr.ScObject.scoVec([
-      SorobanClient.xdr.ScVal.scvSymbol("Admin"),
-    ]),
-  );
+  let key = SorobanClient.xdr.ScVal.scvVec([
+    SorobanClient.xdr.ScVal.scvSymbol("Admin"),
+  ]);
 
   it("key found", function(done) {
     let result = {
