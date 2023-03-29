@@ -76,6 +76,7 @@ export namespace SorobanRpc {
     contractId: string;
     id: string;
     pagingToken: string;
+    inSuccessfulContractCall: boolean;
     topic: string[];
     value: {
       xdr: string;
@@ -108,6 +109,7 @@ export namespace SorobanRpc {
       xdr: string;
       footprint: string;
       auth: string[];
+      events: string[];
     }>;
     error?: jsonrpc.Error;
     latestLedger: number;

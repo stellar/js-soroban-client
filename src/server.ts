@@ -237,16 +237,17 @@ export class Server {
    *     {
    *      type: "contract",
    *      contractIds: [ "deadb33f..." ],
-   *      topics: [[ "AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc=", "*" ]],
+   *      topics: [[ "AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc=", "*" ]]
    *     }, {
    *      type: "system",
    *      contractIds: [ "...c4f3b4b3..." ],
-   *      topics: [[ "*" ], [ "*", "AAAAAQB6Mcc=" ]],
+   *      topics: [[ "*" ], [ "*", "AAAAAQB6Mcc=" ]]
    *     }, {
    *      contractIds: [ "...c4f3b4b3..." ],
-   *      topics: [[ "AAAABQAAAAh0cmFuc2Zlcg==" ]],
+   *      topics: [[ "AAAABQAAAAh0cmFuc2Zlcg==" ]]
    *     }, {
-   *      topics: [[ "AAAAAQB6Mcc=" ]],
+   *      type: "diagnostic",
+   *      topics: [[ "AAAAAQB6Mcc=" ]]
    *     }
    *    ],
    *    limit: 10,

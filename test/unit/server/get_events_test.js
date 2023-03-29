@@ -215,6 +215,7 @@ let getEventsResponseFixture = [
     id: "0164090849041387521-0000000003",
     pagingToken: "164090849041387521-3",
     topic: ["AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc="],
+    inSuccessfulContractCall: true,
     value: {
       xdr: "AAAABQAAAApHaWJNb255UGxzAAA=",
     },
@@ -228,18 +229,20 @@ let getEventsResponseFixture = [
     id: "0164090849041387521-0000000003",
     pagingToken: "164090849041387521-3",
     topic: ["AAAAAQB6Mcc=", "AAAABQAAAAh0cmFuc2Zlcg=="],
+    inSuccessfulContractCall: true,
     value: {
       xdr: "AAAABQAAAApHaWJNb255UGxzAAA=",
     },
   },
   {
-    type: "system",
+    type: "diagnostic",
     ledger: "2",
     ledgerClosedAt: "2022-11-16T16:10:41Z",
     contractId:
       "a3e82a76cc316f6289fd1ffbdf315da0f2c6be9582b84b9983a402f02ea0fff7",
     id: "0164090849041387521-0000000003",
     pagingToken: "164090849041387521-3",
+    inSuccessfulContractCall: true,
     topic: ["AAAAAQB6Mcc="],
     value: {
       xdr: "AAAABQAAAApHaWJNb255UGxzAAA=",
@@ -253,6 +256,7 @@ let getEventsResponseFixture = [
       "6ebe0114ae15f72f187f05d06dcb66b22bd97218755c9b4646b034ab961fc1d5",
     id: "0000000171798695936-0000000001",
     pagingToken: "0000000171798695936-0000000001",
+    inSuccessfulContractCall: true,
     topic: ["AAAABQAAAAdDT1VOVEVSAA==", "AAAABQAAAAlpbmNyZW1lbnQAAAA="],
     value: {
       xdr: "AAAAAQAAAAE=",
