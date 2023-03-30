@@ -60,8 +60,10 @@ export namespace SorobanRpc {
     createdAt?: number;
   }
 
+  export type EventType = "contract" | "system" | "diagnostic";
+
   export interface EventFilter {
-    type?: string;
+    type?: EventType;
     contractIds?: string[];
     topics?: string[][];
   }
