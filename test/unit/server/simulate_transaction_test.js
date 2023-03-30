@@ -43,14 +43,17 @@ describe("Server#simulateTransaction", function() {
       cpuInsns: "10000",
       memBytes: "10000",
     },
-    footprint: new SorobanClient.xdr.LedgerFootprint({
-      readOnly: [],
-      readWrite: [],
-    }).toXDR("base64"),
     results: [
-      SorobanClient.xdr.ScVal.scvU32(0)
-        .toXDR()
-        .toString("base64"),
+      {
+        xdr: SorobanClient.xdr.ScVal.scvU32(0)
+          .toXDR()
+          .toString("base64"),
+        footprint: new SorobanClient.xdr.LedgerFootprint({
+          readOnly: [],
+          readWrite: [],
+        }).toXDR("base64"),
+        events: [],
+      },
     ],
     latestLedger: 1,
   };
