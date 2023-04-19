@@ -41,7 +41,7 @@ export namespace SorobanRpc {
     protocolVersion: string;
   }
 
-  /* Response for jsonrpc method `getNetwork`
+  /* Response for jsonrpc method `getLatestLedger`
    */
   export interface GetLatestLedgerResponse {
     id: string;
