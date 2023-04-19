@@ -296,6 +296,24 @@ export class Server {
   }
 
   /**
+   * Fetches the latest ledger meta info from network which Soroban-RPC is connected to.
+   *
+   * @example
+   * server.getLatestLedger().then(response => {
+   *   console.log("hash:", response.id);
+   *   console.log("sequence:", response.sequence);
+   *   console.log("protocolVersion:", response.protocolVersion);
+   * });
+   *
+   * @returns {Promise<SorobanRpc.GetLatestLedgerResponse>} a promise to the
+   *    {@link SorobanRpc.GetLatestLedgerResponse} object containing metadata
+   *    about the latest ledger from network soroban-rpc server is connected to.
+   */
+  public async getLatestLedger(): Promise<SorobanRpc.GetLatestLedgerResponse> {
+    return await jsonrpc.post(this.serverURL.toString(), "getLatestLedger");
+  }
+
+  /**
    * Submit a trial contract invocation to get back return values, expected
    * ledger footprint, expected authorizations, and expected costs.
    *
