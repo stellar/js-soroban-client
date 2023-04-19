@@ -24,21 +24,27 @@ describe("Server#getAccount", function() {
       .withArgs(serverUrl, {
         jsonrpc: "2.0",
         id: 1,
-        method: "getLedgerEntry",
+        method: "getLedgerEntries",
         params: [
-          xdr.LedgerKey.account(
-            new xdr.LedgerKeyAccount({
-              accountId,
-            }),
-          ).toXDR("base64"),
+          [
+            xdr.LedgerKey.account(
+              new xdr.LedgerKeyAccount({
+                accountId,
+              }),
+            ).toXDR("base64"),
+          ],
         ],
       })
       .returns(
         Promise.resolve({
           data: {
             result: {
-              xdr:
-                "AAAAAAAAAABzdv3ojkzWHMD7KUoXhrPx0GH18vHKV0ZfqpMiEblG1g3gtpoE608YAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAQAAAAAY9D8iA",
+              entries: [
+                {
+                  xdr:
+                    "AAAAAAAAAABzdv3ojkzWHMD7KUoXhrPx0GH18vHKV0ZfqpMiEblG1g3gtpoE608YAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAQAAAAAY9D8iA",
+                },
+              ],
             },
           },
         }),

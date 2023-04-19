@@ -117,22 +117,30 @@ describe("Server#requestAirdrop", function() {
       .withArgs(serverUrl, {
         jsonrpc: "2.0",
         id: 1,
-        method: "getLedgerEntry",
+        method: "getLedgerEntries",
         params: [
-          xdr.LedgerKey.account(
-            new xdr.LedgerKeyAccount({
-              accountId: xdr.PublicKey.publicKeyTypeEd25519(
-                StrKey.decodeEd25519PublicKey(accountId),
-              ),
-            }),
-          ).toXDR("base64"),
+          [
+            xdr.LedgerKey.account(
+              new xdr.LedgerKeyAccount({
+                accountId: xdr.PublicKey.publicKeyTypeEd25519(
+                  StrKey.decodeEd25519PublicKey(accountId),
+                ),
+              }),
+            ).toXDR("base64"),
+          ],
         ],
       })
       .returns(
         Promise.resolve({
           data: {
             result: {
-              xdr: accountLedgerEntryData(accountId, "1234").toXDR("base64"),
+              entries: [
+                {
+                  xdr: accountLedgerEntryData(accountId, "1234").toXDR(
+                    "base64",
+                  ),
+                },
+              ],
             },
           },
         }),

@@ -31,7 +31,7 @@ Methods return a [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScri
 The transaction endpoints will return some fields in raw [XDR](https://developers.stellar.org/api/introduction/xdr/)
 form. You can convert this XDR to JSON using the `.fromXDR()` method.
 
-An example of using the `getLedgerEntry` method to read the current ledger entry for an account and print the XDR field as JSON:
+An example of using the `getLedgerEntries` method to read the current ledger entry for an account and print the XDR field as JSON:
 
 ```javascript
 // Construct the LedgerKey we want to look up
@@ -42,8 +42,9 @@ const key = SorobanClient.xdr.LedgerKey.account(
 );
 
 // Fetch the current LedgerKeyData from the server.
-server.getLedgerEntry(key).then(function (response) {
-  const parsed = SorobanClient.xdr.LedgerEntryData.fromXDR(response.xdr, 'base64');
+server.getLedgerEntries([key]).then(function (response) {
+  const ledgerEntry = response.entries[0];
+  const parsed = SorobanClient.xdr.LedgerEntryData.fromXDR(ledgerEntry.xdr, 'base64');
   console.log( JSON.stringify(parsed) );
 });
 ```

@@ -29,17 +29,27 @@ describe("Server#getContractData", function() {
       .withArgs(serverUrl, {
         jsonrpc: "2.0",
         id: 1,
-        method: "getLedgerEntry",
+        method: "getLedgerEntries",
         params: [
-          xdr.LedgerKey.contractData(
-            new xdr.LedgerKeyContractData({
-              contractId: Buffer.from(address, "hex"),
-              key,
-            }),
-          ).toXDR("base64"),
+          [
+            xdr.LedgerKey.contractData(
+              new xdr.LedgerKeyContractData({
+                contractId: Buffer.from(address, "hex"),
+                key,
+              }),
+            ).toXDR("base64"),
+          ],
         ],
       })
-      .returns(Promise.resolve({ data: { result } }));
+      .returns(
+        Promise.resolve({
+          data: {
+            result: {
+              entries: [result],
+            },
+          },
+        }),
+      );
 
     this.server
       .getContractData(address, key)
@@ -58,17 +68,19 @@ describe("Server#getContractData", function() {
       .withArgs(serverUrl, {
         jsonrpc: "2.0",
         id: 1,
-        method: "getLedgerEntry",
+        method: "getLedgerEntries",
         params: [
-          xdr.LedgerKey.contractData(
-            new xdr.LedgerKeyContractData({
-              contractId: Buffer.from(address, "hex"),
-              key,
-            }),
-          ).toXDR("base64"),
+          [
+            xdr.LedgerKey.contractData(
+              new xdr.LedgerKeyContractData({
+                contractId: Buffer.from(address, "hex"),
+                key,
+              }),
+            ).toXDR("base64"),
+          ],
         ],
       })
-      .returns(Promise.resolve({ data: { error: { code: 404 } } }));
+      .returns(Promise.resolve({ data: { result: { entries: [] } } }));
 
     this.server
       .getContractData(address, key)
