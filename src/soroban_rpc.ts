@@ -41,6 +41,14 @@ export namespace SorobanRpc {
     protocolVersion: string;
   }
 
+  /* Response for jsonrpc method `getLatestLedger`
+   */
+  export interface GetLatestLedgerResponse {
+    id: string;
+    sequence: number;
+    protocolVersion: string;
+  }
+
   export type GetTransactionStatus = "SUCCESS" | "NOT_FOUND" | "FAILED";
 
   export interface GetTransactionResponse {
