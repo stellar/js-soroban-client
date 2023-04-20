@@ -9,7 +9,7 @@ describe("assembleTransaction", () => {
     const networkPassphrase = SorobanClient.Networks.TESTNET;
     const source = new SorobanClient.Account(
       "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI",
-      "1",
+      "1"
     );
     const emptyFootprint = new xdr.LedgerFootprint({
       readOnly: [],
@@ -27,7 +27,7 @@ describe("assembleTransaction", () => {
             parameters: [],
             footprint: emptyFootprint,
             auth: [],
-          }),
+          })
         )
         .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
@@ -44,7 +44,7 @@ describe("assembleTransaction", () => {
               xdr.LedgerKey.contractCode(
                 new xdr.LedgerKeyContractCode({
                   hash: Buffer.alloc(32),
-                }),
+                })
               ),
             ],
             readWrite: [],
@@ -88,7 +88,7 @@ describe("assembleTransaction", () => {
         .addOperation(
           SorobanClient.Operation.changeTrust({
             asset: SorobanClient.Asset.native(),
-          }),
+          })
         )
         .setTimeout(SorobanClient.TimeoutInfinite)
         .build();

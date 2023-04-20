@@ -1,11 +1,11 @@
-describe("Server#simulateTransaction", function() {
+describe("Server#simulateTransaction", function () {
   let keypair = SorobanClient.Keypair.random();
   let account = new SorobanClient.Account(
     keypair.publicKey(),
-    "56199647068161",
+    "56199647068161"
   );
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
     let transaction = new SorobanClient.TransactionBuilder(account, {
@@ -19,7 +19,7 @@ describe("Server#simulateTransaction", function() {
             "GASOCNHNNLYFNMDJYQ3XFMI7BYHIOCFW3GJEOWRPEGK2TDPGTG2E5EDW",
           asset: SorobanClient.Asset.native(),
           amount: "100.50",
-        }),
+        })
       )
       .setTimeout(SorobanClient.TimeoutInfinite)
       .build();
@@ -27,13 +27,10 @@ describe("Server#simulateTransaction", function() {
 
     this.transaction = transaction;
     this.hash = this.transaction.hash().toString("hex");
-    this.blob = transaction
-      .toEnvelope()
-      .toXDR()
-      .toString("base64");
+    this.blob = transaction.toEnvelope().toXDR().toString("base64");
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.axiosMock.verify();
     this.axiosMock.restore();
   });
@@ -45,9 +42,7 @@ describe("Server#simulateTransaction", function() {
     },
     results: [
       {
-        xdr: SorobanClient.xdr.ScVal.scvU32(0)
-          .toXDR()
-          .toString("base64"),
+        xdr: SorobanClient.xdr.ScVal.scvU32(0).toXDR().toString("base64"),
         footprint: new SorobanClient.xdr.LedgerFootprint({
           readOnly: [],
           readWrite: [],
@@ -58,7 +53,7 @@ describe("Server#simulateTransaction", function() {
     latestLedger: 1,
   };
 
-  it("simulates a transaction", function(done) {
+  it("simulates a transaction", function (done) {
     this.axiosMock
       .expects("post")
       .withArgs(serverUrl, {
@@ -71,11 +66,11 @@ describe("Server#simulateTransaction", function() {
 
     this.server
       .simulateTransaction(this.transaction)
-      .then(function(response) {
+      .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
   });
