@@ -9,8 +9,8 @@ const config = {
   target: 'web',
   // https://stackoverflow.com/a/34018909
   entry: {
-    'stellar-sdk': path.resolve(__dirname, './src/browser.ts'),
-    'stellar-sdk.min': path.resolve(__dirname, './src/browser.ts')
+    'soroban-client': path.resolve(__dirname, './src/browser.ts'),
+    'soroban-client.min': path.resolve(__dirname, './src/browser.ts')
   },
   resolve: {
     fallback: {
@@ -22,7 +22,7 @@ const config = {
   },
   output: {
     clean: true,
-    library: 'StellarSdk',
+    library: 'SorobanClient',
     compareBeforeEmit: true,
     path: path.resolve(__dirname, './dist')
   },
