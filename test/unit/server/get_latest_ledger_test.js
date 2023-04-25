@@ -23,7 +23,7 @@ describe("Server#getLatestLedger", function() {
         jsonrpc: "2.0",
         id: 1,
         method: "getLatestLedger",
-        params: [],
+        params: null,
       })
       .returns(Promise.resolve({ data: { result } }));
 

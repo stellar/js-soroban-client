@@ -22,7 +22,7 @@ describe("Server#getHealth", function() {
         jsonrpc: "2.0",
         id: 1,
         method: "getHealth",
-        params: [],
+        params: null,
       })
       .returns(Promise.resolve({ data: { result } }));
 
