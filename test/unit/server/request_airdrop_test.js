@@ -63,7 +63,7 @@ describe("Server#requestAirdrop", function() {
         jsonrpc: "2.0",
         id: 1,
         method: "getNetwork",
-        params: [],
+        params: null,
       })
       .returns(Promise.resolve({ data: { result } }));
   }

@@ -35,6 +35,9 @@ export async function post<T>(
   method: string,
   ...params: any
 ): Promise<T> {
+  if (params && params.length < 1) {
+    params = null;
+  }
   const response = await axios.post<Response<T>>(url, {
     jsonrpc: "2.0",
     // TODO: Generate a unique request id
