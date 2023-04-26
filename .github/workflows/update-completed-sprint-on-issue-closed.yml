@@ -18,7 +18,7 @@ jobs:
           private_key: ${{ secrets.GH_PROJECT_MANAGEMENT_APP_PEM }}
       - name: Update CompletedSprint on Issue Closed
         id: update_completedsprint_on_issue_closed
-        uses: paulbellamy/stellar-actions/update-completed-sprint-on-issue-closed@update-completed-sprint-on-issue-closed
+        uses: stellar/actions/update-completed-sprint-on-issue-closed@main
         with:
           project_name: "Platform Scrum"
           field_name: "CompletedSprint"
