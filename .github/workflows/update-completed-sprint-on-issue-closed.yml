@@ -4,7 +4,7 @@ on:
   issues:
     types: [closed]
   pull_request:
-    types: [closed, comment]
+    types: [closed]
 
 jobs:
   update-completed-sprint:
