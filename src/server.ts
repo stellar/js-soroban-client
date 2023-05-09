@@ -425,19 +425,19 @@ export class Server {
     transaction: Transaction | FeeBumpTransaction,
     networkPassphrase?: string,
   ): Promise<Transaction | FeeBumpTransaction> {
-    const [{ passphrase }, { error, results }] = await Promise.all([
+    const [{ passphrase }, simResponse] = await Promise.all([
       networkPassphrase
         ? Promise.resolve({ passphrase: networkPassphrase })
         : this.getNetwork(),
       this.simulateTransaction(transaction),
     ]);
-    if (error) {
-      throw error;
+    if (simResponse.error) {
+      throw simResponse.error;
     }
-    if (!results) {
+    if (!simResponse.results || simResponse.results.length < 1) {
       throw new Error("transaction simulation failed");
     }
-    return assembleTransaction(transaction, passphrase, results);
+    return assembleTransaction(transaction, passphrase, simResponse);
   }
 
   /**
