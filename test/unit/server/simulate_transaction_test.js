@@ -5,24 +5,71 @@ describe("Server#simulateTransaction", function() {
     "56199647068161",
   );
 
+  const simulationResponse = {
+    transactionData: new SorobanClient.xdr.SorobanTransactionData({
+      resources: new SorobanClient.xdr.SorobanResources({
+        footprint: new SorobanClient.xdr.LedgerFootprint({
+          readOnly: [],
+          readWrite: [],
+        }),
+        instructions: 0,
+        readBytes: 0,
+        writeBytes: 0,
+        extendedMetaDataSizeBytes: 0,
+      }),
+      refundableFee: SorobanClient.xdr.Int64.fromString("0"),
+      ext: new SorobanClient.xdr.ExtensionPoint(0),
+    }).toXDR("base64"),
+    events: [],
+    minResourceFee: "15",
+    results: [
+      {
+        auth: [
+          new SorobanClient.xdr.ContractAuth({
+            addressWithNonce: null,
+            rootInvocation: new SorobanClient.xdr.AuthorizedInvocation({
+              contractId: Buffer.alloc(32),
+              functionName: "fn",
+              args: [],
+              subInvocations: [],
+            }),
+            signatureArgs: [],
+          }).toXDR("base64"),
+        ],
+        xdr: SorobanClient.xdr.ScVal.scvU32(0)
+          .toXDR()
+          .toString("base64"),
+      },
+    ],
+    latestLedger: 3,
+  };
+
   beforeEach(function() {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
-    let transaction = new SorobanClient.TransactionBuilder(account, {
-      fee: 100,
-      networkPassphrase: SorobanClient.Networks.TESTNET,
-      v1: true,
-    })
-      .addOperation(
-        SorobanClient.Operation.payment({
-          destination:
-            "GASOCNHNNLYFNMDJYQ3XFMI7BYHIOCFW3GJEOWRPEGK2TDPGTG2E5EDW",
-          asset: SorobanClient.Asset.native(),
-          amount: "100.50",
-        }),
-      )
-      .setTimeout(SorobanClient.TimeoutInfinite)
-      .build();
+    const source = new SorobanClient.Account(
+      "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI",
+      "1",
+    );
+    function emptyContractTransaction() {
+      return new SorobanClient.TransactionBuilder(source, {
+        fee: 100,
+        networkPassphrase: "Test",
+        v1: true,
+      })
+        .addOperation(
+          SorobanClient.Operation.invokeHostFunction({
+            args: new SorobanClient.xdr.HostFunctionArgs.hostFunctionTypeInvokeContract(
+              [],
+            ),
+            auth: [],
+          }),
+        )
+        .setTimeout(SorobanClient.TimeoutInfinite)
+        .build();
+    }
+
+    const transaction = emptyContractTransaction();
     transaction.sign(keypair);
 
     this.transaction = transaction;
@@ -38,26 +85,6 @@ describe("Server#simulateTransaction", function() {
     this.axiosMock.restore();
   });
 
-  const result = {
-    cost: {
-      cpuInsns: "10000",
-      memBytes: "10000",
-    },
-    results: [
-      {
-        xdr: SorobanClient.xdr.ScVal.scvU32(0)
-          .toXDR()
-          .toString("base64"),
-        footprint: new SorobanClient.xdr.LedgerFootprint({
-          readOnly: [],
-          readWrite: [],
-        }).toXDR("base64"),
-        events: [],
-      },
-    ],
-    latestLedger: 1,
-  };
-
   it("simulates a transaction", function(done) {
     this.axiosMock
       .expects("post")
@@ -67,12 +94,14 @@ describe("Server#simulateTransaction", function() {
         method: "simulateTransaction",
         params: [this.blob],
       })
-      .returns(Promise.resolve({ data: { id: 1, result } }));
+      .returns(
+        Promise.resolve({ data: { id: 1, result: simulationResponse } }),
+      );
 
     this.server
       .simulateTransaction(this.transaction)
       .then(function(response) {
-        expect(response).to.be.deep.equal(result);
+        expect(response).to.be.deep.equal(simulationResponse);
         done();
       })
       .catch(function(err) {

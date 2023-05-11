@@ -28,17 +28,29 @@ export function assembleTransaction(
     raw.operations[0].type !== "invokeHostFunction"
   ) {
     throw new Error(
-      "unsupported operation type for soroban, must be only one InvokeHostFunctionOp in the tx.",
+      "unsupported operation type, must be only one InvokeHostFunctionOp in the transaction.",
     );
   }
 
-  // TODO: Figure out a cleaner way to clone this transaction.
+  const rawInvokeHostFunctionOp: any = raw.operations[0];
+
+  if (
+    !rawInvokeHostFunctionOp.functions ||
+    !simulation.results ||
+    rawInvokeHostFunctionOp.functions.length !== simulation.results.length
+  ) {
+    throw new Error(
+      "preflight simulation results do not contain same count of HostFunctions that InvokeHostFunctionOp in the transaction has.",
+    );
+  }
+
   const source = new Account(raw.source, `${parseInt(raw.sequence, 10) - 1}`);
+  const authDecoratedHostFunctions: xdr.HostFunction[] = [];
+
   const txnBuilder = new TransactionBuilder(source, {
-    fee: (
-      parseInt(raw.fee, 10) ||
-      0 + parseInt(simulation.minResourceFee, 10) ||
-      0
+    fee: Math.max(
+      parseInt(raw.fee, 10) || 0,
+      parseInt(simulation.minResourceFee, 10) || 0,
     ).toString(),
     memo: raw.memo,
     networkPassphrase,
@@ -49,20 +61,6 @@ export function assembleTransaction(
     minAccountSequenceLedgerGap: raw.minAccountSequenceLedgerGap,
     extraSigners: raw.extraSigners,
   });
-
-  // can only be single Op in a Tx that has InvokeHostFunctionOp.
-  const rawInvokeHostFunctionOp: any = raw.operations[0];
-
-  const authDecoratedHostFunctions: xdr.HostFunction[] = [];
-  if (
-    !rawInvokeHostFunctionOp.functions ||
-    !simulation.results ||
-    rawInvokeHostFunctionOp.functions.length !== simulation.results.length
-  ) {
-    throw new Error(
-      "preflight simulation for soroban does not have same HostFunction total as InvokeHostFunctionOp in the tx.",
-    );
-  }
 
   // apply the pre-built Auth from simulation onto each Tx/Op/HostFunction invocation
   for (
@@ -79,7 +77,7 @@ export function assembleTransaction(
   }
 
   txnBuilder.addOperation(
-    Operation.invokeHostFunction({
+    Operation.invokeHostFunctions({
       functions: authDecoratedHostFunctions,
     }),
   );
@@ -95,7 +93,7 @@ function buildExt(sorobanTxDataStr: string) {
     sorobanTxDataStr,
     "base64",
   );
-  const txExt: xdr.TransactionExt = new xdr.TransactionExt();
+  const txExt: xdr.TransactionExt = new xdr.TransactionExt(1);
   txExt.sorobanData(sorobanTxData);
   return txExt;
 }

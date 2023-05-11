@@ -15,11 +15,6 @@ export namespace SorobanRpc {
     smart: string;
   }
 
-  export interface Cost {
-    cpuInsns: string;
-    memBytes: string;
-  }
-
   export interface GetHealthResponse {
     status: "healthy";
   }
@@ -120,13 +115,13 @@ export namespace SorobanRpc {
   }
 
   export interface SimulateTransactionResponse {
+    id: string;
     error?: jsonrpc.Error;
     // this is SorobanTransactionData XDR in base64
     transactionData: string;
     events: string[];
     minResourceFee: string;
     results: SimulateHostFunctionResult[];
-    cost: Cost;
     latestLedger: number;
   }
 }

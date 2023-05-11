@@ -7883,7 +7883,7 @@ statuses@~1.5.0:
 
 "stellar-base@https://github.com/stellar/js-stellar-base\\#host_functions_ts":
   version "9.0.0-soroban.0"
-  resolved "https://github.com/stellar/js-stellar-base\\#539e106ff876c7f7e1f1a5360b770e4520351a66"
+  resolved "https://github.com/stellar/js-stellar-base\\#3034398d575a418a731f41c2cd4e79c0141de9a0"
   dependencies:
     base32.js "^0.1.0"
     bignumber.js "^9.1.1"
