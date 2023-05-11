@@ -45,8 +45,6 @@ export function assembleTransaction(
   }
 
   const source = new Account(raw.source, `${parseInt(raw.sequence, 10) - 1}`);
-  const authDecoratedHostFunctions: xdr.HostFunction[] = [];
-
   const txnBuilder = new TransactionBuilder(source, {
     // automatically update the tx fee based on suggested fees from simulation response
     fee: Math.max(
@@ -64,19 +62,15 @@ export function assembleTransaction(
     extraSigners: raw.extraSigners,
   });
 
-  // apply the pre-built Auth from simulation onto each Tx/Op/HostFunction invocation
-  for (
-    let hostFnIndex = 0;
-    hostFnIndex < simulation.results.length;
-    hostFnIndex++
-  ) {
-    const rawHostFunction: xdr.HostFunction =
-      rawInvokeHostFunctionOp.functions[hostFnIndex];
-    const simHostFunctionResult: SorobanRpc.SimulateHostFunctionResult =
-      simulation.results[hostFnIndex];
-    rawHostFunction.auth(buildContractAuth(simHostFunctionResult.auth));
-    authDecoratedHostFunctions.push(rawHostFunction);
-  }
+  // apply the pre-built Auth from simulation onto each Tx/Op/HostFunction
+  // invocation
+  const authDecoratedHostFunctions = simulation.results.map(
+    (functionSimulationResult, i) => {
+      const hostFn: xdr.HostFunction = rawInvokeHostFunctionOp.functions[i];
+      hostFn.auth(buildContractAuth(functionSimulationResult.auth));
+      return hostFn;
+    },
+  );
 
   txnBuilder.addOperation(
     Operation.invokeHostFunctions({
