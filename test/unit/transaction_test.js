@@ -43,6 +43,10 @@ describe("assembleTransaction", () => {
       },
     ],
     latestLedger: 3,
+    cost: {
+      cpuInsns: "0",
+      memBytes: "0",
+    },
   };
   describe("Transaction", () => {
     const networkPassphrase = SorobanClient.Networks.TESTNET;

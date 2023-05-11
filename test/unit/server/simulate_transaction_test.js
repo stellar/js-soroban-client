@@ -43,6 +43,10 @@ describe("Server#simulateTransaction", function() {
       },
     ],
     latestLedger: 3,
+    cost: {
+      cpuInsns: "0",
+      memBytes: "0",
+    },
   };
 
   beforeEach(function() {

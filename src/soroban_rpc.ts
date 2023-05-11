@@ -15,6 +15,11 @@ export namespace SorobanRpc {
     smart: string;
   }
 
+  export interface Cost {
+    cpuInsns: string;
+    memBytes: string;
+  }
+
   export interface GetHealthResponse {
     status: "healthy";
   }
@@ -124,5 +129,6 @@ export namespace SorobanRpc {
     suggestedInclusionFee: string;
     results: SimulateHostFunctionResult[];
     latestLedger: number;
+    cost: Cost;
   }
 }
