@@ -22,6 +22,7 @@ describe("assembleTransaction", () => {
     }).toXDR("base64"),
     events: [],
     minResourceFee: "15",
+    suggestedInclusionFee: "3",
     results: [
       {
         auth: [
@@ -68,13 +69,23 @@ describe("assembleTransaction", () => {
         .build();
     }
 
-    it("simulate adds the soroban tx data to the transaction", () => {
+    it("simulate updates the tx data from simulation response", () => {
       const txn = singleContractFnTransaction();
       const result = SorobanClient.assembleTransaction(
         txn,
         networkPassphrase,
         simulationResponse,
       );
+
+      // validate it auto updated the tx fees from sim response fees
+      expect(
+        result
+          .toEnvelope()
+          .tx()
+          .fee(),
+      ).to.equal(18);
+
+      // validate it udpated sorobantransactiondata block in the tx ext
       expect(
         result
           .toEnvelope()

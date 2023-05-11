@@ -48,9 +48,11 @@ export function assembleTransaction(
   const authDecoratedHostFunctions: xdr.HostFunction[] = [];
 
   const txnBuilder = new TransactionBuilder(source, {
+    // automatically update the tx fee based on suggested fees from simulation response
     fee: Math.max(
       parseInt(raw.fee, 10) || 0,
-      parseInt(simulation.minResourceFee, 10) || 0,
+      (parseInt(simulation.minResourceFee, 10) || 0) +
+        (parseInt(simulation.suggestedInclusionFee, 10) || 0),
     ).toString(),
     memo: raw.memo,
     networkPassphrase,
