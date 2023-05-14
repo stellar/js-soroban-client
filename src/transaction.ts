@@ -90,9 +90,9 @@ function buildExt(sorobanTxDataStr: string) {
     "base64",
   );
 
-  // TODO - remove this workaround to invoke hidden constructor on js-xdr union
+  // TODO - remove this workaround to use constructor on js-xdr union
   //       and use the typescript generated static factory method once fixed
-  //       https://github.com/stellar/xdrgen/issues/157
+  //       https://github.com/stellar/dts-xdr/issues/5
   // @ts-ignore
   const txExt = new xdr.TransactionExt(1, sorobanTxData);
   return txExt;
