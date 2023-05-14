@@ -5,38 +5,40 @@ describe("assembleTransaction", () => {
     // TODO: Add support for fee bump transactions
   });
 
-  const simulationResponse = {
-    transactionData: new SorobanClient.xdr.SorobanTransactionData({
-      resources: new SorobanClient.xdr.SorobanResources({
-        footprint: new SorobanClient.xdr.LedgerFootprint({
-          readOnly: [],
-          readWrite: [],
-        }),
-        instructions: 0,
-        readBytes: 5,
-        writeBytes: 0,
-        extendedMetaDataSizeBytes: 0,
+  const fnAuth = new SorobanClient.xdr.ContractAuth({
+    addressWithNonce: undefined,
+    rootInvocation: new SorobanClient.xdr.AuthorizedInvocation({
+      contractId: Buffer.alloc(32),
+      functionName: Buffer.from("fn"),
+      args: [],
+      subInvocations: [],
+    }),
+    signatureArgs: [],
+  });
+
+  const sorobanTransactionData = new SorobanClient.xdr.SorobanTransactionData({
+    resources: new SorobanClient.xdr.SorobanResources({
+      footprint: new SorobanClient.xdr.LedgerFootprint({
+        readOnly: [],
+        readWrite: [],
       }),
-      refundableFee: SorobanClient.xdr.Int64.fromString("0"),
-      ext: new SorobanClient.xdr.ExtensionPoint(0),
-    }).toXDR("base64"),
+      instructions: 0,
+      readBytes: 5,
+      writeBytes: 0,
+      extendedMetaDataSizeBytes: 0,
+    }),
+    refundableFee: SorobanClient.xdr.Int64.fromString("0"),
+    ext: new SorobanClient.xdr.ExtensionPoint(0),
+  });
+
+  const simulationResponse = {
+    transactionData: sorobanTransactionData.toXDR("base64"),
     events: [],
-    minResourceFee: "15",
+    minResourceFee: "115",
     suggestedInclusionFee: "3",
     results: [
       {
-        auth: [
-          new SorobanClient.xdr.ContractAuth({
-            addressWithNonce: null,
-            rootInvocation: new SorobanClient.xdr.AuthorizedInvocation({
-              contractId: Buffer.alloc(32),
-              functionName: "fn",
-              args: [],
-              subInvocations: [],
-            }),
-            signatureArgs: [],
-          }).toXDR("base64"),
-        ],
+        auth: [fnAuth.toXDR("base64")],
         xdr: SorobanClient.xdr.ScVal.scvU32(0)
           .toXDR()
           .toString("base64"),
@@ -85,20 +87,20 @@ describe("assembleTransaction", () => {
       expect(
         result
           .toEnvelope()
+          .v1()
           .tx()
           .fee(),
-      ).to.equal(18);
+      ).to.equal(118);
 
       // validate it udpated sorobantransactiondata block in the tx ext
       expect(
         result
           .toEnvelope()
+          .v1()
           .tx()
           .ext()
-          .sorobanData()
-          .resources()
-          .readByes(),
-      ).to.equal(5);
+          .sorobanData(),
+      ).to.deep.equal(sorobanTransactionData);
     });
 
     it("simulate adds the auth to the host function in tx operation", () => {
@@ -112,16 +114,14 @@ describe("assembleTransaction", () => {
       expect(
         result
           .toEnvelope()
+          .v1()
           .tx()
           .operations()[0]
           .body()
           .invokeHostFunctionOp()
           .functions()[0]
           .auth()[0],
-      )
-        .rootInvocation()
-        .functionName()
-        .to.equal("fn");
+      ).to.deep.equal(fnAuth);
     });
 
     it("throws for non-invokehost-fn ops", () => {
@@ -233,6 +233,7 @@ describe("assembleTransaction", () => {
       expect(
         result
           .toEnvelope()
+          .v1()
           .tx()
           .operations()[0]
           .body()
