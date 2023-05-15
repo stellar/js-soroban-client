@@ -22,7 +22,6 @@ describe("Server#simulateTransaction", function() {
     }).toXDR("base64"),
     events: [],
     minResourceFee: "15",
-    suggestedInclusionFee: "3",
     results: [
       {
         auth: [

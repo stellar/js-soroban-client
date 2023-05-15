@@ -35,7 +35,6 @@ describe("assembleTransaction", () => {
     transactionData: sorobanTransactionData.toXDR("base64"),
     events: [],
     minResourceFee: "115",
-    suggestedInclusionFee: "3",
     results: [
       {
         auth: [fnAuth.toXDR("base64")],
@@ -84,13 +83,14 @@ describe("assembleTransaction", () => {
       );
 
       // validate it auto updated the tx fees from sim response fees
+      // since it was greater than tx.fee
       expect(
         result
           .toEnvelope()
           .v1()
           .tx()
           .fee(),
-      ).to.equal(118);
+      ).to.equal(215);
 
       // validate it udpated sorobantransactiondata block in the tx ext
       expect(
