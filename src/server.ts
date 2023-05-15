@@ -373,10 +373,18 @@ export class Server {
 
   /**
    * Submit a trial contract invocation, first run a simulation of the contract
-   * invocation, and use the results to set the ledger footprint
-   * and auth into the returned transaction so it is ready for signing & sending.
-   * The return transaction will have an updated fee that is the sum of fee set
-   * on incoming transaction with the fees estimated from simulation.
+   * invocation as defined on the incoming transaction, and apply the results
+   * to a new copy of the transaction which is then returned. Setting the ledger
+   * footprint and authorization, so the resulting transaction is ready for signing & sending.
+   *
+   * The returned transaction will also have an updated fee that is the sum of fee set
+   * on incoming transaction with the contract resource fees estimated from simulation. It is
+   * adviseable to check the fee on returned transaction and validate or take appropriate
+   * measures for interaction with user to confirm it is acceptable.
+   *
+   * You can call the {simulateTransaction(transaction)} method directly first if you
+   * want to inspect estimated fees for a given transaction in detail first if that is
+   * of importance.
    *
    * @example
    * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
