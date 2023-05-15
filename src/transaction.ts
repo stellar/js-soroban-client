@@ -48,11 +48,14 @@ export function assembleTransaction(
   const classicFeeNum = parseInt(raw.fee, 10) || 0;
   const minResourceFeeNum = parseInt(simulation.minResourceFee, 10) || 0;
   const txnBuilder = new TransactionBuilder(source, {
-    // automatically update the 'classic' tx fee if min resource fees from simulation response
-    // surpass that value.
-    // 'classic' fees are measured as the product of tx.fee * 'number of operations', In soroban contract tx,
-    // there can only be single operation in the tx, so can safely make simplification of classic fee = tx.fee.
-    fee: Math.max(classicFeeNum + minResourceFeeNum, classicFeeNum).toString(),
+    // automatically update the tx fee that will be set on the resulting tx
+    // to the sum of 'classic' fee provided from incoming tx.fee
+    // and minResourceFee provided by simulation.
+    //
+    // 'classic' tx fees are measured as the product of tx.fee * 'number of operations', In soroban contract tx,
+    // there can only be single operation in the tx, so can make simplification
+    // of total classic fees for the soroban transaction will be equal to incoming tx.fee + minResourceFee.
+    fee: (classicFeeNum + minResourceFeeNum).toString(),
     memo: raw.memo,
     networkPassphrase,
     timebounds: raw.timeBounds,
