@@ -1,12 +1,19 @@
-const xdr = SorobanClient.xdr;
-
 describe("assembleTransaction", () => {
   describe("FeeBumpTransaction", () => {
     // TODO: Add support for fee bump transactions
   });
 
   const fnAuth = new SorobanClient.xdr.ContractAuth({
-    addressWithNonce: undefined,
+    addressWithNonce: new SorobanClient.xdr.AddressWithNonce({
+      address: SorobanClient.xdr.ScAddress.scAddressTypeAccount(
+        SorobanClient.xdr.PublicKey.publicKeyTypeEd25519(
+          SorobanClient.StrKey.decodeEd25519PublicKey(
+            "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI",
+          ),
+        ),
+      ),
+      nonce: SorobanClient.xdr.Uint64.fromString("0"),
+    }),
     rootInvocation: new SorobanClient.xdr.AuthorizedInvocation({
       contractId: Buffer.alloc(32),
       functionName: Buffer.from("fn"),
@@ -120,8 +127,29 @@ describe("assembleTransaction", () => {
           .body()
           .invokeHostFunctionOp()
           .functions()[0]
-          .auth()[0],
-      ).to.deep.equal(fnAuth);
+          .auth()[0]
+          .rootInvocation()
+          .functionName()
+          .toString(),
+      ).to.equal("fn");
+
+      expect(
+        SorobanClient.StrKey.encodeEd25519PublicKey(
+          result
+            .toEnvelope()
+            .v1()
+            .tx()
+            .operations()[0]
+            .body()
+            .invokeHostFunctionOp()
+            .functions()[0]
+            .auth()[0]
+            .addressWithNonce()
+            .address()
+            .accountId()
+            .ed25519(),
+        ),
+      ).to.equal("GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI");
     });
 
     it("throws for non-invokehost-fn ops", () => {
@@ -163,13 +191,13 @@ describe("assembleTransaction", () => {
         .addOperation(
           SorobanClient.Operation.invokeHostFunctions({
             functions: [
-              new xdr.HostFunction({
+              new SorobanClient.xdr.HostFunction({
                 args: new SorobanClient.xdr.HostFunctionArgs.hostFunctionTypeInvokeContract(
                   [],
                 ),
                 auth: [],
               }),
-              new xdr.HostFunction({
+              new SorobanClient.xdr.HostFunction({
                 args: new SorobanClient.xdr.HostFunctionArgs.hostFunctionTypeInvokeContract(
                   [],
                 ),
