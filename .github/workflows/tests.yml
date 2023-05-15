@@ -27,8 +27,7 @@ jobs:
       - name: Install Dependencies
         run: |
           yarn cache clean
-          yarn install
-
+          yarn install --network-concurrency 1
 
       - name: Build
         run: gulp
