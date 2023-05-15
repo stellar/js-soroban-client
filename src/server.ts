@@ -375,8 +375,8 @@ export class Server {
    * Submit a trial contract invocation, first run a simulation of the contract
    * invocation, and use the results to set the ledger footprint
    * and auth into the returned transaction so it is ready for signing & sending.
-   * The return transaction will also have an updated fee if the contract resource
-   * fees estimated from simulation exceed the fee from input transaction.
+   * The return transaction will have an updated fee that is the sum of fee set
+   * on incoming transaction with the fees estimated from simulation.
    *
    * @example
    * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
@@ -423,9 +423,9 @@ export class Server {
    *    from the server via `getNetwork`.
    * @returns {Promise<Transaction | FeeBumpTransaction>} Returns a copy of the
    *    transaction, with the expected ledger footprint and authorizations added
-   *    and the transaction fee will automatically be adjusted if it was lower
-   *    than the soroban contract minimum resource fees discovered from the simulation,
-   *    it will be set to that minimum resource fees value instead.
+   *    and the transaction fee will automatically be adjusted to the sum of
+   *    the incoming transaction fee and the contract minimum resource fees
+   *    discovered from the simulation,
    *
    */
   public async prepareTransaction(
