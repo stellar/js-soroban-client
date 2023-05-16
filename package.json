@@ -138,7 +138,7 @@
     "axios": "0.25.0",
     "es6-promise": "^4.2.4",
     "lodash": "4.17.21",
-    "stellar-base": "https://github.com/stellar/js-stellar-base\\#host_functions_ts",
+    "stellar-base": "9.0.0-soroban.1",
     "urijs": "^1.19.1"
   }
 }
