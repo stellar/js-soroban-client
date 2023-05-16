@@ -82,24 +82,14 @@ export function assembleTransaction(
     }),
   );
 
-  // apply the pre-built Soroban Tx Ext from simulation onto the Tx
-  txnBuilder.setExt(buildExt(simulation.transactionData));
-
-  return txnBuilder.build();
-}
-
-function buildExt(sorobanTxDataStr: string) {
-  const sorobanTxData: xdr.SorobanTransactionData = xdr.SorobanTransactionData.fromXDR(
-    sorobanTxDataStr,
+  // apply the pre-built Soroban Tx Data from simulation onto the Tx
+  const sorobanTxData = xdr.SorobanTransactionData.fromXDR(
+    simulation.transactionData,
     "base64",
   );
+  txnBuilder.setSorobanData(sorobanTxData);
 
-  // TODO - remove this workaround to use constructor on js-xdr union
-  //       and use the typescript generated static factory method once fixed
-  //       https://github.com/stellar/dts-xdr/issues/5
-  // @ts-ignore
-  const txExt = new xdr.TransactionExt(1, sorobanTxData);
-  return txExt;
+  return txnBuilder.build();
 }
 
 function buildContractAuth(auths: string[]): xdr.ContractAuth[] {
