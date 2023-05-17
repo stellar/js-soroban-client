@@ -2,7 +2,7 @@
     "comments": true,
     "presets": [
         "@babel/preset-env",
-        "@babel/typescript"
+        "@babel/typescript",
     ],
     "env": {
         "development": {
@@ -10,5 +10,13 @@
                 "istanbul"
             ]
         }
+    },
+    "targets": {
+        "node": 14,
+        "browsers": [
+            "> 2%",
+            "ie 11",
+            "not op_mini all"
+        ]
     }
 }
