@@ -37,7 +37,7 @@
     "test:browser": "karma start ./karma.conf.js",
     "lint": "eslint -c .eslintrc.js src/",
     "fmt": "yarn lint --fix && yarn _prettier",
-    "preversion": "yarn clean && yarn fmt && yarn lint && yarn build:prod && yarn test",
+    "preversion": "yarn clean && yarn fmt && yarn lint && yarn build && yarn test",
     "prepare": "yarn build:prod",
     "_build": "yarn build:node && yarn build:browser",
     "_nyc": "nyc --nycrc-path .nycrc",

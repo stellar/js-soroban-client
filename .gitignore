@@ -7,5 +7,6 @@
 /jsdoc/
 .DS_Store
 .idea/
+.nyc_output/
 js-stellar-base/
 .envrc
