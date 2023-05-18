@@ -4,6 +4,9 @@
 
 A breaking change should be clearly marked in this log.
 
+#### 0.6.1
+* removed reference to deprecated usage of gulp in docs build step [#80](https://github.com/stellar/js-soroban-client/pull/80)
+
 #### 0.6.0
 * updated server.prepareTransaction() for new soroban simulation results and fees. Note the change in behavior now, where transaction fee will be increased by the resource fee estimates received from simulation. More details this aspect mentioned on method.[#76](https://github.com/stellar/js-soroban-client/issues/76)
 
