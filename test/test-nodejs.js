@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
-
-require("babel-register");
+require("@babel/register");
 global.SorobanClient = require("../lib/");
 
 global.axios = require("axios");

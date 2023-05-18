@@ -1,17 +1,17 @@
 const MockAdapter = require("axios-mock-adapter");
 
-describe("Server#getLatestLedger", function() {
-  beforeEach(function() {
+describe("Server#getLatestLedger", function () {
+  beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.axiosMock.verify();
     this.axiosMock.restore();
   });
 
-  it("requests the correct method", function(done) {
+  it("requests the correct method", function (done) {
     const result = {
       id: "hashed_id",
       sequence: 123,
@@ -29,11 +29,11 @@ describe("Server#getLatestLedger", function() {
 
     this.server
       .getLatestLedger()
-      .then(function(response) {
+      .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
   });

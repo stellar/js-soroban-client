@@ -1,17 +1,17 @@
 const MockAdapter = require("axios-mock-adapter");
 
-describe("Server#getEvents", function() {
-  beforeEach(function() {
+describe("Server#getEvents", function () {
+  beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.axiosMock.verify();
     this.axiosMock.restore();
   });
 
-  it("requests the correct endpoint", function(done) {
+  it("requests the correct endpoint", function (done) {
     let result = { events: [] };
     setupMock(
       this.axiosMock,
@@ -20,21 +20,21 @@ describe("Server#getEvents", function() {
         pagination: {},
         startLedger: "1",
       },
-      result,
+      result
     );
 
     this.server
       .getEvents({ startLedger: 1 })
-      .then(function(response) {
+      .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
   });
 
-  it("can build wildcard filters", function(done) {
+  it("can build wildcard filters", function (done) {
     let result = filterEvents(getEventsResponseFixture, "*/*");
 
     setupMock(
@@ -48,7 +48,7 @@ describe("Server#getEvents", function() {
         ],
         pagination: {},
       },
-      result,
+      result
     );
 
     this.server
@@ -60,17 +60,17 @@ describe("Server#getEvents", function() {
           },
         ],
       })
-      .then(function(response) {
+      .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
       })
       .catch(done);
   });
 
-  it("can build matching filters", function(done) {
+  it("can build matching filters", function (done) {
     let result = filterEvents(
       getEventsResponseFixture,
-      "AAAABQAAAAh0cmFuc2Zlcg==/AAAAAQB6Mcc=",
+      "AAAABQAAAAh0cmFuc2Zlcg==/AAAAAQB6Mcc="
     );
 
     setupMock(
@@ -84,7 +84,7 @@ describe("Server#getEvents", function() {
         ],
         pagination: {},
       },
-      result,
+      result
     );
 
     this.server
@@ -96,17 +96,17 @@ describe("Server#getEvents", function() {
           },
         ],
       })
-      .then(function(response) {
+      .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
       })
       .catch(done);
   });
 
-  it("can build mixed filters", function(done) {
+  it("can build mixed filters", function (done) {
     let result = filterEventsByLedger(
       filterEvents(getEventsResponseFixture, "AAAABQAAAAh0cmFuc2Zlcg==/*"),
-      1,
+      1
     );
 
     setupMock(
@@ -120,7 +120,7 @@ describe("Server#getEvents", function() {
         ],
         pagination: {},
       },
-      result,
+      result
     );
 
     this.server
@@ -132,17 +132,17 @@ describe("Server#getEvents", function() {
           },
         ],
       })
-      .then(function(response) {
+      .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
       })
       .catch(done);
   });
 
-  it("can paginate", function(done) {
+  it("can paginate", function (done) {
     let result = filterEventsByLedger(
       filterEvents(getEventsResponseFixture, "*/*"),
-      1,
+      1
     );
 
     setupMock(
@@ -158,7 +158,7 @@ describe("Server#getEvents", function() {
           cursor: "0164090849041387521-0000000000",
         },
       },
-      result,
+      result
     );
 
     this.server
@@ -171,7 +171,7 @@ describe("Server#getEvents", function() {
         cursor: "0164090849041387521-0000000000",
         limit: 10,
       })
-      .then(function(response) {
+      .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
       })
@@ -183,7 +183,7 @@ function filterEvents(events, filter) {
   return events.filter(
     (e, i) =>
       e.topic.length == filter.length &&
-      e.topic.every((s, j) => s === filter[j] || s === "*"),
+      e.topic.every((s, j) => s === filter[j] || s === "*")
   );
 }
 
