@@ -372,8 +372,19 @@ export class Server {
   }
 
   /**
-   * Submit a trial contract invocation, then add the expected ledger footprint
-   * and auth into the transaction so it is ready for signing & sending.
+   * Submit a trial contract invocation, first run a simulation of the contract
+   * invocation as defined on the incoming transaction, and apply the results
+   * to a new copy of the transaction which is then returned. Setting the ledger
+   * footprint and authorization, so the resulting transaction is ready for signing & sending.
+   *
+   * The returned transaction will also have an updated fee that is the sum of fee set
+   * on incoming transaction with the contract resource fees estimated from simulation. It is
+   * adviseable to check the fee on returned transaction and validate or take appropriate
+   * measures for interaction with user to confirm it is acceptable.
+   *
+   * You can call the {simulateTransaction(transaction)} method directly first if you
+   * want to inspect estimated fees for a given transaction in detail first if that is
+   * of importance.
    *
    * @example
    * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
@@ -419,25 +430,29 @@ export class Server {
    *    passphrase. If not passed, the current network passphrase will be requested
    *    from the server via `getNetwork`.
    * @returns {Promise<Transaction | FeeBumpTransaction>} Returns a copy of the
-   *    transaction, with the expected ledger footprint added.
+   *    transaction, with the expected ledger footprint and authorizations added
+   *    and the transaction fee will automatically be adjusted to the sum of
+   *    the incoming transaction fee and the contract minimum resource fees
+   *    discovered from the simulation,
+   *
    */
   public async prepareTransaction(
     transaction: Transaction | FeeBumpTransaction,
     networkPassphrase?: string,
   ): Promise<Transaction | FeeBumpTransaction> {
-    const [{ passphrase }, { error, results }] = await Promise.all([
+    const [{ passphrase }, simResponse] = await Promise.all([
       networkPassphrase
         ? Promise.resolve({ passphrase: networkPassphrase })
         : this.getNetwork(),
       this.simulateTransaction(transaction),
     ]);
-    if (error) {
-      throw error;
+    if (simResponse.error) {
+      throw simResponse.error;
     }
-    if (!results) {
+    if (!simResponse.results || simResponse.results.length < 1) {
       throw new Error("transaction simulation failed");
     }
-    return assembleTransaction(transaction, passphrase, results);
+    return assembleTransaction(transaction, passphrase, simResponse);
   }
 
   /**

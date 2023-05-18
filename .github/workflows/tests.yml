@@ -27,7 +27,9 @@ jobs:
       # Workaround for some `yarn` nonsense, see:
       # https://github.com/yarnpkg/yarn/issues/6312#issuecomment-429685210
       - name: Install Dependencies
-        run: yarn install --network-concurrency 1
+        run: |
+          yarn cache clean
+          yarn install --network-concurrency 1
 
       - name: Build
         run: yarn build:prod

@@ -144,7 +144,7 @@
     "eventsource": "^2.0.2",
     "lodash": "^4.17.21",
     "randombytes": "^2.1.0",
-    "stellar-base": "v8.2.2-soroban.12",
+    "stellar-base": "^9.0.0-soroban.1",
     "toml": "^3.0.0",
     "urijs": "^1.19.1"
   }
