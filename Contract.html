@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>js-stellar-base/src/account.js - Documentation</title>
+    <title>Contract - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,82 +29,644 @@
 
 <div id="main">
     
-    <h1 class="page-title">js-stellar-base/src/account.js</h1>
+    <h1 class="page-title">Contract</h1>
     
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>import isString from 'lodash/isString';
-import BigNumber from 'bignumber.js';
+        <h2>
+        Contract
+        </h2>
+        
+            <div class="class-description"><p>Create a new Contract object.</p>
+<p><code>Contract</code> represents a single contract in the Stellar network, embodying the
+interface of the contract. See
+<a href="https://soroban.stellar.org/docs/learn/interacting-with-contracts">Contracts</a>
+for more information about how contracts work in Stellar.</p></div>
+        
+    
+</header>
 
-import { StrKey } from './strkey';
+<article>
+    <div class="container-overview">
+    
+        
+<div class="section-method">
 
-/**
- * Create a new Account object.
- *
- * `Account` represents a single account in the Stellar network and its sequence
- * number. Account tracks the sequence number as it is used by {@link
- * TransactionBuilder}. See
- * [Accounts](https://developers.stellar.org/docs/glossary/accounts/) for
- * more information about how accounts work in Stellar.
- *
- * @constructor
- *
- * @param {string} accountId - ID of the account (ex.
- *     `GB3KJPLFUYN5VL6R3GU3EGCGVCKFDSD7BEDX42HWG5BWFKB3KQGJJRMA`). If you
- *     provide a muxed account address, this will throw; use {@link
- *     MuxedAccount} instead.
- * @param {string} sequence  - current sequence number of the account
- */
-export class Account {
-  constructor(accountId, sequence) {
-    if (StrKey.isValidMed25519PublicKey(accountId)) {
-      throw new Error('accountId is an M-address; use MuxedAccount instead');
-    }
+    
+    <h2>Constructor</h2>
+    
 
-    if (!StrKey.isValidEd25519PublicKey(accountId)) {
-      throw new Error('accountId is invalid');
-    }
-    if (!isString(sequence)) {
-      throw new Error('sequence must be of type string');
-    }
+    <h4 class="name" id="Contract"><span class="type-signature"></span>new Contract<span class="signature">(contractId)</span><span class="type-signature"></span></h4>
 
-    this._accountId = accountId;
-    this.sequence = new BigNumber(sequence);
-  }
+    
 
-  /**
-   * Returns Stellar account ID, ex.
-   * `GB3KJPLFUYN5VL6R3GU3EGCGVCKFDSD7BEDX42HWG5BWFKB3KQGJJRMA`.
-   * @returns {string}
-   */
-  accountId() {
-    return this._accountId;
-  }
 
-  /**
-   * @returns {string}  sequence number for the account as a string
-   */
-  sequenceNumber() {
-    return this.sequence.toString();
-  }
 
-  /**
-   * Increments sequence number in this object by one.
-   * @returns {void}
-   */
-  incrementSequenceNumber() {
-    this.sequence = this.sequence.plus(1);
-  }
-}
-</code></pre>
-        </article>
-    </section>
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js-stellar-base_src_contract.js.html">js-stellar-base/src/contract.js</a>, <a href="js-stellar-base_src_contract.js.html#line18">line 18</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>contractId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code>string</code></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">
+                <p>ID of the contract (ex.
+<code>000000000000000000000000000000000000000000000000000000000000000001</code>).</p>
+                
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+    
+    </div>
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="Contract.html">Contract</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id="call"><span class="type-signature"></span>call<span class="signature">(method, &hellip;params)</span><span class="type-signature"> &rarr; {xdr.Operation}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Returns an operation that will invoke this contract call.</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js-stellar-base_src_contract.js.html">js-stellar-base/src/contract.js</a>, <a href="js-stellar-base_src_contract.js.html#line58">line 58</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="tag-todo">To Do:</dt>
+    <dd class="tag-todo">
+        <ul>
+            <li>Allow easily building `Operation`s that invoke multiple contract
+calls at once via this abstraction layer. For example, something like
+
+```js
+let [ a, b ] = [someId1, someId2].map(id => { new Contract(id) });
+
+let combinedOp = Operation.invokeHostFunctions({
+ source: undefined, // optional
+ functions: [
+   a.partialCall("hello"),
+   a.partialCall("transfer", ...),
+   b.partialCall("increment"),
+ ]
+});
+```</li>
+        </ul>
+    </dd>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>method</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code>string</code></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <p>name of the method to call</p>
+                
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><code>xdr.ScVal</code></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                    &lt;repeatable><br>
+                
+                </td>
+            
+
+            
+
+            <td class="description last">
+                <p>arguments to pass to the function call</p>
+                
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="section-returns">
+<h5>Returns:</h5>
+
+        
+
+<dl class="param-type">
+    <dt>
+        Type:
+    </dt>
+    <dd>
+        
+<span class="param-type"><code>xdr.Operation</code></span>
+
+
+    </dd>
+</dl>
+
+
+<div class="param-desc">
+    <p>Build a InvokeHostFunctionOp operation to call the
+contract.</p>
+</div>
+
+    
+</div>
+
+
+
+</div>
+        
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id="contractId"><span class="type-signature"></span>contractId<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Returns Stellar contract ID as a hex string, ex.
+<code>000000000000000000000000000000000000000000000000000000000000000001</code>.</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js-stellar-base_src_contract.js.html">js-stellar-base/src/contract.js</a>, <a href="js-stellar-base_src_contract.js.html#line30">line 30</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="section-returns">
+<h5>Returns:</h5>
+
+        
+
+<dl class="param-type">
+    <dt>
+        Type:
+    </dt>
+    <dd>
+        
+<span class="param-type"><code>string</code></span>
+
+
+    </dd>
+</dl>
+
+
+    
+</div>
+
+
+
+</div>
+        
+            
+<div class="section-method">
+
+    
+
+    <h4 class="name" id="getFootprint"><span class="type-signature"></span>getFootprint<span class="signature">()</span><span class="type-signature"> &rarr; {xdr.LedgerKey}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Returns the read-only footprint entry necessary for any invocations to this
+contract, for convenience when adding it to your transaction's overall
+footprint.</p>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="js-stellar-base_src_contract.js.html">js-stellar-base/src/contract.js</a>, <a href="js-stellar-base_src_contract.js.html#line78">line 78</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="section-returns">
+<h5>Returns:</h5>
+
+        
+
+<dl class="param-type">
+    <dt>
+        Type:
+    </dt>
+    <dd>
+        
+<span class="param-type"><code>xdr.LedgerKey</code></span>
+
+
+    </dd>
+</dl>
+
+
+<div class="param-desc">
+    <p>the contract's executable data ledger key</p>
+</div>
+
+    
+</div>
+
+
+
+</div>
+        
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

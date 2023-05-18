@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>js-stellar-base/src/account.js - Documentation</title>
+    <title>lib/axios.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,7 +29,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">js-stellar-base/src/account.js</h1>
+    <h1 class="page-title">lib/axios.js</h1>
     
 
     
@@ -39,70 +39,79 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import isString from 'lodash/isString';
-import BigNumber from 'bignumber.js';
+            <pre class="prettyprint source linenums"><code>"use strict";
 
-import { StrKey } from './strkey';
-
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = exports.SERVER_TIME_MAP = void 0;
+exports.getCurrentServerTime = getCurrentServerTime;
+var _axios = _interopRequireDefault(require("axios"));
+var _urijs = _interopRequireDefault(require("urijs"));
+function _interopRequireDefault(obj) { return obj &amp;&amp; obj.__esModule ? obj : { default: obj }; }
+/* tslint:disable-next-line:no-var-requires */
+var version = require("../package.json").version;
 /**
- * Create a new Account object.
+ * keep a local map of server times
+ * (export this purely for testing purposes)
  *
- * `Account` represents a single account in the Stellar network and its sequence
- * number. Account tracks the sequence number as it is used by {@link
- * TransactionBuilder}. See
- * [Accounts](https://developers.stellar.org/docs/glossary/accounts/) for
- * more information about how accounts work in Stellar.
+ * each entry will map the server domain to the last-known time and the local
+ * time it was recorded, ex:
  *
- * @constructor
- *
- * @param {string} accountId - ID of the account (ex.
- *     `GB3KJPLFUYN5VL6R3GU3EGCGVCKFDSD7BEDX42HWG5BWFKB3KQGJJRMA`). If you
- *     provide a muxed account address, this will throw; use {@link
- *     MuxedAccount} instead.
- * @param {string} sequence  - current sequence number of the account
+ *     "localhost:8000": {
+ *       serverTime: 1552513039,
+ *       localTimeRecorded: 1552513052
+ *     }
  */
-export class Account {
-  constructor(accountId, sequence) {
-    if (StrKey.isValidMed25519PublicKey(accountId)) {
-      throw new Error('accountId is an M-address; use MuxedAccount instead');
-    }
-
-    if (!StrKey.isValidEd25519PublicKey(accountId)) {
-      throw new Error('accountId is invalid');
-    }
-    if (!isString(sequence)) {
-      throw new Error('sequence must be of type string');
-    }
-
-    this._accountId = accountId;
-    this.sequence = new BigNumber(sequence);
+var SERVER_TIME_MAP = {};
+exports.SERVER_TIME_MAP = SERVER_TIME_MAP;
+var AxiosClient = _axios.default.create({
+  headers: {
+    "X-Client-Name": "js-soroban-client",
+    "X-Client-Version": version
   }
-
-  /**
-   * Returns Stellar account ID, ex.
-   * `GB3KJPLFUYN5VL6R3GU3EGCGVCKFDSD7BEDX42HWG5BWFKB3KQGJJRMA`.
-   * @returns {string}
-   */
-  accountId() {
-    return this._accountId;
-  }
-
-  /**
-   * @returns {string}  sequence number for the account as a string
-   */
-  sequenceNumber() {
-    return this.sequence.toString();
-  }
-
-  /**
-   * Increments sequence number in this object by one.
-   * @returns {void}
-   */
-  incrementSequenceNumber() {
-    this.sequence = this.sequence.plus(1);
-  }
+});
+function _toSeconds(ms) {
+  return Math.floor(ms / 1000);
 }
-</code></pre>
+AxiosClient.interceptors.response.use(function interceptorHorizonResponse(response) {
+  var hostname = (0, _urijs.default)(response.config.url).hostname();
+  var serverTime = _toSeconds(Date.parse(response.headers.date));
+  var localTimeRecorded = _toSeconds(new Date().getTime());
+  if (!isNaN(serverTime)) {
+    SERVER_TIME_MAP[hostname] = {
+      serverTime: serverTime,
+      localTimeRecorded: localTimeRecorded
+    };
+  }
+  return response;
+});
+var _default = AxiosClient;
+/**
+ * Given a hostname, get the current time of that server (i.e., use the last-
+ * recorded server time and offset it by the time since then.) If there IS no
+ * recorded server time, or it's been 5 minutes since the last, return null.
+ * @param {string} hostname Hostname of a Soroban-RPC server.
+ * @returns {number} The UNIX timestamp (in seconds, not milliseconds)
+ * representing the current time on that server, or `null` if we don't have
+ * a record of that time.
+ */
+exports.default = _default;
+function getCurrentServerTime(hostname) {
+  var entry = SERVER_TIME_MAP[hostname];
+  if (!entry || !entry.localTimeRecorded || !entry.serverTime) {
+    return null;
+  }
+  var serverTime = entry.serverTime,
+    localTimeRecorded = entry.localTimeRecorded;
+  var currentTime = _toSeconds(new Date().getTime());
+
+  // if it's been more than 5 minutes from the last time, then null it out
+  if (currentTime - localTimeRecorded > 60 * 5) {
+    return null;
+  }
+  return currentTime - localTimeRecorded + serverTime;
+}</code></pre>
         </article>
     </section>
 

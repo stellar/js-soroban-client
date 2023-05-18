@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>lib/server.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <li class="nav-link nav-home-link"><a href="index.html">Home</a></li><li class="nav-heading">Classes</li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Account.html">Account</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Account.html#accountId">accountId</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Account.html#incrementSequenceNumber">incrementSequenceNumber</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Account.html#sequenceNumber">sequenceNumber</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Address.html">Address</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Address.html#toBuffer">toBuffer</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Address.html#toScAddress">toScAddress</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Address.html#toScVal">toScVal</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Address.html#toString">toString</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Address.html#.account">account</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Address.html#.contract">contract</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Address.html#.fromScAddress">fromScAddress</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Address.html#.fromScVal">fromScVal</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Address.html#.fromString">fromString</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Asset.html">Asset</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#_toXDRObject">_toXDRObject</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#equals">equals</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#getAssetType">getAssetType</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#getCode">getCode</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#getIssuer">getIssuer</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#getRawAssetType">getRawAssetType</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#isNative">isNative</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#toChangeTrustXDRObject">toChangeTrustXDRObject</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#toTrustLineXDRObject">toTrustLineXDRObject</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#toXDRObject">toXDRObject</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#.compare">compare</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#.fromOperation">fromOperation</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Asset.html#.native">native</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Claimant.html">Claimant</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Claimant.html#toXDRObject">toXDRObject</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Claimant.html#.fromXDR">fromXDR</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Claimant.html#.predicateAnd">predicateAnd</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Claimant.html#.predicateBeforeAbsoluteTime">predicateBeforeAbsoluteTime</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Claimant.html#.predicateBeforeRelativeTime">predicateBeforeRelativeTime</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Claimant.html#.predicateNot">predicateNot</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Claimant.html#.predicateOr">predicateOr</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Claimant.html#.predicateUnconditional">predicateUnconditional</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Contract.html">Contract</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Contract.html#call">call</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Contract.html#contractId">contractId</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Contract.html#getFootprint">getFootprint</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="FeeBumpTransaction.html">FeeBumpTransaction</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="FeeBumpTransaction.html#addDecoratedSignature">addDecoratedSignature</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="FeeBumpTransaction.html#addSignature">addSignature</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="FeeBumpTransaction.html#getKeypairSignature">getKeypairSignature</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="FeeBumpTransaction.html#hash">hash</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="FeeBumpTransaction.html#sign">sign</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="FeeBumpTransaction.html#signHashX">signHashX</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="FeeBumpTransaction.html#signatureBase">signatureBase</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="FeeBumpTransaction.html#toEnvelope">toEnvelope</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="FeeBumpTransaction.html#toXDR">toXDR</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Keypair.html">Keypair</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#canSign">canSign</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#publicKey">publicKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#rawPublicKey">rawPublicKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#rawSecretKey">rawSecretKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#secret">secret</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#sign">sign</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#signDecorated">signDecorated</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#signPayloadDecorated">signPayloadDecorated</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#verify">verify</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#xdrMuxedAccount">xdrMuxedAccount</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#.fromPublicKey">fromPublicKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#.fromRawEd25519Seed">fromRawEd25519Seed</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#.fromSecret">fromSecret</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#.master">master</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Keypair.html#.random">random</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="LiquidityPoolAsset.html">LiquidityPoolAsset</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="LiquidityPoolAsset.html#equals">equals</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="LiquidityPoolAsset.html#getAssetType">getAssetType</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="LiquidityPoolAsset.html#getLiquidityPoolParameters">getLiquidityPoolParameters</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="LiquidityPoolAsset.html#toXDRObject">toXDRObject</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="LiquidityPoolAsset.html#.fromOperation">fromOperation</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="LiquidityPoolId.html">LiquidityPoolId</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="LiquidityPoolId.html#equals">equals</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="LiquidityPoolId.html#getAssetType">getAssetType</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="LiquidityPoolId.html#getLiquidityPoolId">getLiquidityPoolId</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="LiquidityPoolId.html#toXDRObject">toXDRObject</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="LiquidityPoolId.html#.fromOperation">fromOperation</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Memo.html">Memo</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Memo.html#toXDRObject">toXDRObject</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Memo.html#.fromXDRObject">fromXDRObject</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Memo.html#.hash">hash</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Memo.html#.id">id</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Memo.html#.none">none</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Memo.html#.return">return</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Memo.html#.text">text</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="MuxedAccount.html">MuxedAccount</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="MuxedAccount.html#accountId">accountId</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="MuxedAccount.html#baseAccount">baseAccount</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="MuxedAccount.html#incrementSequenceNumber">incrementSequenceNumber</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="MuxedAccount.html#sequenceNumber">sequenceNumber</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="MuxedAccount.html#toXDRObject">toXDRObject</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="MuxedAccount.html#.fromAddress">fromAddress</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Operation.html">Operation</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.accountMerge">accountMerge</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.allowTrust">allowTrust</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.beginSponsoringFutureReserves">beginSponsoringFutureReserves</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.bumpSequence">bumpSequence</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.changeTrust">changeTrust</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.claimClaimableBalance">claimClaimableBalance</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.clawback">clawback</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.clawbackClaimableBalance">clawbackClaimableBalance</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.createAccount">createAccount</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.createClaimableBalance">createClaimableBalance</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.createPassiveSellOffer">createPassiveSellOffer</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.endSponsoringFutureReserves">endSponsoringFutureReserves</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.fromXDRObject">fromXDRObject</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.inflation">inflation</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.invokeHostFunction">invokeHostFunction</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.invokeHostFunctions">invokeHostFunctions</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.liquidityPoolDeposit">liquidityPoolDeposit</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.liquidityPoolWithdraw">liquidityPoolWithdraw</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.manageBuyOffer">manageBuyOffer</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.manageData">manageData</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.manageSellOffer">manageSellOffer</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.pathPaymentStrictReceive">pathPaymentStrictReceive</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.pathPaymentStrictSend">pathPaymentStrictSend</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.payment">payment</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.revokeAccountSponsorship">revokeAccountSponsorship</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.revokeClaimableBalanceSponsorship">revokeClaimableBalanceSponsorship</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.revokeDataSponsorship">revokeDataSponsorship</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.revokeLiquidityPoolSponsorship">revokeLiquidityPoolSponsorship</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.revokeOfferSponsorship">revokeOfferSponsorship</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.revokeSignerSponsorship">revokeSignerSponsorship</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.revokeTrustlineSponsorship">revokeTrustlineSponsorship</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.setOptions">setOptions</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Operation.html#.setTrustLineFlags">setTrustLineFlags</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Server.html">Server</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="SignerKey.html">SignerKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SignerKey.html#.decodeAddress">decodeAddress</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SignerKey.html#.encodeSignerKey">encodeSignerKey</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="StrKey.html">StrKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.decodeContract">decodeContract</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.decodeEd25519PublicKey">decodeEd25519PublicKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.decodeEd25519SecretSeed">decodeEd25519SecretSeed</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.decodeMed25519PublicKey">decodeMed25519PublicKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.decodePreAuthTx">decodePreAuthTx</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.decodeSha256Hash">decodeSha256Hash</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.decodeSignedPayload">decodeSignedPayload</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.encodeContract">encodeContract</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.encodeEd25519PublicKey">encodeEd25519PublicKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.encodeEd25519SecretSeed">encodeEd25519SecretSeed</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.encodeMed25519PublicKey">encodeMed25519PublicKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.encodePreAuthTx">encodePreAuthTx</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.encodeSha256Hash">encodeSha256Hash</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.encodeSignedPayload">encodeSignedPayload</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.isValidContract">isValidContract</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.isValidEd25519PublicKey">isValidEd25519PublicKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.isValidEd25519SecretSeed">isValidEd25519SecretSeed</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.isValidMed25519PublicKey">isValidMed25519PublicKey</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="StrKey.html#.isValidSignedPayload">isValidSignedPayload</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="Transaction.html">Transaction</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Transaction.html#addDecoratedSignature">addDecoratedSignature</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Transaction.html#addSignature">addSignature</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Transaction.html#getClaimableBalanceId">getClaimableBalanceId</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Transaction.html#getKeypairSignature">getKeypairSignature</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Transaction.html#hash">hash</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Transaction.html#sign">sign</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Transaction.html#signHashX">signHashX</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Transaction.html#signatureBase">signatureBase</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Transaction.html#toEnvelope">toEnvelope</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="Transaction.html#toXDR">toXDR</a></span></li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="TransactionBuilder.html">TransactionBuilder</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#addMemo">addMemo</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#addOperation">addOperation</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#build">build</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#setExtraSigners">setExtraSigners</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#setLedgerbounds">setLedgerbounds</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#setMinAccountSequence">setMinAccountSequence</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#setMinAccountSequenceAge">setMinAccountSequenceAge</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#setMinAccountSequenceLedgerGap">setMinAccountSequenceLedgerGap</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#setNetworkPassphrase">setNetworkPassphrase</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#setSorobanData">setSorobanData</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#setTimebounds">setTimebounds</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#setTimeout">setTimeout</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#.buildFeeBumpTransaction">buildFeeBumpTransaction</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="TransactionBuilder.html#.fromXDR">fromXDR</a></span></li><li class="nav-heading"><a href="global.html">Globals</a></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#AuthClawbackEnabledFlag">AuthClawbackEnabledFlag</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#AuthImmutableFlag">AuthImmutableFlag</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#AuthRequiredFlag">AuthRequiredFlag</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#AuthRevocableFlag">AuthRevocableFlag</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#BASE_FEE">BASE_FEE</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#FastSigning">FastSigning</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#MemoHash">MemoHash</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#MemoID">MemoID</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#MemoNone">MemoNone</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#MemoReturn">MemoReturn</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#MemoText">MemoText</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#Networks">Networks</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#SERVER_TIME_MAP">SERVER_TIME_MAP</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#TimeoutInfinite">TimeoutInfinite</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#_post">_post</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#asciiCompare">asciiCompare</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#decodeAddressToMuxedAccount">decodeAddressToMuxedAccount</a></span></li><li class="nav-item"><span class="nav-item-type type-member">M</span><span class="nav-item-name"><a href="global.html#default">default</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#encodeMuxedAccount">encodeMuxedAccount</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#encodeMuxedAccountToAddress">encodeMuxedAccountToAddress</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#extractBaseAddress">extractBaseAddress</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#getLiquidityPoolId">getLiquidityPoolId</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#isValid">isValid</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#isValidDate">isValidDate</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#post">post</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#unmarshalSorobanData">unmarshalSorobanData</a></span></li>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">lib/server.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Server = exports.SUBMIT_TRANSACTION_TIMEOUT = void 0;
+var _isEmpty = _interopRequireDefault(require("lodash/isEmpty"));
+var _merge = _interopRequireDefault(require("lodash/merge"));
+var _stellarBase = require("stellar-base");
+var _urijs = _interopRequireDefault(require("urijs"));
+var _axios = _interopRequireDefault(require("./axios"));
+var jsonrpc = _interopRequireWildcard(require("./jsonrpc"));
+var _transaction = require("./transaction");
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop &amp;&amp; obj &amp;&amp; obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" &amp;&amp; typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache &amp;&amp; cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty &amp;&amp; Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" &amp;&amp; Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc &amp;&amp; (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+function _interopRequireDefault(obj) { return obj &amp;&amp; obj.__esModule ? obj : { default: obj }; }
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol &amp;&amp; "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj &amp;&amp; "function" == typeof Symbol &amp;&amp; obj.constructor === Symbol &amp;&amp; obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" &amp;&amp; o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike &amp;&amp; o &amp;&amp; typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion &amp;&amp; it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" &amp;&amp; o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i &lt; len; i++) arr2[i] = arr[i]; return arr2; }
+function _iterableToArrayLimit(arr, i) { var _i = null == arr ? null : "undefined" != typeof Symbol &amp;&amp; arr[Symbol.iterator] || arr["@@iterator"]; if (null != _i) { var _s, _e, _x, _r, _arr = [], _n = !0, _d = !1; try { if (_x = (_i = _i.call(arr)).next, 0 === i) { if (Object(_i) !== _i) return; _n = !1; } else for (; !(_n = (_s = _x.call(_i)).done) &amp;&amp; (_arr.push(_s.value), _arr.length !== i); _n = !0); } catch (err) { _d = !0, _e = err; } finally { try { if (!_n &amp;&amp; null != _i.return &amp;&amp; (_r = _i.return(), Object(_r) !== _r)) return; } finally { if (_d) throw _e; } } return _arr; } }
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly &amp;&amp; (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i &lt; arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return exports; }; var exports = {}, Op = Object.prototype, hasOwn = Op.hasOwnProperty, defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; }, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag"; function define(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: !0, configurable: !0, writable: !0 }), obj[key]; } try { define({}, ""); } catch (err) { define = function define(obj, key, value) { return obj[key] = value; }; } function wrap(innerFn, outerFn, self, tryLocsList) { var protoGenerator = outerFn &amp;&amp; outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []); return defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) }), generator; } function tryCatch(fn, obj, arg) { try { return { type: "normal", arg: fn.call(obj, arg) }; } catch (err) { return { type: "throw", arg: err }; } } exports.wrap = wrap; var ContinueSentinel = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var IteratorPrototype = {}; define(IteratorPrototype, iteratorSymbol, function () { return this; }); var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto &amp;&amp; getProto(getProto(values([]))); NativeIteratorPrototype &amp;&amp; NativeIteratorPrototype !== Op &amp;&amp; hasOwn.call(NativeIteratorPrototype, iteratorSymbol) &amp;&amp; (IteratorPrototype = NativeIteratorPrototype); var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype); function defineIteratorMethods(prototype) { ["next", "throw", "return"].forEach(function (method) { define(prototype, method, function (arg) { return this._invoke(method, arg); }); }); } function AsyncIterator(generator, PromiseImpl) { function invoke(method, arg, resolve, reject) { var record = tryCatch(generator[method], generator, arg); if ("throw" !== record.type) { var result = record.arg, value = result.value; return value &amp;&amp; "object" == _typeof(value) &amp;&amp; hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) { invoke("next", value, resolve, reject); }, function (err) { invoke("throw", err, resolve, reject); }) : PromiseImpl.resolve(value).then(function (unwrapped) { result.value = unwrapped, resolve(result); }, function (error) { return invoke("throw", error, resolve, reject); }); } reject(record.arg); } var previousPromise; defineProperty(this, "_invoke", { value: function value(method, arg) { function callInvokeWithMethodAndArg() { return new PromiseImpl(function (resolve, reject) { invoke(method, arg, resolve, reject); }); } return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(innerFn, self, context) { var state = "suspendedStart"; return function (method, arg) { if ("executing" === state) throw new Error("Generator is already running"); if ("completed" === state) { if ("throw" === method) throw arg; return doneResult(); } for (context.method = method, context.arg = arg;;) { var delegate = context.delegate; if (delegate) { var delegateResult = maybeInvokeDelegate(delegate, context); if (delegateResult) { if (delegateResult === ContinueSentinel) continue; return delegateResult; } } if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) { if ("suspendedStart" === state) throw state = "completed", context.arg; context.dispatchException(context.arg); } else "return" === context.method &amp;&amp; context.abrupt("return", context.arg); state = "executing"; var record = tryCatch(innerFn, self, context); if ("normal" === record.type) { if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue; return { value: record.arg, done: context.done }; } "throw" === record.type &amp;&amp; (state = "completed", context.method = "throw", context.arg = record.arg); } }; } function maybeInvokeDelegate(delegate, context) { var methodName = context.method, method = delegate.iterator[methodName]; if (undefined === method) return context.delegate = null, "throw" === methodName &amp;&amp; delegate.iterator.return &amp;&amp; (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName &amp;&amp; (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel; var record = tryCatch(method, delegate.iterator, context.arg); if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel; var info = record.arg; return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method &amp;&amp; (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel); } function pushTryEntry(locs) { var entry = { tryLoc: locs[0] }; 1 in locs &amp;&amp; (entry.catchLoc = locs[1]), 2 in locs &amp;&amp; (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry); } function resetTryEntry(entry) { var record = entry.completion || {}; record.type = "normal", delete record.arg, entry.completion = record; } function Context(tryLocsList) { this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0); } function values(iterable) { if (iterable) { var iteratorMethod = iterable[iteratorSymbol]; if (iteratorMethod) return iteratorMethod.call(iterable); if ("function" == typeof iterable.next) return iterable; if (!isNaN(iterable.length)) { var i = -1, next = function next() { for (; ++i &lt; iterable.length;) if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next; return next.value = undefined, next.done = !0, next; }; return next.next = next; } } return { next: doneResult }; } function doneResult() { return { value: undefined, done: !0 }; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), defineProperty(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) { var ctor = "function" == typeof genFun &amp;&amp; genFun.constructor; return !!ctor &amp;&amp; (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name)); }, exports.mark = function (genFun) { return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun; }, exports.awrap = function (arg) { return { __await: arg }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () { return this; }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) { void 0 === PromiseImpl &amp;&amp; (PromiseImpl = Promise); var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl); return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) { return result.done ? result.value : iter.next(); }); }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () { return this; }), define(Gp, "toString", function () { return "[object Generator]"; }), exports.keys = function (val) { var object = Object(val), keys = []; for (var key in object) keys.push(key); return keys.reverse(), function next() { for (; keys.length;) { var key = keys.pop(); if (key in object) return next.value = key, next.done = !1, next; } return next.done = !0, next; }; }, exports.values = values, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) { if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) "t" === name.charAt(0) &amp;&amp; hasOwn.call(this, name) &amp;&amp; !isNaN(+name.slice(1)) &amp;&amp; (this[name] = undefined); }, stop: function stop() { this.done = !0; var rootRecord = this.tryEntries[0].completion; if ("throw" === rootRecord.type) throw rootRecord.arg; return this.rval; }, dispatchException: function dispatchException(exception) { if (this.done) throw exception; var context = this; function handle(loc, caught) { return record.type = "throw", record.arg = exception, context.next = loc, caught &amp;&amp; (context.method = "next", context.arg = undefined), !!caught; } for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i], record = entry.completion; if ("root" === entry.tryLoc) return handle("end"); if (entry.tryLoc &lt;= this.prev) { var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc"); if (hasCatch &amp;&amp; hasFinally) { if (this.prev &lt; entry.catchLoc) return handle(entry.catchLoc, !0); if (this.prev &lt; entry.finallyLoc) return handle(entry.finallyLoc); } else if (hasCatch) { if (this.prev &lt; entry.catchLoc) return handle(entry.catchLoc, !0); } else { if (!hasFinally) throw new Error("try statement without catch or finally"); if (this.prev &lt; entry.finallyLoc) return handle(entry.finallyLoc); } } } }, abrupt: function abrupt(type, arg) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc &lt;= this.prev &amp;&amp; hasOwn.call(entry, "finallyLoc") &amp;&amp; this.prev &lt; entry.finallyLoc) { var finallyEntry = entry; break; } } finallyEntry &amp;&amp; ("break" === type || "continue" === type) &amp;&amp; finallyEntry.tryLoc &lt;= arg &amp;&amp; arg &lt;= finallyEntry.finallyLoc &amp;&amp; (finallyEntry = null); var record = finallyEntry ? finallyEntry.completion : {}; return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record); }, complete: function complete(record, afterLoc) { if ("throw" === record.type) throw record.arg; return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type &amp;&amp; afterLoc &amp;&amp; (this.next = afterLoc), ContinueSentinel; }, finish: function finish(finallyLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel; } }, catch: function _catch(tryLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc === tryLoc) { var record = entry.completion; if ("throw" === record.type) { var thrown = record.arg; resetTryEntry(entry); } return thrown; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(iterable, resultName, nextLoc) { return this.delegate = { iterator: values(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method &amp;&amp; (this.arg = undefined), ContinueSentinel; } }, exports; }
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _defineProperties(target, props) { for (var i = 0; i &lt; props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); } /* tslint:disable:variable-name no-namespace */
+var SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
+exports.SUBMIT_TRANSACTION_TIMEOUT = SUBMIT_TRANSACTION_TIMEOUT;
+/**
+ * Server handles the network connection to a [Soroban-RPC](https://soroban.stellar.org/docs)
+ * instance and exposes an interface for requests to that instance.
+ * @constructor
+ * @param {string} serverURL Soroban-RPC Server URL (ex. `http://localhost:8000/soroban/rpc`).
+ * @param {object} [opts] Options object
+ * @param {boolean} [opts.allowHttp] - Allow connecting to http servers, default: `false`. This must be set to false in production deployments! You can also use {@link Config} class to set this globally.
+ * @param {string} [opts.appName] - Allow set custom header `X-App-Name`, default: `undefined`.
+ * @param {string} [opts.appVersion] - Allow set custom header `X-App-Version`, default: `undefined`.
+ */
+var Server = /*#__PURE__*/function () {
+  /**
+   * serverURL Soroban-RPC Server URL (ex. `http://localhost:8000/soroban/rpc`).
+   */
+
+  function Server(serverURL) {
+    var opts = arguments.length > 1 &amp;&amp; arguments[1] !== undefined ? arguments[1] : {};
+    _classCallCheck(this, Server);
+    this.serverURL = (0, _urijs.default)(serverURL);
+    var customHeaders = {};
+    if (opts.appName) {
+      customHeaders["X-App-Name"] = opts.appName;
+    }
+    if (opts.appVersion) {
+      customHeaders["X-App-Version"] = opts.appVersion;
+    }
+    if (!(0, _isEmpty.default)(customHeaders)) {
+      _axios.default.interceptors.request.use(function (config) {
+        // merge the custom headers with an existing headers
+        config.headers = (0, _merge.default)(customHeaders, config.headers);
+        return config;
+      });
+    }
+    if (this.serverURL.protocol() !== "https" &amp;&amp; !opts.allowHttp) {
+      throw new Error("Cannot connect to insecure soroban-rpc server");
+    }
+  }
+
+  /**
+   * Fetch a minimal set of current info about a Stellar account.
+   *
+   * Needed to get the current sequence number for the account so you can build
+   * a successful transaction with {@link TransactionBuilder}.
+   *
+   * @example
+   * server.getAccount("GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4").then(account => {
+   *   console.log("sequence:", account.sequence);
+   * });
+   *
+   * @param {string} address - The public address of the account to load.
+   * @returns {Promise&lt;Account>} Returns a promise to the {@link Account} object with populated sequence number.
+   */
+  _createClass(Server, [{
+    key: "getAccount",
+    value: function () {
+      var _getAccount = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(address) {
+        var _yield$jsonrpc$post, ledgerEntryData, accountEntry, _accountEntry$seqNum, high, low, sequence;
+        return _regeneratorRuntime().wrap(function _callee$(_context) {
+          while (1) switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return jsonrpc.post(this.serverURL.toString(), "getLedgerEntry", _stellarBase.xdr.LedgerKey.account(new _stellarBase.xdr.LedgerKeyAccount({
+                accountId: _stellarBase.xdr.PublicKey.publicKeyTypeEd25519(_stellarBase.StrKey.decodeEd25519PublicKey(address))
+              })).toXDR("base64"));
+            case 2:
+              _yield$jsonrpc$post = _context.sent;
+              ledgerEntryData = _yield$jsonrpc$post.xdr;
+              accountEntry = _stellarBase.xdr.LedgerEntryData.fromXDR(ledgerEntryData, "base64").account();
+              _accountEntry$seqNum = accountEntry.seqNum(), high = _accountEntry$seqNum.high, low = _accountEntry$seqNum.low;
+              sequence = BigInt(high) * BigInt(4294967296) + BigInt(low);
+              return _context.abrupt("return", new _stellarBase.Account(address, sequence.toString()));
+            case 8:
+            case "end":
+              return _context.stop();
+          }
+        }, _callee, this);
+      }));
+      function getAccount(_x) {
+        return _getAccount.apply(this, arguments);
+      }
+      return getAccount;
+    }()
+    /**
+     * General node health check.
+     *
+     * @example
+     * server.getHealth().then(health => {
+     *   console.log("status:", health.status);
+     * });
+     *
+     * @returns {Promise&lt;SorobanRpc.GetHealthResponse>} Returns a promise to the {@link SorobanRpc.GetHealthResponse} object with the status of the server ("healthy").
+     */
+  }, {
+    key: "getHealth",
+    value: function () {
+      var _getHealth = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
+        return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+          while (1) switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.next = 2;
+              return jsonrpc.post(this.serverURL.toString(), "getHealth");
+            case 2:
+              return _context2.abrupt("return", _context2.sent);
+            case 3:
+            case "end":
+              return _context2.stop();
+          }
+        }, _callee2, this);
+      }));
+      function getHealth() {
+        return _getHealth.apply(this, arguments);
+      }
+      return getHealth;
+    }()
+    /**
+     * Reads the current value of contract data ledger entries directly.
+     *
+     * @example
+     * const contractId = "0000000000000000000000000000000000000000000000000000000000000001";
+     * const key = xdr.ScVal.scvSymbol("counter");
+     * server.getContractData(contractId, key).then(data => {
+     *   console.log("value:", data.xdr);
+     *   console.log("lastModified:", data.lastModifiedLedgerSeq);
+     *   console.log("latestLedger:", data.latestLedger);
+     * });
+     *
+     * Allows you to directly inspect the current state of a contract. This is a backup way to access your contract data which may not be available via events or simulateTransaction.
+     *
+     * @param {string} contractId - The contract ID containing the data to load. Encoded as a hex string.
+     * @param {xdr.ScVal} key - The key of the contract data to load.
+     * @returns {Promise&lt;SorobanRpc.GetLedgerEntryResponse>} Returns a promise to the {@link SorobanRpc.GetLedgerEntryResponse} object with the current value.
+     */
+  }, {
+    key: "getContractData",
+    value: function () {
+      var _getContractData = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(contractId, key) {
+        return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+          while (1) switch (_context3.prev = _context3.next) {
+            case 0:
+              _context3.next = 2;
+              return jsonrpc.post(this.serverURL.toString(), "getLedgerEntry", _stellarBase.xdr.LedgerKey.contractData(new _stellarBase.xdr.LedgerKeyContractData({
+                contractId: Buffer.from(contractId, "hex"),
+                key: key
+              })).toXDR("base64"));
+            case 2:
+              return _context3.abrupt("return", _context3.sent);
+            case 3:
+            case "end":
+              return _context3.stop();
+          }
+        }, _callee3, this);
+      }));
+      function getContractData(_x2, _x3) {
+        return _getContractData.apply(this, arguments);
+      }
+      return getContractData;
+    }()
+    /**
+     * Reads the current value of ledger entries directly.
+     *
+     * Allows you to directly inspect the current state of a contract,
+     * contract's code, or any other ledger entry. This is a backup way to access
+     * your contract data which may not be available via events or
+     * simulateTransaction.
+     *
+     * To fetch contract wasm byte-code, use the ContractCode ledger entry key.
+     *
+     * @example
+     * const contractId = "0000000000000000000000000000000000000000000000000000000000000001";
+     * const key = xdr.LedgerKey.contractData(new xdr.LedgerKeyContractData({
+     *   contractId: Buffer.from(contractId, "hex"),
+     *   key: xdr.ScVal.scvSymbol("counter"),
+     * }));
+     * server.getLedgerEntry(key).then(data => {
+     *   console.log("value:", data.xdr);
+     *   console.log("lastModified:", data.lastModifiedLedgerSeq);
+     *   console.log("latestLedger:", data.latestLedger);
+     * });
+     *
+     * @param {xdr.ScVal} key - The key of the contract data to load.
+     * @returns {Promise&lt;SorobanRpc.GetLedgerEntryResponse>} Returns a promise to the {@link SorobanRpc.GetLedgerEntryResponse} object with the current value.
+     */
+  }, {
+    key: "getLedgerEntry",
+    value: function () {
+      var _getLedgerEntry = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(key) {
+        return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+          while (1) switch (_context4.prev = _context4.next) {
+            case 0:
+              _context4.next = 2;
+              return jsonrpc.post(this.serverURL.toString(), "getLedgerEntry", key.toXDR("base64"));
+            case 2:
+              return _context4.abrupt("return", _context4.sent);
+            case 3:
+            case "end":
+              return _context4.stop();
+          }
+        }, _callee4, this);
+      }));
+      function getLedgerEntry(_x4) {
+        return _getLedgerEntry.apply(this, arguments);
+      }
+      return getLedgerEntry;
+    }()
+    /**
+     * Fetch the details of a submitted transaction.
+     *
+     * When submitting a transaction, clients should poll this to tell when the
+     * transaction has completed.
+     *
+     * @example
+     * const transactionHash = "c4515e3bdc0897f21cc5dbec8c82cf0a936d4741cb74a8e158eb51b9fb00411a";
+     * server.getTransaction(transactionHash).then(transaction => {
+     *   console.log("status:", transaction.status);
+     *   console.log("envelopeXdr:", transaction.envelopeXdr);
+     *   console.log("resultMetaXdr:", transaction.resultMetaXdr);
+     *   console.log("resultXdr:", transaction.resultXdr);
+     * });
+     *
+     * @param {string} hash - The hash of the transaction to check. Encoded as a
+     *    hex string.
+     *
+     * @returns {Promise&lt;SorobanRpc.GetTransactionResponse>} Returns a
+     *    promise to the {@link SorobanRpc.GetTransactionResponse} object
+     *    with the status, result, and other details about the transaction.
+     */
+  }, {
+    key: "getTransaction",
+    value: function () {
+      var _getTransaction = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(hash) {
+        return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+          while (1) switch (_context5.prev = _context5.next) {
+            case 0:
+              _context5.next = 2;
+              return jsonrpc.post(this.serverURL.toString(), "getTransaction", hash);
+            case 2:
+              return _context5.abrupt("return", _context5.sent);
+            case 3:
+            case "end":
+              return _context5.stop();
+          }
+        }, _callee5, this);
+      }));
+      function getTransaction(_x5) {
+        return _getTransaction.apply(this, arguments);
+      }
+      return getTransaction;
+    }()
+    /**
+     * Fetches all events that match a given set of filters.
+     *
+     * The given filters (see {@link SorobanRpc.EventFilter} for detailed fields)
+     * are combined only in a logical OR fashion, and all of the fields in each
+     * filter are optional.
+     *
+     * To page through events, use the `pagingToken` field on the relevant
+     * {@link SorobanRpc.EventResponse} object to set the `cursor` parameter.
+     *
+     * @example
+     * server.getEvents({
+     *    startLedger: "1000",
+     *    filters: [
+     *     {
+     *      type: "contract",
+     *      contractIds: [ "deadb33f..." ],
+     *      topics: [[ "AAAABQAAAAh0cmFuc2Zlcg==", "AAAAAQB6Mcc=", "*" ]]
+     *     }, {
+     *      type: "system",
+     *      contractIds: [ "...c4f3b4b3..." ],
+     *      topics: [[ "*" ], [ "*", "AAAAAQB6Mcc=" ]]
+     *     }, {
+     *      contractIds: [ "...c4f3b4b3..." ],
+     *      topics: [[ "AAAABQAAAAh0cmFuc2Zlcg==" ]]
+     *     }, {
+     *      type: "diagnostic",
+     *      topics: [[ "AAAAAQB6Mcc=" ]]
+     *     }
+     *    ],
+     *    limit: 10,
+     * });
+     *
+     * @returns {Promise&lt;SorobanRpc.GetEventsResponse>} a promise to the
+     *    {@link SorobanRpc.GetEventsResponse} object containing a paginatable set
+     *    of the events matching the given event filters.
+     */
+  }, {
+    key: "getEvents",
+    value: function () {
+      var _getEvents = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(request) {
+        var _request$filters;
+        return _regeneratorRuntime().wrap(function _callee6$(_context6) {
+          while (1) switch (_context6.prev = _context6.next) {
+            case 0:
+              _context6.next = 2;
+              return jsonrpc.postObject(this.serverURL.toString(), "getEvents", _objectSpread({
+                filters: (_request$filters = request.filters) !== null &amp;&amp; _request$filters !== void 0 ? _request$filters : [],
+                pagination: _objectSpread(_objectSpread({}, request.cursor &amp;&amp; {
+                  cursor: request.cursor
+                }), request.limit &amp;&amp; {
+                  limit: request.limit
+                })
+              }, request.startLedger &amp;&amp; {
+                startLedger: String(request.startLedger)
+              }));
+            case 2:
+              return _context6.abrupt("return", _context6.sent);
+            case 3:
+            case "end":
+              return _context6.stop();
+          }
+        }, _callee6, this);
+      }));
+      function getEvents(_x6) {
+        return _getEvents.apply(this, arguments);
+      }
+      return getEvents;
+    }()
+    /**
+     * Fetches metadata about the network which Soroban-RPC is connected to.
+     *
+     * @example
+     * server.getNetwork().then(network => {
+     *   console.log("friendbotUrl:", network.friendbotUrl);
+     *   console.log("passphrase:", network.passphrase);
+     *   console.log("protocolVersion:", network.protocolVersion);
+     * });
+     *
+     * @returns {Promise&lt;SorobanRpc.GetNetworkResponse>} a promise to the
+     *    {@link SorobanRpc.GetNetworkResponse} object containing metadata
+     *    about the current network this soroban-rpc server is connected to.
+     */
+  }, {
+    key: "getNetwork",
+    value: function () {
+      var _getNetwork = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7() {
+        return _regeneratorRuntime().wrap(function _callee7$(_context7) {
+          while (1) switch (_context7.prev = _context7.next) {
+            case 0:
+              _context7.next = 2;
+              return jsonrpc.post(this.serverURL.toString(), "getNetwork");
+            case 2:
+              return _context7.abrupt("return", _context7.sent);
+            case 3:
+            case "end":
+              return _context7.stop();
+          }
+        }, _callee7, this);
+      }));
+      function getNetwork() {
+        return _getNetwork.apply(this, arguments);
+      }
+      return getNetwork;
+    }()
+    /**
+     * Fetches the latest ledger meta info from network which Soroban-RPC is connected to.
+     *
+     * @example
+     * server.getLatestLedger().then(response => {
+     *   console.log("hash:", response.id);
+     *   console.log("sequence:", response.sequence);
+     *   console.log("protocolVersion:", response.protocolVersion);
+     * });
+     *
+     * @returns {Promise&lt;SorobanRpc.GetLatestLedgerResponse>} a promise to the
+     *    {@link SorobanRpc.GetLatestLedgerResponse} object containing metadata
+     *    about the latest ledger from network soroban-rpc server is connected to.
+     */
+  }, {
+    key: "getLatestLedger",
+    value: function () {
+      var _getLatestLedger = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8() {
+        return _regeneratorRuntime().wrap(function _callee8$(_context8) {
+          while (1) switch (_context8.prev = _context8.next) {
+            case 0:
+              _context8.next = 2;
+              return jsonrpc.post(this.serverURL.toString(), "getLatestLedger");
+            case 2:
+              return _context8.abrupt("return", _context8.sent);
+            case 3:
+            case "end":
+              return _context8.stop();
+          }
+        }, _callee8, this);
+      }));
+      function getLatestLedger() {
+        return _getLatestLedger.apply(this, arguments);
+      }
+      return getLatestLedger;
+    }()
+    /**
+     * Submit a trial contract invocation to get back return values, expected
+     * ledger footprint, expected authorizations, and expected costs.
+     *
+     * @example
+     * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
+     * const contract = new SorobanClient.Contract(contractId);
+     *
+     * // Right now, this is just the default fee for this example.
+     * const fee = 100;
+     *
+     * const transaction = new SorobanClient.TransactionBuilder(account, {
+     *     fee,
+     *     // Uncomment the following line to build transactions for the live network. Be
+     *     // sure to also change the horizon hostname.
+     *     // networkPassphrase: SorobanClient.Networks.PUBLIC,
+     *     networkPassphrase: SorobanClient.Networks.STANDALONE
+     *   })
+     *   // Add a contract.increment soroban contract invocation operation
+     *   .addOperation(contract.call("increment"))
+     *   // Make this transaction valid for the next 30 seconds only
+     *   .setTimeout(30)
+     *   // Uncomment to add a memo (https://developers.stellar.org/docs/glossary/transactions/)
+     *   // .addMemo(SorobanClient.Memo.text('Hello world!'))
+     *   .build();
+     *
+     * // Sign this transaction with the secret key
+     * // NOTE: signing is transaction is network specific. Test network transactions
+     * // won't work in the public network. To switch networks, use the Network object
+     * // as explained above (look for SorobanClient.Network).
+     * const sourceKeypair = SorobanClient.Keypair.fromSecret(sourceSecretKey);
+     * transaction.sign(sourceKeypair);
+     *
+     * server.simulateTransaction(transaction).then(sim => {
+     *   console.log("cost:", sim.cost);
+     *   console.log("results:", sim.results);
+     *   console.log("error:", sim.error);
+     *   console.log("latestLedger:", sim.latestLedger);
+     * });
+     *
+     * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
+     *    simulate. It should include exactly one operation, which must be a
+     *    {@link InvokeHostFunctionOp}. Any provided footprint will be ignored.
+     * @returns {Promise&lt;SorobanRpc.SimulateTransactionResponse>} Returns a
+     *    promise to the {@link SorobanRpc.SimulateTransactionResponse} object
+     *    with the cost, result, footprint, auth, and error of the transaction.
+     */
+  }, {
+    key: "simulateTransaction",
+    value: function () {
+      var _simulateTransaction = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee9(transaction) {
+        return _regeneratorRuntime().wrap(function _callee9$(_context9) {
+          while (1) switch (_context9.prev = _context9.next) {
+            case 0:
+              _context9.next = 2;
+              return jsonrpc.post(this.serverURL.toString(), "simulateTransaction", transaction.toXDR());
+            case 2:
+              return _context9.abrupt("return", _context9.sent);
+            case 3:
+            case "end":
+              return _context9.stop();
+          }
+        }, _callee9, this);
+      }));
+      function simulateTransaction(_x7) {
+        return _simulateTransaction.apply(this, arguments);
+      }
+      return simulateTransaction;
+    }()
+    /**
+     * Submit a trial contract invocation, first run a simulation of the contract
+     * invocation as defined on the incoming transaction, and apply the results
+     * to a new copy of the transaction which is then returned. Setting the ledger
+     * footprint and authorization, so the resulting transaction is ready for signing &amp; sending.
+     *
+     * The returned transaction will also have an updated fee that is the sum of fee set
+     * on incoming transaction with the contract resource fees estimated from simulation. It is
+     * adviseable to check the fee on returned transaction and validate or take appropriate
+     * measures for interaction with user to confirm it is acceptable.
+     *
+     * You can call the {simulateTransaction(transaction)} method directly first if you
+     * want to inspect estimated fees for a given transaction in detail first if that is
+     * of importance.
+     *
+     * @example
+     * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
+     * const contract = new SorobanClient.Contract(contractId);
+     *
+     * // Right now, this is just the default fee for this example.
+     * const fee = 100;
+     *
+     * const transaction = new SorobanClient.TransactionBuilder(account, {
+     *     fee,
+     *     // Uncomment the following line to build transactions for the live network. Be
+     *     // sure to also change the horizon hostname.
+     *     // networkPassphrase: SorobanClient.Networks.PUBLIC,
+     *     networkPassphrase: SorobanClient.Networks.TESTNET
+     *   })
+     *   // Add a contract.increment soroban contract invocation operation
+     *   .addOperation(contract.call("increment"))
+     *   // Make this transaction valid for the next 30 seconds only
+     *   .setTimeout(30)
+     *   // Uncomment to add a memo (https://developers.stellar.org/docs/glossary/transactions/)
+     *   // .addMemo(SorobanClient.Memo.text('Hello world!'))
+     *   .build();
+     *
+     * preparedTransaction = await server.prepareTransaction(transaction);
+     *
+     * // Sign this transaction with the secret key
+     * // NOTE: signing is transaction is network specific. Test network transactions
+     * // won't work in the public network. To switch networks, use the Network object
+     * // as explained above (look for SorobanClient.Network).
+     * const sourceKeypair = SorobanClient.Keypair.fromSecret(sourceSecretKey);
+     * preparedTransaction.sign(sourceKeypair);
+     *
+     * server.sendTransaction(transaction).then(result => {
+     *   console.log("hash:", result.hash);
+     *   console.log("status:", result.status);
+     *   console.log("errorResultXdr:", result.errorResultXdr);
+     * });
+     *
+     * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
+     *    prepare. It should include exactly one operation, which must be a
+     *    {@link InvokeHostFunctionOp}. Any provided footprint will be overwritten.
+     * @param {string} [networkPassphrase] - Explicitly provide a network
+     *    passphrase. If not passed, the current network passphrase will be requested
+     *    from the server via `getNetwork`.
+     * @returns {Promise&lt;Transaction | FeeBumpTransaction>} Returns a copy of the
+     *    transaction, with the expected ledger footprint and authorizations added
+     *    and the transaction fee will automatically be adjusted to the sum of
+     *    the incoming transaction fee and the contract minimum resource fees
+     *    discovered from the simulation,
+     *
+     */
+  }, {
+    key: "prepareTransaction",
+    value: function () {
+      var _prepareTransaction = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee10(transaction, networkPassphrase) {
+        var _yield$Promise$all, _yield$Promise$all2, passphrase, simResponse;
+        return _regeneratorRuntime().wrap(function _callee10$(_context10) {
+          while (1) switch (_context10.prev = _context10.next) {
+            case 0:
+              _context10.next = 2;
+              return Promise.all([networkPassphrase ? Promise.resolve({
+                passphrase: networkPassphrase
+              }) : this.getNetwork(), this.simulateTransaction(transaction)]);
+            case 2:
+              _yield$Promise$all = _context10.sent;
+              _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 2);
+              passphrase = _yield$Promise$all2[0].passphrase;
+              simResponse = _yield$Promise$all2[1];
+              if (!simResponse.error) {
+                _context10.next = 8;
+                break;
+              }
+              throw simResponse.error;
+            case 8:
+              if (!(!simResponse.results || simResponse.results.length &lt; 1)) {
+                _context10.next = 10;
+                break;
+              }
+              throw new Error("transaction simulation failed");
+            case 10:
+              return _context10.abrupt("return", (0, _transaction.assembleTransaction)(transaction, passphrase, simResponse));
+            case 11:
+            case "end":
+              return _context10.stop();
+          }
+        }, _callee10, this);
+      }));
+      function prepareTransaction(_x8, _x9) {
+        return _prepareTransaction.apply(this, arguments);
+      }
+      return prepareTransaction;
+    }()
+    /**
+     * Submit a real transaction to the Stellar network. This is the only way to
+     * make changes "on-chain". Unlike Horizon, Soroban-RPC does not wait for
+     * transaction completion. It simply validates the transaction and enqueues
+     * it. Clients should call {@link Server#getTransactionStatus} to learn about
+     * transaction success/failure.
+     *
+     * @example
+     * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
+     * const contract = new SorobanClient.Contract(contractId);
+     *
+     * // Right now, this is just the default fee for this example.
+     * const fee = 100;
+     *
+     * const transaction = new SorobanClient.TransactionBuilder(account, {
+     *     fee,
+     *     // Uncomment the following line to build transactions for the live network. Be
+     *     // sure to also change the horizon hostname.
+     *     // networkPassphrase: SorobanClient.Networks.PUBLIC,
+     *     networkPassphrase: SorobanClient.Networks.STANDALONE
+     *   })
+     *   // Add a contract.increment soroban contract invocation operation
+     *   // Note: For real transactions you will need to include the footprint
+     *   // and auth in the operation, as returned from simulateTransaction.
+     *   .addOperation(contract.call("increment"))
+     *   // Make this transaction valid for the next 30 seconds only
+     *   .setTimeout(30)
+     *   // Uncomment to add a memo (https://developers.stellar.org/docs/glossary/transactions/)
+     *   // .addMemo(SorobanClient.Memo.text('Hello world!'))
+     *   .build();
+     *
+     * // Sign this transaction with the secret key
+     * // NOTE: signing is transaction is network specific. Test network transactions
+     * // won't work in the public network. To switch networks, use the Network object
+     * // as explained above (look for SorobanClient.Network).
+     * const sourceKeypair = SorobanClient.Keypair.fromSecret(sourceSecretKey);
+     * transaction.sign(sourceKeypair);
+     *
+     * server.sendTransaction(transaction).then(result => {
+     *   console.log("hash:", result.hash);
+     *   console.log("status:", result.status);
+     *   console.log("errorResultXdr:", result.errorResultXdr);
+     * });
+     *
+     * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
+     *    submit.
+     * @returns {Promise&lt;SorobanRpc.SendTransactionResponse>} Returns a promise to
+     *    the {@link SorobanRpc.SendTransactionResponse} object with the
+     *    transaction id, status, and any error if available.
+     */
+  }, {
+    key: "sendTransaction",
+    value: function () {
+      var _sendTransaction = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee11(transaction) {
+        return _regeneratorRuntime().wrap(function _callee11$(_context11) {
+          while (1) switch (_context11.prev = _context11.next) {
+            case 0:
+              _context11.next = 2;
+              return jsonrpc.post(this.serverURL.toString(), "sendTransaction", transaction.toXDR());
+            case 2:
+              return _context11.abrupt("return", _context11.sent);
+            case 3:
+            case "end":
+              return _context11.stop();
+          }
+        }, _callee11, this);
+      }));
+      function sendTransaction(_x10) {
+        return _sendTransaction.apply(this, arguments);
+      }
+      return sendTransaction;
+    }()
+    /**
+     * Use the friendbot faucet to create and fund a new account. The method will
+     * return an Account object for the created account, or if the account already
+     * existed. If friendbot is not configured on this network, this method will
+     * throw an error.  If the request fails, this method will throw an error.
+     *
+     * @example
+     * server.requestAirdrop("GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4").then(accountCreated => {
+     *   console.log("accountCreated:", accountCreated);
+     * }).catch(error => {
+     *   console.error("error:", error);
+     * });
+     *
+     * @param {string | Account} address - The address or account we want to create and fund.
+     * @param {string} [friendbotUrl] - The optional explicit address for
+     *    friendbot. If not provided, the client will call the Soroban-RPC `getNetwork`
+     *    method to attempt to find this network's friendbot url.
+     * @returns {Promise&lt;Account>} Returns a promise to the {@link Account} object with populated sequence number.
+     */
+  }, {
+    key: "requestAirdrop",
+    value: function () {
+      var _requestAirdrop = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee12(address, friendbotUrl) {
+        var account, response, meta, sequence, _error$response, _error$response$detai;
+        return _regeneratorRuntime().wrap(function _callee12$(_context12) {
+          while (1) switch (_context12.prev = _context12.next) {
+            case 0:
+              account = typeof address === "string" ? address : address.accountId();
+              _context12.t0 = friendbotUrl;
+              if (_context12.t0) {
+                _context12.next = 6;
+                break;
+              }
+              _context12.next = 5;
+              return this.getNetwork();
+            case 5:
+              _context12.t0 = _context12.sent.friendbotUrl;
+            case 6:
+              friendbotUrl = _context12.t0;
+              if (friendbotUrl) {
+                _context12.next = 9;
+                break;
+              }
+              throw new Error("No friendbot URL configured for current network");
+            case 9:
+              _context12.prev = 9;
+              _context12.next = 12;
+              return _axios.default.post("".concat(friendbotUrl, "?addr=").concat(encodeURIComponent(account)));
+            case 12:
+              response = _context12.sent;
+              meta = _stellarBase.xdr.TransactionMeta.fromXDR(response.data.result_meta_xdr, "base64");
+              sequence = findCreatedAccountSequenceInTransactionMeta(meta);
+              return _context12.abrupt("return", new _stellarBase.Account(account, sequence));
+            case 18:
+              _context12.prev = 18;
+              _context12.t1 = _context12["catch"](9);
+              if (!(((_error$response = _context12.t1.response) === null || _error$response === void 0 ? void 0 : _error$response.status) === 400)) {
+                _context12.next = 23;
+                break;
+              }
+              if (!((_error$response$detai = _context12.t1.response.detail) !== null &amp;&amp; _error$response$detai !== void 0 &amp;&amp; _error$response$detai.includes("createAccountAlreadyExist"))) {
+                _context12.next = 23;
+                break;
+              }
+              return _context12.abrupt("return", this.getAccount(account));
+            case 23:
+              throw _context12.t1;
+            case 24:
+            case "end":
+              return _context12.stop();
+          }
+        }, _callee12, this, [[9, 18]]);
+      }));
+      function requestAirdrop(_x11, _x12) {
+        return _requestAirdrop.apply(this, arguments);
+      }
+      return requestAirdrop;
+    }()
+  }]);
+  return Server;
+}();
+exports.Server = Server;
+function findCreatedAccountSequenceInTransactionMeta(meta) {
+  var operations = [];
+  switch (meta.switch()) {
+    case 0:
+      operations = meta.operations();
+      break;
+    case 1:
+      operations = meta.v1().operations();
+      break;
+    case 2:
+      operations = meta.v2().operations();
+      break;
+    case 3:
+      operations = meta.v3().operations();
+      break;
+    default:
+      throw new Error("Unexpected transaction meta switch value");
+  }
+  var _iterator = _createForOfIteratorHelper(operations),
+    _step;
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var op = _step.value;
+      var _iterator2 = _createForOfIteratorHelper(op.changes()),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var c = _step2.value;
+          if (c.switch() !== _stellarBase.xdr.LedgerEntryChangeType.ledgerEntryCreated()) {
+            continue;
+          }
+          var data = c.created().data();
+          if (data.switch() !== _stellarBase.xdr.LedgerEntryType.account()) {
+            continue;
+          }
+          var account = data.account();
+          var seqNum = account.seqNum();
+          return bigIntFromBytes(!seqNum.unsigned, seqNum.high, seqNum.low).toString();
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+  throw new Error("No account created in transaction");
+}
+function bigIntFromBytes(signed) {
+  var sign = BigInt(1);
+  for (var _len = arguments.length, bytes = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key &lt; _len; _key++) {
+    bytes[_key - 1] = arguments[_key];
+  }
+  if (signed &amp;&amp; bytes[0] === 0x80) {
+    // top bit is set, negative number.
+    sign = BigInt(-1);
+    // tslint:disable-next-line:no-bitwise
+    bytes[0] &amp;= 0x7f;
+  }
+  var b = BigInt(0);
+  for (var _i2 = 0, _bytes = bytes; _i2 &lt; _bytes.length; _i2++) {
+    var byte = _bytes[_i2];
+    // tslint:disable-next-line:no-bitwise
+    b &lt;&lt;= BigInt(8);
+    // tslint:disable-next-line:no-bitwise
+    b |= BigInt(byte);
+  }
+  return b * sign;
+}
+(function (_Server) {})(Server || (exports.Server = Server = {}));</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Thu May 18 2023 23:02:00 GMT+0000 (Coordinated Universal Time) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

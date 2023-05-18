@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>js-stellar-base/src/account.js - Documentation</title>
+    <title>js-stellar-base/src/contract.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,7 +29,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">js-stellar-base/src/account.js</h1>
+    <h1 class="page-title">js-stellar-base/src/contract.js</h1>
     
 
     
@@ -39,67 +39,92 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import isString from 'lodash/isString';
-import BigNumber from 'bignumber.js';
-
-import { StrKey } from './strkey';
+            <pre class="prettyprint source linenums"><code>import { Operation } from './operation';
+import xdr from './xdr';
 
 /**
- * Create a new Account object.
+ * Create a new Contract object.
  *
- * `Account` represents a single account in the Stellar network and its sequence
- * number. Account tracks the sequence number as it is used by {@link
- * TransactionBuilder}. See
- * [Accounts](https://developers.stellar.org/docs/glossary/accounts/) for
- * more information about how accounts work in Stellar.
+ * `Contract` represents a single contract in the Stellar network, embodying the
+ * interface of the contract. See
+ * [Contracts](https://soroban.stellar.org/docs/learn/interacting-with-contracts)
+ * for more information about how contracts work in Stellar.
  *
  * @constructor
  *
- * @param {string} accountId - ID of the account (ex.
- *     `GB3KJPLFUYN5VL6R3GU3EGCGVCKFDSD7BEDX42HWG5BWFKB3KQGJJRMA`). If you
- *     provide a muxed account address, this will throw; use {@link
- *     MuxedAccount} instead.
- * @param {string} sequence  - current sequence number of the account
+ * @param {string} contractId - ID of the contract (ex.
+ *     `000000000000000000000000000000000000000000000000000000000000000001`).
  */
-export class Account {
-  constructor(accountId, sequence) {
-    if (StrKey.isValidMed25519PublicKey(accountId)) {
-      throw new Error('accountId is an M-address; use MuxedAccount instead');
-    }
-
-    if (!StrKey.isValidEd25519PublicKey(accountId)) {
-      throw new Error('accountId is invalid');
-    }
-    if (!isString(sequence)) {
-      throw new Error('sequence must be of type string');
-    }
-
-    this._accountId = accountId;
-    this.sequence = new BigNumber(sequence);
+// TODO: Support contract deployment, maybe?
+export class Contract {
+  // TODO: Figure out contract owner/id stuff here. How should we represent that?
+  constructor(contractId) {
+    // TODO: Add methods based on the contractSpec (or do that elsewhere?)
+    this._id = Buffer.from(contractId, 'hex');
   }
 
   /**
-   * Returns Stellar account ID, ex.
-   * `GB3KJPLFUYN5VL6R3GU3EGCGVCKFDSD7BEDX42HWG5BWFKB3KQGJJRMA`.
+   * Returns Stellar contract ID as a hex string, ex.
+   * `000000000000000000000000000000000000000000000000000000000000000001`.
    * @returns {string}
    */
-  accountId() {
-    return this._accountId;
+  contractId() {
+    return this._id.toString('hex');
   }
 
   /**
-   * @returns {string}  sequence number for the account as a string
+   * Returns an operation that will invoke this contract call.
+   *
+   * @todo Allow easily building `Operation`s that invoke multiple contract
+   * calls at once via this abstraction layer. For example, something like
+   *
+   * ```js
+   * let [ a, b ] = [someId1, someId2].map(id => { new Contract(id) });
+   *
+   * let combinedOp = Operation.invokeHostFunctions({
+   *  source: undefined, // optional
+   *  functions: [
+   *    a.partialCall("hello"),
+   *    a.partialCall("transfer", ...),
+   *    b.partialCall("increment"),
+   *  ]
+   * });
+   * ```
+   *
+   * @param {string} method - name of the method to call
+   * @param {...xdr.ScVal} params - arguments to pass to the function call
+   * @returns {xdr.Operation} Build a InvokeHostFunctionOp operation to call the
+   * contract.
    */
-  sequenceNumber() {
-    return this.sequence.toString();
+  call(method, ...params) {
+    const contractId = Buffer.from(this._id, 'hex');
+
+    return Operation.invokeHostFunction({
+      args: xdr.HostFunctionArgs.hostFunctionTypeInvokeContract([
+        xdr.ScVal.scvBytes(contractId),
+        xdr.ScVal.scvSymbol(method),
+        ...params
+      ]),
+      auth: []
+    });
   }
 
   /**
-   * Increments sequence number in this object by one.
-   * @returns {void}
+   * Returns the read-only footprint entry necessary for any invocations to this
+   * contract, for convenience when adding it to your transaction's overall
+   * footprint.
+   *
+   * @returns {xdr.LedgerKey} the contract's executable data ledger key
    */
-  incrementSequenceNumber() {
-    this.sequence = this.sequence.plus(1);
+  getFootprint() {
+    const contractId = Buffer.from(this._id, 'hex');
+
+    return xdr.LedgerKey.contractData(
+      new xdr.LedgerKeyContractData({
+        contractId,
+        key: xdr.ScVal.scvLedgerKeyContractExecutable()
+      })
+    );
   }
 }
 </code></pre>

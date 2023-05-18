@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>js-stellar-base/src/account.js - Documentation</title>
+    <title>js-stellar-base/src/operations/invoke_host_function.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,7 +29,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">js-stellar-base/src/account.js</h1>
+    <h1 class="page-title">js-stellar-base/src/operations/invoke_host_function.js</h1>
     
 
     
@@ -39,68 +39,59 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import isString from 'lodash/isString';
-import BigNumber from 'bignumber.js';
-
-import { StrKey } from './strkey';
+            <pre class="prettyprint source linenums"><code>import xdr from '../xdr';
 
 /**
- * Create a new Account object.
+ * Invokes a single smart contract function.
  *
- * `Account` represents a single account in the Stellar network and its sequence
- * number. Account tracks the sequence number as it is used by {@link
- * TransactionBuilder}. See
- * [Accounts](https://developers.stellar.org/docs/glossary/accounts/) for
- * more information about how accounts work in Stellar.
+ * @function
+ * @alias Operation.invokeHostFunction
  *
- * @constructor
+ * @param {object} opts - options object
+ * @param {xdr.HostFunctionArgs} opts.args - parameters to pass to the host
+ *    function being invoked
+ * @param {xdr.ContractAuth[]} [opts.auth] - list of authorizations for the call
+ * @param {string} [opts.source] - an optional source account
  *
- * @param {string} accountId - ID of the account (ex.
- *     `GB3KJPLFUYN5VL6R3GU3EGCGVCKFDSD7BEDX42HWG5BWFKB3KQGJJRMA`). If you
- *     provide a muxed account address, this will throw; use {@link
- *     MuxedAccount} instead.
- * @param {string} sequence  - current sequence number of the account
+ * @returns {xdr.Operation} an Invoke Host Function operation
+ *    (xdr.InvokeHostFunctionOp)
  */
-export class Account {
-  constructor(accountId, sequence) {
-    if (StrKey.isValidMed25519PublicKey(accountId)) {
-      throw new Error('accountId is an M-address; use MuxedAccount instead');
-    }
-
-    if (!StrKey.isValidEd25519PublicKey(accountId)) {
-      throw new Error('accountId is invalid');
-    }
-    if (!isString(sequence)) {
-      throw new Error('sequence must be of type string');
-    }
-
-    this._accountId = accountId;
-    this.sequence = new BigNumber(sequence);
+export function invokeHostFunction(opts) {
+  if (!opts.args) {
+    throw new TypeError(
+      `function arguments ('args') required (got ${JSON.stringify(opts)})`
+    );
   }
 
-  /**
-   * Returns Stellar account ID, ex.
-   * `GB3KJPLFUYN5VL6R3GU3EGCGVCKFDSD7BEDX42HWG5BWFKB3KQGJJRMA`.
-   * @returns {string}
-   */
-  accountId() {
-    return this._accountId;
-  }
+  const hostFn = new xdr.HostFunction({args: opts.args, auth: opts.auth || []});
+  return this.invokeHostFunctions({ source: opts.source, functions: [hostFn] });
+}
 
-  /**
-   * @returns {string}  sequence number for the account as a string
-   */
-  sequenceNumber() {
-    return this.sequence.toString();
-  }
+/**
+ * Invokes multiple smart contract functions via a single operation.
+ *
+ * @function
+ * @alias Operation.invokeHostFunctions
+ *
+ * @param {object} opts - options for the operation
+ * @param {xdr.HostFunction[]} opts.functions - a list of contract functions to
+ *    invoke in this operation. 
+ * @param {string} [opts.source] - an optional source account
+ *
+ * @returns {xdr.Operation} an Invoke Host Function operation
+ *    (xdr.InvokeHostFunctionOp) with xdr.HostFunction instances corresponding
+ *    to each invocation
+ *
+ */
+export function invokeHostFunctions(opts) {
+  
+  const invokeHostFunctionOp = new xdr.InvokeHostFunctionOp({ functions: opts.functions });
+  const opAttributes = {
+    body: xdr.OperationBody.invokeHostFunction(invokeHostFunctionOp)
+  };
+  this.setSourceAccount(opAttributes, opts);
 
-  /**
-   * Increments sequence number in this object by one.
-   * @returns {void}
-   */
-  incrementSequenceNumber() {
-    this.sequence = this.sequence.plus(1);
-  }
+  return new xdr.Operation(opAttributes);
 }
 </code></pre>
         </article>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>js-stellar-base/src/account.js - Documentation</title>
+    <title>js-stellar-base/src/address.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,7 +29,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">js-stellar-base/src/account.js</h1>
+    <h1 class="page-title">js-stellar-base/src/address.js</h1>
     
 
     
@@ -39,67 +39,142 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import isString from 'lodash/isString';
-import BigNumber from 'bignumber.js';
-
-import { StrKey } from './strkey';
+            <pre class="prettyprint source linenums"><code>import { StrKey } from './strkey';
+import xdr from './xdr';
 
 /**
- * Create a new Account object.
+ * Create a new Address object.
  *
- * `Account` represents a single account in the Stellar network and its sequence
- * number. Account tracks the sequence number as it is used by {@link
- * TransactionBuilder}. See
- * [Accounts](https://developers.stellar.org/docs/glossary/accounts/) for
- * more information about how accounts work in Stellar.
+ * `Address` represents a single address in the Stellar network. An address can
+ * represent an account or a contract.
  *
  * @constructor
  *
- * @param {string} accountId - ID of the account (ex.
+ * @param {string} address - ID of the account (ex.
  *     `GB3KJPLFUYN5VL6R3GU3EGCGVCKFDSD7BEDX42HWG5BWFKB3KQGJJRMA`). If you
  *     provide a muxed account address, this will throw; use {@link
  *     MuxedAccount} instead.
- * @param {string} sequence  - current sequence number of the account
  */
-export class Account {
-  constructor(accountId, sequence) {
-    if (StrKey.isValidMed25519PublicKey(accountId)) {
-      throw new Error('accountId is an M-address; use MuxedAccount instead');
+export class Address {
+  constructor(address) {
+    if (StrKey.isValidEd25519PublicKey(address)) {
+      this._type = 'account';
+      this._key = StrKey.decodeEd25519PublicKey(address);
+    } else if (StrKey.isValidContract(address)) {
+      this._type = 'contract';
+      this._key = StrKey.decodeContract(address);
+    } else {
+      throw new Error('Unsupported address type');
     }
-
-    if (!StrKey.isValidEd25519PublicKey(accountId)) {
-      throw new Error('accountId is invalid');
-    }
-    if (!isString(sequence)) {
-      throw new Error('sequence must be of type string');
-    }
-
-    this._accountId = accountId;
-    this.sequence = new BigNumber(sequence);
   }
 
   /**
-   * Returns Stellar account ID, ex.
-   * `GB3KJPLFUYN5VL6R3GU3EGCGVCKFDSD7BEDX42HWG5BWFKB3KQGJJRMA`.
+   * Parses a string and returns an Address object.
+   *
+   * @param {string} address - The address to parse. ex. `GB3KJPLFUYN5VL6R3GU3EGCGVCKFDSD7BEDX42HWG5BWFKB3KQGJJRMA`
+   * @returns {Address}
+   */
+  static fromString(address) {
+    return new Address(address);
+  }
+
+  /**
+   * Creates a new account Address object from a buffer of raw bytes.
+   *
+   * @param {Buffer} buffer - The bytes of an address to parse.
+   * @returns {Address}
+   */
+  static account(buffer) {
+    return new Address(StrKey.encodeEd25519PublicKey(buffer));
+  }
+
+  /**
+   * Creates a new contract Address object from a buffer of raw bytes.
+   *
+   * @param {Buffer} buffer - The bytes of an address to parse.
+   * @returns {Address}
+   */
+  static contract(buffer) {
+    return new Address(StrKey.encodeContract(buffer));
+  }
+
+  /**
+   * Convert this from an xdr.ScVal type
+   *
+   * @param {xdr.ScVal} scVal - The xdr.ScVal type to parse
+   * @returns {Address}
+   */
+  static fromScVal(scVal) {
+    return Address.fromScAddress(scVal.address());
+  }
+
+  /**
+   * Convert this from an xdr.ScAddress type
+   *
+   * @param {xdr.ScAddress} scAddress - The xdr.ScAddress type to parse
+   * @returns {Address}
+   */
+  static fromScAddress(scAddress) {
+    switch (scAddress.switch()) {
+      case xdr.ScAddressType.scAddressTypeAccount():
+        return Address.account(scAddress.accountId().ed25519());
+      case xdr.ScAddressType.scAddressTypeContract():
+        return Address.contract(scAddress.contractId());
+      default:
+        throw new Error('Unsupported address type');
+    }
+  }
+
+  /**
+   * Serialize an address to string.
+   *
    * @returns {string}
    */
-  accountId() {
-    return this._accountId;
+  toString() {
+    switch (this._type) {
+      case 'account':
+        return StrKey.encodeEd25519PublicKey(this._key);
+      case 'contract':
+        return StrKey.encodeContract(this._key);
+      default:
+        throw new Error('Unsupported address type');
+    }
   }
 
   /**
-   * @returns {string}  sequence number for the account as a string
+   * Convert this Address to an xdr.ScVal type.
+   *
+   * @returns {xdr.ScVal}
    */
-  sequenceNumber() {
-    return this.sequence.toString();
+  toScVal() {
+    return xdr.ScVal.scvAddress(this.toScAddress());
   }
 
   /**
-   * Increments sequence number in this object by one.
-   * @returns {void}
+   * Convert this Address to an xdr.ScAddress type.
+   *
+   * @returns {xdr.ScAddress}
    */
-  incrementSequenceNumber() {
-    this.sequence = this.sequence.plus(1);
+  toScAddress() {
+    switch (this._type) {
+      case 'account':
+        return xdr.ScAddress.scAddressTypeAccount(
+          xdr.PublicKey.publicKeyTypeEd25519(this._key)
+        );
+      case 'contract':
+        return xdr.ScAddress.scAddressTypeContract(this._key);
+      default:
+        throw new Error('Unsupported address type');
+    }
+  }
+
+  /**
+   * Return the raw public key bytes for this address.
+   *
+   * @returns {Buffer}
+   */
+  toBuffer() {
+    return this._key;
   }
 }
 </code></pre>
