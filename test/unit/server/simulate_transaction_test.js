@@ -1,8 +1,8 @@
-describe("Server#simulateTransaction", function() {
+describe("Server#simulateTransaction", function () {
   let keypair = SorobanClient.Keypair.random();
   let account = new SorobanClient.Account(
     keypair.publicKey(),
-    "56199647068161",
+    "56199647068161"
   );
 
   const simulationResponse = {
@@ -78,13 +78,10 @@ describe("Server#simulateTransaction", function() {
 
     this.transaction = transaction;
     this.hash = this.transaction.hash().toString("hex");
-    this.blob = transaction
-      .toEnvelope()
-      .toXDR()
-      .toString("base64");
+    this.blob = transaction.toEnvelope().toXDR().toString("base64");
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.axiosMock.verify();
     this.axiosMock.restore();
   });
@@ -108,7 +105,7 @@ describe("Server#simulateTransaction", function() {
         expect(response).to.be.deep.equal(simulationResponse);
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
   });

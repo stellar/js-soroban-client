@@ -1,11 +1,11 @@
-describe("Server#getTransaction", function() {
+describe("Server#getTransaction", function () {
   let keypair = SorobanClient.Keypair.random();
   let account = new SorobanClient.Account(
     keypair.publicKey(),
-    "56199647068161",
+    "56199647068161"
   );
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
     let transaction = new SorobanClient.TransactionBuilder(account, {
@@ -19,7 +19,7 @@ describe("Server#getTransaction", function() {
             "GASOCNHNNLYFNMDJYQ3XFMI7BYHIOCFW3GJEOWRPEGK2TDPGTG2E5EDW",
           asset: SorobanClient.Asset.native(),
           amount: "100.50",
-        }),
+        })
       )
       .setTimeout(SorobanClient.TimeoutInfinite)
       .build();
@@ -27,18 +27,15 @@ describe("Server#getTransaction", function() {
 
     this.transaction = transaction;
     this.hash = this.transaction.hash().toString("hex");
-    this.blob = transaction
-      .toEnvelope()
-      .toXDR()
-      .toString("base64");
+    this.blob = transaction.toEnvelope().toXDR().toString("base64");
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.axiosMock.verify();
     this.axiosMock.restore();
   });
 
-  it("transaction not found", function(done) {
+  it("transaction not found", function (done) {
     const result = {
       status: "NOT_FOUND",
       latestLedger: 100,
@@ -56,15 +53,15 @@ describe("Server#getTransaction", function() {
       })
       .returns(Promise.resolve({ data: { id: 1, result } }));
 
-    this.server.getTransaction(this.hash).then(function(response) {
+    this.server.getTransaction(this.hash).then(function (response) {
       expect(response).to.be.deep.equal(result);
       done();
     });
   });
 
-  xit("transaction pending", function(done) {});
+  xit("transaction pending", function (done) {});
 
-  xit("transaction success", function(done) {});
+  xit("transaction success", function (done) {});
 
-  xit("transaction error", function(done) {});
+  xit("transaction error", function (done) {});
 });
