@@ -4,8 +4,10 @@
 
 A breaking change should be clearly marked in this log.
 
-#### Pending
-updated prepare transaction for new soroban simulation results and fees [#76](https://github.com/stellar/js-soroban-client/issues/76)
+#### 0.6.0
+* updated server.prepareTransaction() for new soroban simulation results and fees. Note the change in behavior now, where transaction fee will be increased by the resource fee estimates received from simulation. More details this aspect mentioned on method.[#76](https://github.com/stellar/js-soroban-client/issues/76)
+
+* SDK Modernization, refresh the build system to use the latest in JS build pipelines.[#69](https://github.com/stellar/js-soroban-client/pull/69)
 
 
 #### 0.5.1
