@@ -82,7 +82,7 @@ export class Server {
    * @returns {Promise<Account>} Returns a promise to the {@link Account} object with populated sequence number.
    */
   public async getAccount(address: string): Promise<Account> {
-    const { xdr: ledgerEntryData } = await jsonrpc.post(
+    const { xdr: ledgerEntryData } = await jsonrpc.post<SorobanRpc.GetLedgerEntryResponse>(
       this.serverURL.toString(),
       "getLedgerEntry",
       xdr.LedgerKey.account(
@@ -553,7 +553,7 @@ export class Server {
       );
       const sequence = findCreatedAccountSequenceInTransactionMeta(meta);
       return new Account(account, sequence);
-    } catch (error) {
+    } catch (error: any) {
       if (error.response?.status === 400) {
         if (error.response.detail?.includes("createAccountAlreadyExist")) {
           // Account already exists, load the sequence number

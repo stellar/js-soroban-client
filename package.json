@@ -27,7 +27,8 @@
   "scripts": {
     "build": "cross-env NODE_ENV=development yarn _build",
     "build:prod": "cross-env NODE_ENV=production yarn _build",
-    "build:node": "babel --extensions '.ts' --out-dir lib/ src/",
+    "build:ts": "npx tsc",
+    "build:node": "yarn build:ts && babel --extensions '.ts' --out-dir lib/ src/",
     "build:browser": "webpack -c ./webpack.config.browser.js",
     "clean": "rm -rf lib/ dist/ coverage/ .nyc_output/",
     "docs": "jsdoc -c ./.jsdoc.json --verbose",
