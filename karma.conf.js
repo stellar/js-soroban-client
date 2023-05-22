@@ -3,6 +3,7 @@ const webpackConfig = require("./webpack.config.browser.js");
 delete webpackConfig.output;
 delete webpackConfig.entry; // karma fills these in
 webpackConfig.plugins.shift(); // drop eslinter plugin
+webpackConfig.mode = "test";
 
 module.exports = function (config) {
   config.set({

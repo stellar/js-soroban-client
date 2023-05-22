@@ -34,7 +34,7 @@ jobs:
           ref: gh-pages
           path: jsdoc
 
-      - name: Generate JS docs
+      - name: Build package and generate JS docs
         continue-on-error: true
         run: yarn docs
 

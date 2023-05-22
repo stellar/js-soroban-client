@@ -1,22 +1,30 @@
 {
-    "comments": true,
+    "comments": false,
     "presets": [
         "@babel/preset-env",
-        "@babel/typescript",
+        "@babel/typescript"
     ],
-    "env": {
-        "development": {
-            "plugins": [
-                "istanbul"
-            ]
-        }
-    },
     "targets": {
         "node": 14,
-        "browsers": [
-            "> 2%",
-            "ie 11",
-            "not op_mini all"
-        ]
+        "browsers": [ "> 2%" ]
+    },
+    "env": {
+        "test": {
+            "comments": true,           // for debugging
+            "plugins": [ "istanbul" ]   // for code coverage
+        },
+        "development": {
+            "comments": true            // for jsdocs
+        },
+        "production": {
+            // stricter target for final browser bundle
+            "targets": {
+                "browsers": [
+                    "> 2%",
+                    "ie 11",
+                    "not op_mini all"
+                ]
+            }
+        }
     }
 }
