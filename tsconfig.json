@@ -4,6 +4,7 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "declarationDir": "lib",
+    "removeComments": false,
     "lib": ["es2015"],
     "moduleResolution": "node",
     "rootDir": "src",
