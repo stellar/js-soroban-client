@@ -30,7 +30,7 @@
     "build:node": "yarn _babel && yarn build:ts",
     "build:ts": "tsc -p ./tsconfig.json",
     "build:browser": "webpack --stats-modules-space 999 -c ./webpack.config.browser.js",
-    "build:docs": "cross-env NODE_ENV=test yarn _babel",
+    "build:docs": "cross-env NODE_ENV=docs yarn _babel",
     "clean": "rm -rf lib/ dist/ coverage/ .nyc_output/ jsdoc/",
     "docs": "yarn build:docs && jsdoc -c .jsdoc.json --verbose",
     "test": "yarn test:node && yarn test:integration && yarn test:browser",
