@@ -83,7 +83,7 @@
     "@babel/preset-env": "^7.21.5",
     "@babel/preset-typescript": "^7.21.5",
     "@babel/register": "^7.21.0",
-    "@definitelytyped/dtslint": "^0.0.160",
+    "@definitelytyped/dtslint": "^0.0.162",
     "@istanbuljs/nyc-config-babel": "3.0.0",
     "@stellar/tsconfig": "^1.0.2",
     "@types/detect-node": "^2.0.0",
