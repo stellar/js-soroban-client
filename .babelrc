@@ -6,7 +6,7 @@
     ],
     "targets": {
         "node": 14,
-        "browsers": [ "> 2%" ]
+        "browsers": [ "> 2%" ]          // target modern browsers and ES6
     },
     "env": {
         "development": {
@@ -16,15 +16,6 @@
         "docs": {
             "comments": true            // for jsdocs
         },
-        "production": {
-            // stricter target for final browser bundle
-            "targets": {
-                "browsers": [
-                    "> 2%",
-                    "ie 11",
-                    "not op_mini all"
-                ]
-            }
-        }
+        "production": {}
     }
 }
