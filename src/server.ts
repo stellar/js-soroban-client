@@ -82,17 +82,26 @@ export class Server {
    * @returns {Promise<Account>} Returns a promise to the {@link Account} object with populated sequence number.
    */
   public async getAccount(address: string): Promise<Account> {
-    const { xdr: ledgerEntryData } = await jsonrpc.post<SorobanRpc.GetLedgerEntryResponse>(
+    const ledgerKey = xdr.LedgerKey.account(
+      new xdr.LedgerKeyAccount({
+        accountId: xdr.PublicKey.publicKeyTypeEd25519(
+          StrKey.decodeEd25519PublicKey(address),
+        ),
+      }),
+    ).toXDR("base64");
+    const data: SorobanRpc.GetLedgerEntriesResponse = await jsonrpc.post(
       this.serverURL.toString(),
-      "getLedgerEntry",
-      xdr.LedgerKey.account(
-        new xdr.LedgerKeyAccount({
-          accountId: xdr.PublicKey.publicKeyTypeEd25519(
-            StrKey.decodeEd25519PublicKey(address),
-          ),
-        }),
-      ).toXDR("base64"),
+      "getLedgerEntries",
+      [ledgerKey],
     );
+    const ledgerEntries = data.entries;
+    if (ledgerEntries.length === 0) {
+      return Promise.reject({
+        code: 404,
+        message: "Ledger entry not found. Key: " + ledgerKey,
+      });
+    }
+    const ledgerEntryData = ledgerEntries[0].xdr;
     const accountEntry = xdr.LedgerEntryData.fromXDR(
       ledgerEntryData,
       "base64",
@@ -135,29 +144,37 @@ export class Server {
    *
    * @param {string} contractId - The contract ID containing the data to load. Encoded as a hex string.
    * @param {xdr.ScVal} key - The key of the contract data to load.
-   * @returns {Promise<SorobanRpc.GetLedgerEntryResponse>} Returns a promise to the {@link SorobanRpc.GetLedgerEntryResponse} object with the current value.
+   * @returns {Promise<SorobanRpc.LedgerEntryResult>} Returns a promise to the {@link SorobanRpc.LedgerEntryResult} object with the current value.
    */
   public async getContractData(
     contractId: string,
     key: xdr.ScVal,
-  ): Promise<SorobanRpc.GetLedgerEntryResponse> {
-    return await jsonrpc.post(
+  ): Promise<SorobanRpc.LedgerEntryResult> {
+    const contractKey = xdr.LedgerKey.contractData(
+      new xdr.LedgerKeyContractData({
+        contractId: Buffer.from(contractId, "hex"),
+        key,
+      }),
+    ).toXDR("base64");
+    const getLedgerEntriesResponse: SorobanRpc.GetLedgerEntriesResponse = await jsonrpc.post(
       this.serverURL.toString(),
-      "getLedgerEntry",
-      xdr.LedgerKey.contractData(
-        new xdr.LedgerKeyContractData({
-          contractId: Buffer.from(contractId, "hex"),
-          key,
-        }),
-      ).toXDR("base64"),
+      "getLedgerEntries",
+      [contractKey],
     );
+    if (getLedgerEntriesResponse.entries.length === 0) {
+      return Promise.reject({
+        code: 404,
+        message: "Ledger entry not found. Key: " + contractKey,
+      });
+    }
+    return getLedgerEntriesResponse.entries[0];
   }
 
   /**
    * Reads the current value of ledger entries directly.
    *
-   * Allows you to directly inspect the current state of a contract,
-   * contract's code, or any other ledger entry. This is a backup way to access
+   * Allows you to directly inspect the current state of contracts,
+   * contract's code, or any other ledger entries. This is a backup way to access
    * your contract data which may not be available via events or
    * simulateTransaction.
    *
@@ -169,22 +186,24 @@ export class Server {
    *   contractId: Buffer.from(contractId, "hex"),
    *   key: xdr.ScVal.scvSymbol("counter"),
    * }));
-   * server.getLedgerEntry(key).then(data => {
-   *   console.log("value:", data.xdr);
-   *   console.log("lastModified:", data.lastModifiedLedgerSeq);
-   *   console.log("latestLedger:", data.latestLedger);
+   * server.getLedgerEntries([key]).then(response => {
+   *   const ledgerData = response.entries[0];
+   *   console.log("key:", ledgerData.key);
+   *   console.log("value:", ledgerData.xdr);
+   *   console.log("lastModified:", ledgerData.lastModifiedLedgerSeq);
+   *   console.log("latestLedger:", response.latestLedger);
    * });
    *
    * @param {xdr.ScVal} key - The key of the contract data to load.
-   * @returns {Promise<SorobanRpc.GetLedgerEntryResponse>} Returns a promise to the {@link SorobanRpc.GetLedgerEntryResponse} object with the current value.
+   * @returns {Promise<SorobanRpc.GetLedgerEntriesResponse>} Returns a promise to the {@link SorobanRpc.GetLedgerEntriesResponse} object with the current value.
    */
-  public async getLedgerEntry(
-    key: xdr.LedgerKey,
-  ): Promise<SorobanRpc.GetLedgerEntryResponse> {
+  public async getLedgerEntries(
+    keys: xdr.LedgerKey[],
+  ): Promise<SorobanRpc.GetLedgerEntriesResponse> {
     return await jsonrpc.post(
       this.serverURL.toString(),
-      "getLedgerEntry",
-      key.toXDR("base64"),
+      "getLedgerEntries",
+      keys.map((k) => k.toXDR("base64")),
     );
   }
 

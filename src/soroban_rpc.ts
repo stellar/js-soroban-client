@@ -24,13 +24,18 @@ export namespace SorobanRpc {
     status: "healthy";
   }
 
-  /* Response for jsonrpc method `getLedgerEntry`
-   */
-  export interface GetLedgerEntryResponse {
+  export interface LedgerEntryResult {
+    key: string;
     // xdr is a base-64 encoded {@link xdr.LedgerEntryData}
     xdr: string;
     lastModifiedLedgerSeq?: number;
-    latestLedger?: number;
+  }
+
+  /* Response for jsonrpc method `getLedgerEntries`
+   */
+  export interface GetLedgerEntriesResponse {
+    entries: LedgerEntryResult[];
+    latestLedger: number;
   }
 
   /* Response for jsonrpc method `getNetwork`

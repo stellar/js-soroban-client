@@ -4,6 +4,9 @@
 
 A breaking change should be clearly marked in this log.
 
+#### Unreleased
+* **Breaking**: replaced `getLedgerEntry` with `getLedgerEntries`. `getLedgerEntry` is deprecated and should no longer be used.
+
 #### 0.6.1
 * removed reference to deprecated usage of gulp in docs build step [#80](https://github.com/stellar/js-soroban-client/pull/80)
 
