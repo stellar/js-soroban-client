@@ -97,10 +97,8 @@ export class Server {
     const ledgerEntries = data.entries;
     if (ledgerEntries.length === 0) {
       return Promise.reject({
-        error: {
-          code: 404,
-          message: "Ledger entry not found. Key: " + ledgerKey,
-        },
+        code: 404,
+        message: "Ledger entry not found. Key: " + ledgerKey,
       });
     }
     const ledgerEntryData = ledgerEntries[0].xdr;
@@ -165,10 +163,8 @@ export class Server {
     );
     if (getLedgerEntriesResponse.entries.length === 0) {
       return Promise.reject({
-        error: {
-          code: 404,
-          message: "Ledger entry not found. Key: " + contractKey,
-        },
+        code: 404,
+        message: "Ledger entry not found. Key: " + contractKey,
       });
     }
     return getLedgerEntriesResponse.entries[0];
