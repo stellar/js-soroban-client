@@ -123,9 +123,9 @@ describe("Server#requestAirdrop", function () {
             xdr.LedgerKey.account(
               new xdr.LedgerKeyAccount({
                 accountId: xdr.PublicKey.publicKeyTypeEd25519(
-                  StrKey.decodeEd25519PublicKey(accountId),
+                  StrKey.decodeEd25519PublicKey(accountId)
                 ),
-              }),
+              })
             ).toXDR("base64"),
           ],
         ],
@@ -137,7 +137,7 @@ describe("Server#requestAirdrop", function () {
               entries: [
                 {
                   xdr: accountLedgerEntryData(accountId, "1234").toXDR(
-                    "base64",
+                    "base64"
                   ),
                 },
               ],

@@ -36,7 +36,7 @@ describe("Server#getContractData", function () {
               new xdr.LedgerKeyContractData({
                 contractId: Buffer.from(address, "hex"),
                 key,
-              }),
+              })
             ).toXDR("base64"),
           ],
         ],
@@ -48,7 +48,7 @@ describe("Server#getContractData", function () {
               entries: [result],
             },
           },
-        }),
+        })
       );
 
     this.server
@@ -75,7 +75,7 @@ describe("Server#getContractData", function () {
               new xdr.LedgerKeyContractData({
                 contractId: Buffer.from(address, "hex"),
                 key,
-              }),
+              })
             ).toXDR("base64"),
           ],
         ],

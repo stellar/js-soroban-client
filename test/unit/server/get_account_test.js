@@ -30,7 +30,7 @@ describe("Server#getAccount", function () {
             xdr.LedgerKey.account(
               new xdr.LedgerKeyAccount({
                 accountId,
-              }),
+              })
             ).toXDR("base64"),
           ],
         ],
@@ -41,8 +41,7 @@ describe("Server#getAccount", function () {
             result: {
               entries: [
                 {
-                  xdr:
-                    "AAAAAAAAAABzdv3ojkzWHMD7KUoXhrPx0GH18vHKV0ZfqpMiEblG1g3gtpoE608YAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAQAAAAAY9D8iA",
+                  xdr: "AAAAAAAAAABzdv3ojkzWHMD7KUoXhrPx0GH18vHKV0ZfqpMiEblG1g3gtpoE608YAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAQAAAAAY9D8iA",
                 },
               ],
             },
