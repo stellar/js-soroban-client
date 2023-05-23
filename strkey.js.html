@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Home - Documentation</title>
+    <title>strkey.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,190 +29,380 @@
 
 <div id="main">
     
+    <h1 class="page-title">strkey.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* eslint no-bitwise: ["error", {"allow": ["&lt;&lt;"]}] */
 
+import base32 from 'base32.js';
+import crc from 'crc';
+import isUndefined from 'lodash/isUndefined';
+import isNull from 'lodash/isNull';
+import isString from 'lodash/isString';
+import { verifyChecksum } from './util/checksum';
 
+const versionBytes = {
+  ed25519PublicKey: 6 &lt;&lt; 3, // G (when encoded in base32)
+  ed25519SecretSeed: 18 &lt;&lt; 3, // S
+  med25519PublicKey: 12 &lt;&lt; 3, // M
+  preAuthTx: 19 &lt;&lt; 3, // T
+  sha256Hash: 23 &lt;&lt; 3, // X
+  signedPayload: 15 &lt;&lt; 3, // P
+  contract: 2 &lt;&lt; 3 // C
+};
 
+const strkeyTypes = {
+  G: 'ed25519PublicKey',
+  S: 'ed25519SecretSeed',
+  M: 'med25519PublicKey',
+  T: 'preAuthTx',
+  X: 'sha256Hash',
+  P: 'signedPayload',
+  C: 'contract'
+};
 
+/**
+ * StrKey is a helper class that allows encoding and decoding Stellar keys
+ * to/from strings, i.e. between their binary (Buffer, xdr.PublicKey, etc.) and
+ * string (i.e. "GABCD...", etc.) representations.
+ */
+export class StrKey {
+  /**
+   * Encodes `data` to strkey ed25519 public key.
+   *
+   * @param   {Buffer} data   raw data to encode
+   * @returns {string}        "G..." representation of the key
+   */
+  static encodeEd25519PublicKey(data) {
+    return encodeCheck('ed25519PublicKey', data);
+  }
 
+  /**
+   * Decodes strkey ed25519 public key to raw data.
+   *
+   * If the parameter is a muxed account key ("M..."), this will only encode it
+   * as a basic Ed25519 key (as if in "G..." format).
+   *
+   * @param   {string} data   "G..." (or "M...") key representation to decode
+   * @returns {Buffer}        raw key
+   */
+  static decodeEd25519PublicKey(data) {
+    return decodeCheck('ed25519PublicKey', data);
+  }
 
+  /**
+   * Returns true if the given Stellar public key is a valid ed25519 public key.
+   * @param {string} publicKey public key to check
+   * @returns {boolean}
+   */
+  static isValidEd25519PublicKey(publicKey) {
+    return isValid('ed25519PublicKey', publicKey);
+  }
 
+  /**
+   * Encodes data to strkey ed25519 seed.
+   * @param {Buffer} data data to encode
+   * @returns {string}
+   */
+  static encodeEd25519SecretSeed(data) {
+    return encodeCheck('ed25519SecretSeed', data);
+  }
 
+  /**
+   * Decodes strkey ed25519 seed to raw data.
+   * @param {string} address data to decode
+   * @returns {Buffer}
+   */
+  static decodeEd25519SecretSeed(address) {
+    return decodeCheck('ed25519SecretSeed', address);
+  }
 
-    
+  /**
+   * Returns true if the given Stellar secret key is a valid ed25519 secret seed.
+   * @param {string} seed seed to check
+   * @returns {boolean}
+   */
+  static isValidEd25519SecretSeed(seed) {
+    return isValid('ed25519SecretSeed', seed);
+  }
 
+  /**
+   * Encodes data to strkey med25519 public key.
+   * @param {Buffer} data data to encode
+   * @returns {string}
+   */
+  static encodeMed25519PublicKey(data) {
+    return encodeCheck('med25519PublicKey', data);
+  }
 
-    <section class="readme">
-        <article><div align="center">
-  <img alt="Stellar" src="https://github.com/stellar/.github/raw/master/stellar-logo.png" width="558" />
-  <br/>
-  <strong>Creating equitable access to the global financial system</strong>
-  <h1>js-soroban-client</h1>
-</div>
-<p align="center">
-  <a href="https://badge.fury.io/js/soroban-client"><img src="https://badge.fury.io/js/soroban-client.svg" alt="npm version" height="18"></a>
-  <a href="https://github.com/stellar/js-soroban-client/actions/workflows/tests.yml"><img alt="Test Status" src="https://github.com/stellar/js-soroban-client/actions/workflows/tests.yml/badge.svg" /></a>
-  <a href="https://coveralls.io/github/stellar/js-soroban-client?branch=master"><img alt="Coverage Status" src="https://coveralls.io/repos/stellar/js-soroban-client/badge.svg?branch=master&service=github" /></a>
-</p>
-<p>js-soroban-client is a Javascript library for communicating with a
-<a href="https://github.com/stellar/go/tree/master/exp/services/soroban-rpc">Soroban RPC server</a>.
-It is used for building Stellar apps either on Node.js or in the browser.</p>
-<p>It provides:</p>
-<ul>
-<li>a networking layer API for soroban-rpc methods.</li>
-<li>facilities for building and signing transactions, for communicating with a
-soroban-rpc instance, and for submitting transactions or querying network
-state.</li>
-</ul>
-<h3>soroban-client vs stellar-base</h3>
-<p>soroban-client is a high-level library that serves as client-side API for Horizon.
-<a href="https://github.com/stellar/js-stellar-base">stellar-base</a> is lower-level
-library for creating Stellar primitive constructs via XDR helpers and wrappers.</p>
-<p><strong>Most people will want soroban-client instead of stellar-base.</strong> You should only
-use stellar-base if you know what you're doing!</p>
-<p>If you add <code>soroban-client</code> to a project, <strong>do not add <code>stellar-base</code>!</strong> Mis-matching
-versions could cause weird, hard-to-find bugs. <code>soroban-client</code> automatically
-installs <code>stellar-base</code> and exposes all of its exports in case you need them.</p>
-<blockquote>
-<p><strong>Important!</strong> The Node.js version of the <code>stellar-base</code> (<code>soroban-client</code> dependency) package
-uses the <a href="https://www.npmjs.com/package/sodium-native"><code>sodium-native</code></a> package as
-an <a href="https://docs.npmjs.com/files/package.json#optionaldependencies">optional dependency</a>. <code>sodium-native</code> is
-a low level binding to <a href="https://github.com/jedisct1/libsodium">libsodium</a>,
-(an implementation of <a href="https://ed25519.cr.yp.to/">Ed25519</a> signatures).
-If installation of <code>sodium-native</code> fails, or it is unavailable, <code>stellar-base</code> (and <code>soroban-client</code>) will
-fallback to using the <a href="https://www.npmjs.com/package/tweetnacl"><code>tweetnacl</code></a> package implementation.</p>
-<p>If you are using <code>soroban-client</code>/<code>stellar-base</code> in a browser you can ignore
-this. However, for production backend deployments you should be
-using <code>sodium-native</code>. If <code>sodium-native</code> is successfully installed and working the
-<code>SorobanClient.FastSigning</code> variable will return <code>true</code>.</p>
-</blockquote>
-<h2>Quick start</h2>
-<p>Using npm to include js-soroban-client in your own project:</p>
-<pre class="prettyprint source lang-shell"><code>npm install --save soroban-client
+  /**
+   * Decodes strkey med25519 public key to raw data.
+   * @param {string} address data to decode
+   * @returns {Buffer}
+   */
+  static decodeMed25519PublicKey(address) {
+    return decodeCheck('med25519PublicKey', address);
+  }
+
+  /**
+   * Returns true if the given Stellar public key is a valid med25519 public key.
+   * @param {string} publicKey public key to check
+   * @returns {boolean}
+   */
+  static isValidMed25519PublicKey(publicKey) {
+    return isValid('med25519PublicKey', publicKey);
+  }
+
+  /**
+   * Encodes data to strkey preAuthTx.
+   * @param {Buffer} data data to encode
+   * @returns {string}
+   */
+  static encodePreAuthTx(data) {
+    return encodeCheck('preAuthTx', data);
+  }
+
+  /**
+   * Decodes strkey PreAuthTx to raw data.
+   * @param {string} address data to decode
+   * @returns {Buffer}
+   */
+  static decodePreAuthTx(address) {
+    return decodeCheck('preAuthTx', address);
+  }
+
+  /**
+   * Encodes data to strkey sha256 hash.
+   * @param {Buffer} data data to encode
+   * @returns {string}
+   */
+  static encodeSha256Hash(data) {
+    return encodeCheck('sha256Hash', data);
+  }
+
+  /**
+   * Decodes strkey sha256 hash to raw data.
+   * @param {string} address data to decode
+   * @returns {Buffer}
+   */
+  static decodeSha256Hash(address) {
+    return decodeCheck('sha256Hash', address);
+  }
+
+  /**
+   * Encodes raw data to strkey signed payload (P...).
+   * @param   {Buffer} data  data to encode
+   * @returns {string}
+   */
+  static encodeSignedPayload(data) {
+    return encodeCheck('signedPayload', data);
+  }
+
+  /**
+   * Decodes strkey signed payload (P...) to raw data.
+   * @param   {string} address  address to decode
+   * @returns {Buffer}
+   */
+  static decodeSignedPayload(address) {
+    return decodeCheck('signedPayload', address);
+  }
+
+  /**
+   * Checks validity of alleged signed payload (P...) strkey address.
+   * @param   {string} address  signer key to check
+   * @returns {boolean}
+   */
+  static isValidSignedPayload(address) {
+    return isValid('signedPayload', address);
+  }
+
+  /**
+   * Encodes raw data to strkey contract (C...).
+   * @param   {Buffer} data  data to encode
+   * @returns {string}
+   */
+  static encodeContract(data) {
+    return encodeCheck('contract', data);
+  }
+
+  /**
+   * Decodes strkey contract (C...) to raw data.
+   * @param   {string} address  address to decode
+   * @returns {Buffer}
+   */
+  static decodeContract(address) {
+    return decodeCheck('contract', address);
+  }
+
+  /**
+   * Checks validity of alleged contract (C...) strkey address.
+   * @param   {string} address  signer key to check
+   * @returns {boolean}
+   */
+  static isValidContract(address) {
+    return isValid('contract', address);
+  }
+
+  static getVersionByteForPrefix(address) {
+    return strkeyTypes[address[0]];
+  }
+}
+
+/**
+ * Sanity-checks whether or not a strkey *appears* valid.
+ *
+ * @param  {string}  versionByteName the type of strkey to expect in `encoded`
+ * @param  {string}  encoded         the strkey to validate
+ *
+ * @return {Boolean} whether or not the `encoded` strkey appears valid for the
+ *     `versionByteName` strkey type (see `versionBytes`, above).
+ *
+ * @note This isn't a *definitive* check of validity, but rather a best-effort
+ *     check based on (a) input length, (b) whether or not it can be decoded,
+ *     and (c) output length.
+ */
+function isValid(versionByteName, encoded) {
+  if (!isString(encoded)) {
+    return false;
+  }
+
+  // basic length checks on the strkey lengths
+  switch (versionByteName) {
+    case 'ed25519PublicKey': // falls through
+    case 'ed25519SecretSeed': // falls through
+    case 'preAuthTx': // falls through
+    case 'sha256Hash': // falls through
+    case 'contract':
+      if (encoded.length !== 56) {
+        return false;
+      }
+      break;
+
+    case 'med25519PublicKey':
+      if (encoded.length !== 69) {
+        return false;
+      }
+      break;
+
+    case 'signedPayload':
+      if (encoded.length &lt; 56 || encoded.length > 165) {
+        return false;
+      }
+      break;
+
+    default:
+      return false;
+  }
+
+  let decoded = '';
+  try {
+    decoded = decodeCheck(versionByteName, encoded);
+  } catch (err) {
+    return false;
+  }
+
+  // basic length checks on the resulting buffer sizes
+  switch (versionByteName) {
+    case 'ed25519PublicKey': // falls through
+    case 'ed25519SecretSeed': // falls through
+    case 'preAuthTx': // falls through
+    case 'sha256Hash': // falls through
+    case 'contract':
+      return decoded.length === 32;
+
+    case 'med25519PublicKey':
+      return decoded.length === 40; // +8 bytes for the ID
+
+    case 'signedPayload':
+      return (
+        // 32 for the signer, +4 for the payload size, then either +4 for the
+        // min or +64 for the max payload
+        decoded.length >= 32 + 4 + 4 &amp;&amp; decoded.length &lt;= 32 + 4 + 64
+      );
+
+    default:
+      return false;
+  }
+}
+
+export function decodeCheck(versionByteName, encoded) {
+  if (!isString(encoded)) {
+    throw new TypeError('encoded argument must be of type String');
+  }
+
+  const decoded = base32.decode(encoded);
+  const versionByte = decoded[0];
+  const payload = decoded.slice(0, -2);
+  const data = payload.slice(1);
+  const checksum = decoded.slice(-2);
+
+  if (encoded !== base32.encode(decoded)) {
+    throw new Error('invalid encoded string');
+  }
+
+  const expectedVersion = versionBytes[versionByteName];
+
+  if (isUndefined(expectedVersion)) {
+    throw new Error(
+      `${versionByteName} is not a valid version byte name. ` +
+        `Expected one of ${Object.keys(versionBytes).join(', ')}`
+    );
+  }
+
+  if (versionByte !== expectedVersion) {
+    throw new Error(
+      `invalid version byte. expected ${expectedVersion}, got ${versionByte}`
+    );
+  }
+
+  const expectedChecksum = calculateChecksum(payload);
+
+  if (!verifyChecksum(expectedChecksum, checksum)) {
+    throw new Error(`invalid checksum`);
+  }
+
+  return Buffer.from(data);
+}
+
+export function encodeCheck(versionByteName, data) {
+  if (isNull(data) || isUndefined(data)) {
+    throw new Error('cannot encode null data');
+  }
+
+  const versionByte = versionBytes[versionByteName];
+
+  if (isUndefined(versionByte)) {
+    throw new Error(
+      `${versionByteName} is not a valid version byte name. ` +
+        `Expected one of ${Object.keys(versionBytes).join(', ')}`
+    );
+  }
+  data = Buffer.from(data);
+
+  const versionBuffer = Buffer.from([versionByte]);
+  const payload = Buffer.concat([versionBuffer, data]);
+  const checksum = calculateChecksum(payload);
+  const unencoded = Buffer.concat([payload, checksum]);
+
+  return base32.encode(unencoded);
+}
+
+// Computes the CRC16-XModem checksum of `payload` in little-endian order
+function calculateChecksum(payload) {
+  const checksum = Buffer.alloc(2);
+  checksum.writeUInt16LE(crc.crc16xmodem(payload), 0);
+  return checksum;
+}
 </code></pre>
-<p>Alternatively, you can use cdnjs in a browser:</p>
-<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/soroban-client/{version}/soroban-client.js&quot;>&lt;/script>
-</code></pre>
-<h2>Install</h2>
-<h3>To use as a module in a Node.js project</h3>
-<ol>
-<li>Install it using npm:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>npm install --save soroban-client
-</code></pre>
-<ol start="2">
-<li>require/import it in your JavaScript:</li>
-</ol>
-<pre class="prettyprint source lang-js"><code>var SorobanClient = require('soroban-client');
-</code></pre>
-<h3>To self host for use in the browser</h3>
-<ol>
-<li>Install it using <a href="http://bower.io">bower</a>:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>bower install soroban-client
-</code></pre>
-<ol start="2">
-<li>Include it in the browser:</li>
-</ol>
-<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;./bower_components/soroban-client/soroban-client.js&quot;>&lt;/script>
-&lt;script>
-  console.log(SorobanClient);
-&lt;/script>
-</code></pre>
-<p>If you don't want to use or install Bower, you can copy built JS files from the
-<a href="https://github.com/stellar/bower-js-soroban-client">bower-js-soroban-client
-repo</a>.</p>
-<h3>To use the <a href="https://cdnjs.com/libraries/soroban-client">cdnjs</a> hosted script in the browser</h3>
-<ol>
-<li>Instruct the browser to fetch the library from
-<a href="https://cdnjs.com/libraries/soroban-client">cdnjs</a>, a 3rd party service that
-hosts js libraries:</li>
-</ol>
-<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/soroban-client/{version}/soroban-client.js&quot;>&lt;/script>
-&lt;script>
-  console.log(SorobanClient);
-&lt;/script>
-</code></pre>
-<p>Note that this method relies using a third party to host the JS library. This
-may not be entirely secure.</p>
-<p>Make sure that you are using the latest version number. They can be found on the
-<a href="https://github.com/stellar/js-soroban-client/releases">releases page in Github</a>.</p>
-<h3>To develop and test js-soroban-client itself</h3>
-<ol>
-<li>Clone the repo:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>git clone https://github.com/stellar/js-soroban-client.git
-</code></pre>
-<ol start="2">
-<li>Install dependencies inside js-soroban-client folder:</li>
-</ol>
-<pre class="prettyprint source lang-shell"><code>cd js-soroban-client
-yarn install
-</code></pre>
-<ol start="3">
-<li>Install Node 14</li>
-</ol>
-<p>Because we support the latest maintenance version of Node, please install and develop on Node 14 so you don't get surprised when your code works locally but breaks in CI.</p>
-<p>Here's how to install <code>nvm</code> if you haven't: https://github.com/creationix/nvm</p>
-<pre class="prettyprint source lang-shell"><code>nvm install
-
-# if you've never installed 14 before you'll want to re-install yarn
-yarn install -g yarn
-</code></pre>
-<p>If you work on several projects that use different Node versions, you might it
-helpful to install this automatic version manager:
-https://github.com/wbyoung/avn</p>
-<ol start="4">
-<li>Observe the project's code style</li>
-</ol>
-<p>While you're making changes, make sure to run the linter-watcher to catch any
-linting errors (in addition to making sure your text editor supports ESLint)</p>
-<pre class="prettyprint source lang-shell"><code>node_modules/.bin/gulp watch
-</code></pre>
-<h2>Usage</h2>
-<p>For information on how to use js-soroban-client, take a look at <a href="https://stellar.github.io/js-soroban-client/">the
-documentation</a>, or <a href="https://github.com/stellar/js-soroban-client/tree/master/docs/reference">the
-examples</a>.</p>
-<h2>Testing</h2>
-<p>To run all tests:</p>
-<pre class="prettyprint source lang-shell"><code>gulp test
-</code></pre>
-<p>To run a specific set of tests:</p>
-<pre class="prettyprint source lang-shell"><code>gulp test:node
-gulp test:browser
-</code></pre>
-<p>To generate and check the documentation site:</p>
-<pre class="prettyprint source lang-shell"><code># install the `serve` command if you don't have it already
-yarn install -g serve
-
-# generate the docs files
-yarn docs
-
-# get these files working in a browser
-cd jsdoc && serve .
-
-# you'll be able to browse the docs at http://localhost:5000
-</code></pre>
-<h2>Documentation</h2>
-<p>Documentation for this repo lives in
-<a href="https://github.com/stellar/js-soroban-client/blob/master/docs/reference/readme.md">Developers site</a>.</p>
-<h2>Contributing</h2>
-<p>For information on how to contribute, please refer to our
-<a href="https://github.com/stellar/js-soroban-client/blob/master/CONTRIBUTING.md">contribution guide</a>.</p>
-<h2>Publishing to npm</h2>
-<p>See <a href="./CONTRIBUTING.md">CONTRIBUTING.md</a> for the detailed release process. Once a new release is published and CI passes, a new package will be published to npm by GitHub actions.</p>
-<h2>License</h2>
-<p>js-soroban-client is licensed under an Apache-2.0 license. See the
-<a href="https://github.com/stellar/js-soroban-client/blob/master/LICENSE">LICENSE</a> file
-for details.</p></article>
+        </article>
     </section>
-
-
 
 
 
