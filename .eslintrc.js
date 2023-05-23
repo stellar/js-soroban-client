@@ -1,9 +1,10 @@
 module.exports = {
+  parser: "@babel/eslint-parser",
   env: {
-    node: true
+    node: true,
   },
-  extends: ['eslint:recommended', 'plugin:node/recommended'],
+  extends: ["eslint:recommended", "plugin:node/recommended"],
   rules: {
-    'node/no-unpublished-require': 0
-  }
+    "node/no-unpublished-require": 0,
+  },
 };

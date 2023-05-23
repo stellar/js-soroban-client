@@ -1,22 +1,22 @@
 const MockAdapter = require("axios-mock-adapter");
 
-describe("Server#getAccount", function() {
+describe("Server#getAccount", function () {
   const { Account, StrKey, xdr } = SorobanClient;
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.axiosMock.verify();
     this.axiosMock.restore();
   });
 
-  it("requests the correct method", function(done) {
+  it("requests the correct method", function (done) {
     const address = "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI";
     const accountId = xdr.PublicKey.publicKeyTypeEd25519(
-      StrKey.decodeEd25519PublicKey(address),
+      StrKey.decodeEd25519PublicKey(address)
     );
 
     this.axiosMock
@@ -47,17 +47,17 @@ describe("Server#getAccount", function() {
               ],
             },
           },
-        }),
+        })
       );
 
     const expected = new Account(address, "1");
     this.server
       .getAccount(address)
-      .then(function(response) {
+      .then(function (response) {
         expect(response).to.be.deep.equal(expected);
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
   });

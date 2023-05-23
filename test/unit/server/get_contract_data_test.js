@@ -1,13 +1,13 @@
 const MockAdapter = require("axios-mock-adapter");
 let xdr = SorobanClient.xdr;
 
-describe("Server#getContractData", function() {
-  beforeEach(function() {
+describe("Server#getContractData", function () {
+  beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.axiosMock.verify();
     this.axiosMock.restore();
   });
@@ -18,7 +18,7 @@ describe("Server#getContractData", function() {
     SorobanClient.xdr.ScVal.scvSymbol("Admin"),
   ]);
 
-  it("key found", function(done) {
+  it("key found", function (done) {
     let result = {
       id: address,
       sequence: "1",
@@ -53,16 +53,16 @@ describe("Server#getContractData", function() {
 
     this.server
       .getContractData(address, key)
-      .then(function(response) {
+      .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
   });
 
-  it("key not found", function(done) {
+  it("key not found", function (done) {
     this.axiosMock
       .expects("post")
       .withArgs(serverUrl, {
@@ -84,14 +84,14 @@ describe("Server#getContractData", function() {
 
     this.server
       .getContractData(address, key)
-      .then(function(_response) {
+      .then(function (_response) {
         done(new Error("Expected error"));
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(
           err.code == 404
             ? null
-            : new Error("Expected error code 404, got: " + err.code),
+            : new Error("Expected error code 404, got: " + err.code)
         );
       });
   });

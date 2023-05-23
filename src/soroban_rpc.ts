@@ -46,6 +46,14 @@ export namespace SorobanRpc {
     protocolVersion: string;
   }
 
+  /* Response for jsonrpc method `getLatestLedger`
+   */
+  export interface GetLatestLedgerResponse {
+    id: string;
+    sequence: number;
+    protocolVersion: string;
+  }
+
   export type GetTransactionStatus = "SUCCESS" | "NOT_FOUND" | "FAILED";
 
   export interface GetTransactionResponse {
@@ -109,16 +117,22 @@ export namespace SorobanRpc {
     latestLedgerCloseTime: number;
   }
 
+  export interface SimulateHostFunctionResult {
+    // each string is ContractAuth XDR in base64
+    auth: string[];
+    // function response as SCVal XDR in base64
+    xdr: string;
+  }
+
   export interface SimulateTransactionResponse {
     id: string;
-    cost: Cost;
-    results?: Array<{
-      xdr: string;
-      footprint: string;
-      auth: string[];
-      events: string[];
-    }>;
     error?: jsonrpc.Error;
+    // this is SorobanTransactionData XDR in base64
+    transactionData: string;
+    events: string[];
+    minResourceFee: string;
+    results: SimulateHostFunctionResult[];
     latestLedger: number;
+    cost: Cost;
   }
 }

@@ -1,6 +1,6 @@
 {
   "source": {
-    "include": ["libdocs", "js-stellar-base/src"],
+    "include": ["lib", "js-stellar-base/src"],
     "exclude": "js-stellar-base/src/generated"
   },
   "opts": {

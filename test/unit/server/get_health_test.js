@@ -1,17 +1,17 @@
 const MockAdapter = require("axios-mock-adapter");
 
-describe("Server#getHealth", function() {
-  beforeEach(function() {
+describe("Server#getHealth", function () {
+  beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.axiosMock.verify();
     this.axiosMock.restore();
   });
 
-  it("requests the correct endpoint", function(done) {
+  it("requests the correct endpoint", function (done) {
     let result = {
       status: "healthy",
     };
@@ -22,17 +22,17 @@ describe("Server#getHealth", function() {
         jsonrpc: "2.0",
         id: 1,
         method: "getHealth",
-        params: [],
+        params: null,
       })
       .returns(Promise.resolve({ data: { result } }));
 
     this.server
       .getHealth()
-      .then(function(response) {
+      .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
   });

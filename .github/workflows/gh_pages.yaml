@@ -8,14 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout SDK
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Checkout Base
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: stellar/js-stellar-base
+          ref: soroban
           path: js-stellar-base
 
       - name: Install Node (14.x)
@@ -26,17 +27,14 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
-      - name: Build
-        run: gulp
-
       - name: Checkout GH pages
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: stellar/js-soroban-client
           ref: gh-pages
           path: jsdoc
 
-      - name: Generate JS docs
+      - name: Build package and generate JS docs
         continue-on-error: true
         run: yarn docs
 

@@ -1,11 +1,11 @@
-describe("Server#sendTransaction", function() {
+describe("Server#sendTransaction", function () {
   let keypair = SorobanClient.Keypair.random();
   let account = new SorobanClient.Account(
     keypair.publicKey(),
-    "56199647068161",
+    "56199647068161"
   );
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
     let transaction = new SorobanClient.TransactionBuilder(account, {
@@ -19,7 +19,7 @@ describe("Server#sendTransaction", function() {
             "GASOCNHNNLYFNMDJYQ3XFMI7BYHIOCFW3GJEOWRPEGK2TDPGTG2E5EDW",
           asset: SorobanClient.Asset.native(),
           amount: "100.50",
-        }),
+        })
       )
       .setTimeout(SorobanClient.TimeoutInfinite)
       .build();
@@ -27,18 +27,15 @@ describe("Server#sendTransaction", function() {
 
     this.transaction = transaction;
     this.hash = this.transaction.hash().toString("hex");
-    this.blob = transaction
-      .toEnvelope()
-      .toXDR()
-      .toString("base64");
+    this.blob = transaction.toEnvelope().toXDR().toString("base64");
   });
 
-  afterEach(function() {
+  afterEach(function () {
     this.axiosMock.verify();
     this.axiosMock.restore();
   });
 
-  it("sends a transaction", function(done) {
+  it("sends a transaction", function (done) {
     this.axiosMock
       .expects("post")
       .withArgs(serverUrl, {
@@ -50,15 +47,15 @@ describe("Server#sendTransaction", function() {
       .returns(
         Promise.resolve({
           data: { id: 1, result: { id: this.hash, status: "PENDING" } },
-        }),
+        })
       );
 
     this.server
       .sendTransaction(this.transaction)
-      .then(function() {
+      .then(function () {
         done();
       })
-      .catch(function(err) {
+      .catch(function (err) {
         done(err);
       });
   });
