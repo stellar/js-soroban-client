@@ -8,9 +8,9 @@ describe("assembleTransaction", () => {
       address: SorobanClient.xdr.ScAddress.scAddressTypeAccount(
         SorobanClient.xdr.PublicKey.publicKeyTypeEd25519(
           SorobanClient.StrKey.decodeEd25519PublicKey(
-            "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI",
-          ),
-        ),
+            "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI"
+          )
+        )
       ),
       nonce: SorobanClient.xdr.Uint64.fromString("0"),
     }),
@@ -45,9 +45,7 @@ describe("assembleTransaction", () => {
     results: [
       {
         auth: [fnAuth.toXDR("base64")],
-        xdr: SorobanClient.xdr.ScVal.scvU32(0)
-          .toXDR()
-          .toString("base64"),
+        xdr: SorobanClient.xdr.ScVal.scvU32(0).toXDR().toString("base64"),
       },
     ],
     latestLedger: 3,
@@ -72,7 +70,7 @@ describe("assembleTransaction", () => {
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
             args: new SorobanClient.xdr.HostFunctionArgs.hostFunctionTypeInvokeContract(
-              [],
+              []
             ),
             auth: [],
           })
@@ -86,28 +84,17 @@ describe("assembleTransaction", () => {
       const result = SorobanClient.assembleTransaction(
         txn,
         networkPassphrase,
-        simulationResponse,
+        simulationResponse
       );
 
       // validate it auto updated the tx fees from sim response fees
       // since it was greater than tx.fee
-      expect(
-        result
-          .toEnvelope()
-          .v1()
-          .tx()
-          .fee(),
-      ).to.equal(215);
+      expect(result.toEnvelope().v1().tx().fee()).to.equal(215);
 
       // validate it udpated sorobantransactiondata block in the tx ext
-      expect(
-        result
-          .toEnvelope()
-          .v1()
-          .tx()
-          .ext()
-          .sorobanData(),
-      ).to.deep.equal(sorobanTransactionData);
+      expect(result.toEnvelope().v1().tx().ext().sorobanData()).to.deep.equal(
+        sorobanTransactionData
+      );
     });
 
     it("simulate adds the auth to the host function in tx operation", () => {
@@ -115,7 +102,7 @@ describe("assembleTransaction", () => {
       const result = SorobanClient.assembleTransaction(
         txn,
         networkPassphrase,
-        simulationResponse,
+        simulationResponse
       );
 
       expect(
@@ -130,7 +117,7 @@ describe("assembleTransaction", () => {
           .auth()[0]
           .rootInvocation()
           .functionName()
-          .toString(),
+          .toString()
       ).to.equal("fn");
 
       expect(
@@ -147,9 +134,32 @@ describe("assembleTransaction", () => {
             .addressWithNonce()
             .address()
             .accountId()
-            .ed25519(),
-        ),
+            .ed25519()
+        )
       ).to.equal("GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI");
+    });
+
+    it("simulate ignores non auth from simulation", () => {
+      const txn = singleContractFnTransaction();
+      let simulateResp = JSON.parse(JSON.stringify(simulationResponse));
+      simulateResp.results[0].auth = null;
+      const result = SorobanClient.assembleTransaction(
+        txn,
+        networkPassphrase,
+        simulateResp
+      );
+
+      expect(
+        result
+          .toEnvelope()
+          .v1()
+          .tx()
+          .operations()[0]
+          .body()
+          .invokeHostFunctionOp()
+          .functions()[0]
+          .auth()
+      ).to.have.length(0);
     });
 
     it("throws for non-invokehost-fn ops", () => {
@@ -177,7 +187,7 @@ describe("assembleTransaction", () => {
         expect.fail();
       } catch (err) {
         expect(err.toString()).to.equal(
-          "Error: unsupported operation type, must be only one InvokeHostFunctionOp in the transaction.",
+          "Error: unsupported operation type, must be only one InvokeHostFunctionOp in the transaction."
         );
       }
     });
@@ -193,18 +203,18 @@ describe("assembleTransaction", () => {
             functions: [
               new SorobanClient.xdr.HostFunction({
                 args: new SorobanClient.xdr.HostFunctionArgs.hostFunctionTypeInvokeContract(
-                  [],
+                  []
                 ),
                 auth: [],
               }),
               new SorobanClient.xdr.HostFunction({
                 args: new SorobanClient.xdr.HostFunctionArgs.hostFunctionTypeInvokeContract(
-                  [],
+                  []
                 ),
                 auth: [],
               }),
             ],
-          }),
+          })
         )
         .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
@@ -213,12 +223,12 @@ describe("assembleTransaction", () => {
         SorobanClient.assembleTransaction(
           txn,
           networkPassphrase,
-          simulationResponse,
+          simulationResponse
         );
         expect.fail();
       } catch (err) {
         expect(err.toString()).to.equal(
-          "Error: preflight simulation results do not contain same count of HostFunctions that InvokeHostFunctionOp in the transaction has.",
+          "Error: preflight simulation results do not contain same count of HostFunctions that InvokeHostFunctionOp in the transaction has."
         );
       }
     });
@@ -232,7 +242,7 @@ describe("assembleTransaction", () => {
         .addOperation(
           SorobanClient.Operation.invokeHostFunctions({
             functions: [],
-          }),
+          })
         )
         .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
@@ -266,7 +276,7 @@ describe("assembleTransaction", () => {
           .operations()[0]
           .body()
           .invokeHostFunctionOp()
-          .functions(),
+          .functions()
       ).to.have.length(0);
     });
   });

@@ -36,9 +36,7 @@ describe("Server#simulateTransaction", function () {
             signatureArgs: [],
           }).toXDR("base64"),
         ],
-        xdr: SorobanClient.xdr.ScVal.scvU32(0)
-          .toXDR()
-          .toString("base64"),
+        xdr: SorobanClient.xdr.ScVal.scvU32(0).toXDR().toString("base64"),
       },
     ],
     latestLedger: 3,
@@ -48,12 +46,12 @@ describe("Server#simulateTransaction", function () {
     },
   };
 
-  beforeEach(function() {
+  beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
     const source = new SorobanClient.Account(
       "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI",
-      "1",
+      "1"
     );
     function emptyContractTransaction() {
       return new SorobanClient.TransactionBuilder(source, {
@@ -64,10 +62,10 @@ describe("Server#simulateTransaction", function () {
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
             args: new SorobanClient.xdr.HostFunctionArgs.hostFunctionTypeInvokeContract(
-              [],
+              []
             ),
             auth: [],
-          }),
+          })
         )
         .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
@@ -86,7 +84,7 @@ describe("Server#simulateTransaction", function () {
     this.axiosMock.restore();
   });
 
-  it("simulates a transaction", function(done) {
+  it("simulates a transaction", function (done) {
     this.axiosMock
       .expects("post")
       .withArgs(serverUrl, {
@@ -96,12 +94,12 @@ describe("Server#simulateTransaction", function () {
         params: [this.blob],
       })
       .returns(
-        Promise.resolve({ data: { id: 1, result: simulationResponse } }),
+        Promise.resolve({ data: { id: 1, result: simulationResponse } })
       );
 
     this.server
       .simulateTransaction(this.transaction)
-      .then(function(response) {
+      .then(function (response) {
         expect(response).to.be.deep.equal(simulationResponse);
         done();
       })

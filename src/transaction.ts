@@ -94,8 +94,12 @@ export function assembleTransaction(
 
 function buildContractAuth(auths: string[]): xdr.ContractAuth[] {
   const contractAuths: xdr.ContractAuth[] = [];
-  for (const authStr of auths) {
-    contractAuths.push(xdr.ContractAuth.fromXDR(authStr, "base64"));
+  
+  if (auths) {
+    for (const authStr of auths) {
+      contractAuths.push(xdr.ContractAuth.fromXDR(authStr, "base64"));
+    }
   }
+
   return contractAuths;
 }
