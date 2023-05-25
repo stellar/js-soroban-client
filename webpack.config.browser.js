@@ -22,11 +22,12 @@ const config = {
   },
   output: {
     clean: true,
-    library: "SorobanClient",
-    libraryTarget: "umd",
-    libraryExport: "default",
-    export: "default",
-    umdNamedDefine: true,
+    library: {
+      name: "SorobanClient",
+      export: "default",
+      type: "umd",
+      umdNamedDefine: true,
+    },
     compareBeforeEmit: true,
     path: path.resolve(__dirname, "./dist"),
   },
