@@ -24,7 +24,6 @@ const config = {
     clean: true,
     library: {
       name: "SorobanClient",
-      export: "default",
       type: "umd",
       umdNamedDefine: true,
     },
