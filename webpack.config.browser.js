@@ -28,7 +28,6 @@ const config = {
       type: "umd",
       umdNamedDefine: true,
     },
-    compareBeforeEmit: true,
     path: path.resolve(__dirname, "./dist"),
   },
   mode: process.env.NODE_ENV ?? "development",

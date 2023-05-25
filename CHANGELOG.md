@@ -8,6 +8,18 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v0.7.1
+
+### Fixed
+* The module was not being exported correctly in browser environments; the following should now work in your project ([#TODO](https://github.com/stellar/js-soroban-client/pull/TODO)):
+
+```ts
+import * as SorobanClient from 'soroban-client';
+```
+
+* The browser bundles compatibility has increased, supporting older JS environments and undoing [#90](https://github.com/stellar/js-soroban-client/pull/90) from v0.7.0 ([TODO](https://github.com/stellar/js-soroban-client/pull/TODO)).
+
+
 ## v0.7.0
 
 ### Breaking
