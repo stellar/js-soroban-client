@@ -17,7 +17,7 @@
     "soroban"
   ],
   "main": "./lib/index.js",
-  "browser": "./dist/soroban-client.js",
+  "browser": "./dist/soroban-client.min.js",
   "types": "./lib/index.d.ts",
   "files": [
     "/types",
