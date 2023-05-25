@@ -24,6 +24,7 @@ const config = {
     clean: true,
     library: "SorobanClient",
     libraryTarget: "umd",
+    libraryExport: "default",
     umdNamedDefine: true,
     compareBeforeEmit: true,
     path: path.resolve(__dirname, "./dist"),
