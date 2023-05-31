@@ -4,7 +4,7 @@ import isEmpty from "lodash/isEmpty";
 import merge from "lodash/merge";
 import {
   Account,
-  Address,
+  Contract,
   FeeBumpTransaction,
   StrKey,
   Transaction,
@@ -151,12 +151,9 @@ export class Server {
     contractId: string,
     key: xdr.ScVal,
   ): Promise<SorobanRpc.LedgerEntryResult> {
-    const buf = contractId.startsWith("C")
-      ? Address.fromString(contractId).toBuffer()
-      : Buffer.from(contractId, "hex");
     const contractKey = xdr.LedgerKey.contractData(
       new xdr.LedgerKeyContractData({
-        contractId: buf,
+        contractId: new Contract(contractId).address().toBuffer(),
         key,
       }),
     ).toXDR("base64");
