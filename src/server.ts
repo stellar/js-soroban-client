@@ -4,6 +4,7 @@ import isEmpty from "lodash/isEmpty";
 import merge from "lodash/merge";
 import {
   Account,
+  Address,
   FeeBumpTransaction,
   StrKey,
   Transaction,
@@ -132,7 +133,7 @@ export class Server {
    * Reads the current value of contract data ledger entries directly.
    *
    * @example
-   * const contractId = "0000000000000000000000000000000000000000000000000000000000000001";
+   * const contractId = "CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5";
    * const key = xdr.ScVal.scvSymbol("counter");
    * server.getContractData(contractId, key).then(data => {
    *   console.log("value:", data.xdr);
@@ -142,7 +143,7 @@ export class Server {
    *
    * Allows you to directly inspect the current state of a contract. This is a backup way to access your contract data which may not be available via events or simulateTransaction.
    *
-   * @param {string} contractId - The contract ID containing the data to load. Encoded as a hex string.
+   * @param {string} contractId - The contract ID containing the data to load. Encoded as Stellar Contract Address e.g. `CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5` or a hex string for backwards compatibility, but will likely be deprecated in the future.
    * @param {xdr.ScVal} key - The key of the contract data to load.
    * @returns {Promise<SorobanRpc.LedgerEntryResult>} Returns a promise to the {@link SorobanRpc.LedgerEntryResult} object with the current value.
    */
@@ -150,9 +151,12 @@ export class Server {
     contractId: string,
     key: xdr.ScVal,
   ): Promise<SorobanRpc.LedgerEntryResult> {
+    const buf = contractId.startsWith("C")
+      ? Address.fromString(contractId).toBuffer()
+      : Buffer.from(contractId, "hex");
     const contractKey = xdr.LedgerKey.contractData(
       new xdr.LedgerKeyContractData({
-        contractId: Buffer.from(contractId, "hex"),
+        contractId: buf,
         key,
       }),
     ).toXDR("base64");
