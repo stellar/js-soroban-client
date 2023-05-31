@@ -8,6 +8,19 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v0.8.0
+
+### Added
+
+* `Server.getContractId()` now accepts a contract strkey ([#97](https://github.com/stellar/js-soroban-client/pull/97)).
+
+### Updated
+
+* The XDR library (`stellar-base`) has been upgraded to handle contract strkeys (`C...` addresses) better (see [#612](https://github.com/stellar/js-stellar-base/pull/612) and [#614](https://github.com/stellar/js-stellar-base/pull/614) of [`stellar-base`](https://github.com/stellar/js-stellar-base)) ([#98](https://github.com/stellar/js-soroban-client/pull/98)).
+
+* Misc. dependencies have been upgraded and the `buffer` polyfill is now a primary dependency ([#98](https://github.com/stellar/js-soroban-client/pull/98)).
+
+
 ## v0.7.2
 
 ### Fixed
