@@ -12,7 +12,7 @@ A breaking change should be clearly marked in this log.
 
 ### Fix
 
-* The `stellar-base` library is pinned to a specific version so that a fresh installation (via e.g. `npm i soroban-client`) does not pull the latest major version (without Soroban support) ([]()).
+* The `stellar-base` library is pinned to a specific version so that a fresh installation (via e.g. `npm i soroban-client`) does not pull the latest major version (without Soroban support) ([#100](https://github.com/stellar/js-soroban-client/pull/100)).
 
 
 ## v0.8.0
