@@ -4582,10 +4582,10 @@ js-tokens@^4.0.0:
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
   integrity sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==
 
-js-xdr@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/js-xdr/-/js-xdr-2.0.0.tgz#ef24ea27369ab60217c001fd0e27301f6981ba0a"
-  integrity sha512-4mctWHR47ejNcfpE8/Xl3l2wYqO1Qy09d1pveZRmarUz2BcuU/M8grzadxV6PoN/X0ywOb6cy6117qYUWkfeBA==
+js-xdr@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/js-xdr/-/js-xdr-3.0.0.tgz#fb74275de0ed3cec61269721140a576edf6fca7e"
+  integrity sha512-tSt6UKJ2L7t+yaQURGkHo9kop9qnVbChTlCu62zNiDbDZQoZb/YjUj2iFJ3lgelhfg9p5bhO2o/QX+g36TPsSQ==
 
 js-yaml@4.1.0, js-yaml@^4.1.0:
   version "4.1.0"
@@ -6412,16 +6412,16 @@ statuses@~1.5.0:
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.5.0.tgz#161c7dac177659fd9811f43771fa99381478628c"
   integrity sha512-OpZ3zP+jT1PI7I8nemJX4AKmAX070ZkYPVWV/AaKTJl+tXCTGyVdC1a4SL8RUQYEwk/f34ZX8UTykN68FwrqAA==
 
-stellar-base@9.0.0-soroban.3:
+"stellar-base@git+https://github.com/stellar/js-stellar-base.git#soroban":
   version "9.0.0-soroban.3"
-  resolved "https://registry.yarnpkg.com/stellar-base/-/stellar-base-9.0.0-soroban.3.tgz#ac3a497de5fd86ffeda2ab77f26a04054fb71670"
-  integrity sha512-PaeIrspURhbDA0FSkH/mu/lQxxSYPplOdhIcW4VqmKW2kMm/ADXjyQr1y4tFIfv8EpIe5DCJ6sfIyadIoPd8HQ==
+  resolved "git+https://github.com/stellar/js-stellar-base.git#048fcaaab15716866a0189a77a2d9d6c3ad59589"
   dependencies:
     base32.js "^0.1.0"
     bignumber.js "^9.1.1"
+    buffer "^6.0.3"
     crc "^4.3.2"
     crypto-browserify "^3.12.0"
-    js-xdr "^2.0.0"
+    js-xdr "^3.0.0"
     lodash "^4.17.21"
     sha.js "^2.3.6"
     tweetnacl "^1.0.3"
