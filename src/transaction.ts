@@ -71,7 +71,7 @@ export function assembleTransaction(
           xdr.SorobanAuthorizationEntry.fromXDR(a, "base64")
         ) ?? []
       ),
-    } as unknown as OperationOptions.InvokeHostFunction /* until .1 is released */),
+    });
   );
 
   // apply the pre-built Soroban Tx Data from simulation onto the Tx
