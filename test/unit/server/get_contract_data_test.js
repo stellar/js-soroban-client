@@ -1,6 +1,6 @@
 const MockAdapter = require("axios-mock-adapter");
-let xdr = SorobanClient.xdr;
-const { Address } = require("stellar-base");
+const xdr = SorobanClient.xdr;
+const Address = SorobanClient.Address;
 
 describe("Server#getContractData", function () {
   beforeEach(function () {
