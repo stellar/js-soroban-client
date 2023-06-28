@@ -131,7 +131,7 @@ export namespace SorobanRpc {
     transactionData: string;
     events: string[];
     minResourceFee: string;
-    result: SimulateHostFunctionResult;
+    results: SimulateHostFunctionResult[]; // always one element, tho
     latestLedger: number;
     cost: Cost;
   }

@@ -151,54 +151,91 @@ export class Server {
    * backup way to access your contract data which may not be available via
    * events or simulateTransaction.
    *
+   * By default, we will request both the 'temporary' and 'persistent' versions of this
+   *
    * @param {string} contractId - The contract ID containing the data to load.
    *    Encoded as Stellar Contract Address e.g.
    *    `CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5` or a hex
    *    string for backwards compatibility, but will likely be deprecated in the
    *    future.
    * @param {xdr.ScVal} key - The key of the contract data to load.
-   * @param {string} durability - either 'persistent' or 'temporary' (the
-   *    default), indicating the expiration type of the contract data
+   * @param {string} [expirationType] - The "durability keyspace" that this
+   *    ledger key belongs to. By default, it tries requesting both the
+   *    'temporary' and 'persistent' versions so that you don't need to track
+   *    this separately.
+   *
+   *    WARNING: In the default case, only one should *actually* exist! If BOTH
+   *    exist, this function will throw as it cannot distinguish between them.
    *
    * @returns {Promise<SorobanRpc.LedgerEntryResult>} Returns a promise to the
    *    {@link SorobanRpc.LedgerEntryResult} object with the current value.
+   *
+   * @warning If the data entry in question is a 'temporary' entry, it's
+   *    entirely possible that it has expired out of existence. Future versions
+   *    of this client may provide abstractions to handle that.
    */
   public async getContractData(
     contractId: string,
     key: xdr.ScVal,
-    durability: 'temporary' | 'persistent' = 'temporary',
+    expirationType?: 'temporary' | 'persistent' | undefined
   ): Promise<SorobanRpc.LedgerEntryResult> {
-    let contractDurability: xdr.ContractDataDurability;
-    switch (durability) {
-      case 'temporary':
-        contractDurability = xdr.ContractDataDurability.temporary();
-        break;
+    //
+    // We query both the temporary and persistent keyspace by default so that
+    // the user doesn't have to care about the "durability keyspace" of the
+    // ledger key.
+    //
+    const [ persistentKey, temporaryKey ] = [
+      xdr.LedgerKey.contractData(
+        new xdr.LedgerKeyContractData({
+          contract: new Contract(contractId).address().toScAddress(),
+          key,
+          durability: xdr.ContractDataDurability.persistent(),
+          bodyType: xdr.ContractEntryBodyType.dataEntry() // expirationExtension is internal
+        })
+      ).toXDR("base64"),
+      xdr.LedgerKey.contractData(
+        new xdr.LedgerKeyContractData({
+          contract: new Contract(contractId).address().toScAddress(),
+          key,
+          durability: xdr.ContractDataDurability.temporary(),
+          bodyType: xdr.ContractEntryBodyType.dataEntry()
+        })
+      ).toXDR("base64"),
+    ];
+
+    let requested: string[];
+    switch (expirationType) {
       case undefined:
+        requested = [persistentKey, temporaryKey];
+        break;
+
+      case 'temporary':
+        requested = [temporaryKey];
+        break;
+
       case 'persistent':
-        contractDurability = xdr.ContractDataDurability.persistent();
+        requested = [persistentKey];
         break;
     }
-
-    const contractKey = xdr.LedgerKey.contractData(
-      new xdr.LedgerKeyContractData({
-        contract: new Contract(contractId).address().toScAddress(),
-        key,
-        durability: contractDurability,
-        bodyType: xdr.ContractEntryBodyType.dataEntry() // expirationExtension
-      })
-    ).toXDR("base64");
 
     const getLedgerEntriesResponse: SorobanRpc.GetLedgerEntriesResponse = await jsonrpc.post(
       this.serverURL.toString(),
       "getLedgerEntries",
-      [contractKey],
+      requested,
     );
+
     if (getLedgerEntriesResponse.entries.length === 0) {
       return Promise.reject({
         code: 404,
-        message: "Ledger entry not found. Key: " + contractKey,
+        message: `Ledger entry not found. Key(s): [${requested.join(', ')}]`
       });
+    } else if (getLedgerEntriesResponse.entries.length > 1) {
+      return Promise.reject({
+        code: 409,
+        message: `Multiple ledger entries found, specify keyspace. Key(s): [${requested.join(', ')}]`,
+      })
     }
+
     return getLedgerEntriesResponse.entries[0];
   }
 
@@ -502,7 +539,7 @@ export class Server {
     if (simResponse.error) {
       throw simResponse.error;
     }
-    if (!simResponse.result) {
+    if (!simResponse.results || simResponse.results.length !== 1) {
       throw new Error("transaction simulation failed");
     }
     return assembleTransaction(transaction, passphrase, simResponse);

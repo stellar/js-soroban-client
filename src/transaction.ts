@@ -33,6 +33,10 @@ export function assembleTransaction(
     );
   }
 
+  if( simulation.results.length !== 1) {
+    throw new Error(`simulation results invalid: ${simulation.results}`);
+  }
+
 
   const source = new Account(raw.source, `${parseInt(raw.sequence, 10) - 1}`);
   const classicFeeNum = parseInt(raw.fee, 10) || 0;
@@ -63,8 +67,8 @@ export function assembleTransaction(
     Operation.invokeHostFunction({
       func: invokeOp.func,
       auth: (invokeOp.auth ?? []).concat(
-        simulation.result.auth?.map(authStr =>
-          xdr.SorobanAuthorizationEntry.fromXDR(authStr, "base64")
+        simulation.results[0].auth?.map((a: string) =>
+          xdr.SorobanAuthorizationEntry.fromXDR(a, "base64")
         ) ?? []
       ),
     } as unknown as OperationOptions.InvokeHostFunction /* until .1 is released */),

@@ -51,10 +51,12 @@ describe("assembleTransaction", () => {
     transactionData: sorobanTransactionData.toXDR("base64"),
     events: [],
     minResourceFee: "115",
-    result: {
-      auth: [fnAuth.toXDR("base64")],
-      xdr: SorobanClient.xdr.ScVal.scvU32(0).toXDR().toString("base64"),
-    },
+    results: [
+      {
+        auth: [fnAuth.toXDR("base64")],
+        xdr: SorobanClient.xdr.ScVal.scvU32(0).toXDR().toString("base64"),
+      },
+    ],
     latestLedger: 3,
     cost: {
       cpuInsns: "0",
@@ -150,7 +152,7 @@ describe("assembleTransaction", () => {
     it("simulate ignores non auth from simulation", () => {
       const txn = singleContractFnTransaction();
       let simulateResp = JSON.parse(JSON.stringify(simulationResponse));
-      simulateResp.result.auth = null;
+      simulateResp.results[0].auth = null;
       const result = SorobanClient.assembleTransaction(
         txn,
         networkPassphrase,

@@ -37,10 +37,12 @@ describe("Server#getContractData", function () {
           [
             xdr.LedgerKey.contractData(
               new xdr.LedgerKeyContractData({
-                contract: new Address(nonHexAddress).toScAddress(),
+                contract: new SorobanClient.Contract(address)
+                  .address()
+                  .toScAddress(),
                 key,
                 durability: xdr.ContractDataDurability.persistent(),
-                bodyType: xdr.ContractEntryBodyType.dataEntry()
+                bodyType: xdr.ContractEntryBodyType.dataEntry(),
               })
             ).toXDR("base64"),
           ],
@@ -57,7 +59,7 @@ describe("Server#getContractData", function () {
       );
 
     this.server
-      .getContractData(address, key, 'persistent')
+      .getContractData(address, key, "persistent")
       .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -78,10 +80,12 @@ describe("Server#getContractData", function () {
           [
             xdr.LedgerKey.contractData(
               new xdr.LedgerKeyContractData({
-                contract: new Address(nonHexAddress).toScAddress(),
+                contract: new SorobanClient.Contract(address)
+                  .address()
+                  .toScAddress(),
                 key,
-                durability: xdr.ContractDataDurability.persistent(),
-                bodyType: xdr.ContractEntryBodyType.dataEntry()
+                durability: xdr.ContractDataDurability.temporary(),
+                bodyType: xdr.ContractEntryBodyType.dataEntry(),
               })
             ).toXDR("base64"),
           ],
@@ -90,7 +94,7 @@ describe("Server#getContractData", function () {
       .returns(Promise.resolve({ data: { result: { entries: [] } } }));
 
     this.server
-      .getContractData(address, key)
+      .getContractData(address, key, "temporary")
       .then(function (_response) {
         done(new Error("Expected error"));
       })
@@ -117,7 +121,7 @@ describe("Server#getContractData", function () {
                 contract: new Address(nonHexAddress).toScAddress(),
                 key,
                 durability: xdr.ContractDataDurability.persistent(),
-                bodyType: xdr.ContractEntryBodyType.dataEntry()
+                bodyType: xdr.ContractEntryBodyType.dataEntry(),
               })
             ).toXDR("base64"),
           ],
