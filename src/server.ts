@@ -28,18 +28,24 @@ export interface GetEventsRequest {
 }
 
 /**
- * Server handles the network connection to a [Soroban-RPC](https://soroban.stellar.org/docs)
- * instance and exposes an interface for requests to that instance.
+ * Server handles the network connection to a
+ * [Soroban-RPC](https://soroban.stellar.org/docs) instance and exposes an
+ * interface for requests to that instance.
+ *
  * @constructor
- * @param {string} serverURL Soroban-RPC Server URL (ex. `http://localhost:8000/soroban/rpc`).
+ *
+ * @param {string} serverURL Soroban-RPC Server URL (ex.
+ *    `http://localhost:8000/soroban/rpc`).
  * @param {object} [opts] Options object
- * @param {boolean} [opts.allowHttp] - Allow connecting to http servers, default: `false`. This must be set to false in production deployments! You can also use {@link Config} class to set this globally.
- * @param {string} [opts.appName] - Allow set custom header `X-App-Name`, default: `undefined`.
- * @param {string} [opts.appVersion] - Allow set custom header `X-App-Version`, default: `undefined`.
+ * @param {boolean} [opts.allowHttp] - Allow connecting to http servers,
+ *    default: `false`. This must be set to false in production deployments! You
+ *    can also use {@link Config} class to set this globally.
+ * @param {string} [opts.appName] - Allow set custom header `X-App-Name`
+ * @param {string} [opts.appVersion] - Allow set custom header `X-App-Version`
  */
 export class Server {
   /**
-   * serverURL Soroban-RPC Server URL (ex. `http://localhost:8000/soroban/rpc`).
+   * Soroban-RPC Server URL (ex. `http://localhost:8000/soroban/rpc`).
    */
   public readonly serverURL: URI;
 
@@ -141,22 +147,47 @@ export class Server {
    *   console.log("latestLedger:", data.latestLedger);
    * });
    *
-   * Allows you to directly inspect the current state of a contract. This is a backup way to access your contract data which may not be available via events or simulateTransaction.
+   * Allows you to directly inspect the current state of a contract. This is a
+   * backup way to access your contract data which may not be available via
+   * events or simulateTransaction.
    *
-   * @param {string} contractId - The contract ID containing the data to load. Encoded as Stellar Contract Address e.g. `CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5` or a hex string for backwards compatibility, but will likely be deprecated in the future.
+   * @param {string} contractId - The contract ID containing the data to load.
+   *    Encoded as Stellar Contract Address e.g.
+   *    `CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5` or a hex
+   *    string for backwards compatibility, but will likely be deprecated in the
+   *    future.
    * @param {xdr.ScVal} key - The key of the contract data to load.
-   * @returns {Promise<SorobanRpc.LedgerEntryResult>} Returns a promise to the {@link SorobanRpc.LedgerEntryResult} object with the current value.
+   * @param {string} durability - either 'persistent' or 'temporary' (the
+   *    default), indicating the expiration type of the contract data
+   *
+   * @returns {Promise<SorobanRpc.LedgerEntryResult>} Returns a promise to the
+   *    {@link SorobanRpc.LedgerEntryResult} object with the current value.
    */
   public async getContractData(
     contractId: string,
     key: xdr.ScVal,
+    durability: 'temporary' | 'persistent' = 'temporary',
   ): Promise<SorobanRpc.LedgerEntryResult> {
+    let contractDurability: xdr.ContractDataDurability;
+    switch (durability) {
+      case 'temporary':
+        contractDurability = xdr.ContractDataDurability.temporary();
+        break;
+      case undefined:
+      case 'persistent':
+        contractDurability = xdr.ContractDataDurability.persistent();
+        break;
+    }
+
     const contractKey = xdr.LedgerKey.contractData(
       new xdr.LedgerKeyContractData({
-        contractId: new Contract(contractId).address().toBuffer(),
+        contract: new Contract(contractId).address().toScAddress(),
         key,
-      }),
+        durability: contractDurability,
+        bodyType: xdr.ContractEntryBodyType.dataEntry() // expirationExtension
+      })
     ).toXDR("base64");
+
     const getLedgerEntriesResponse: SorobanRpc.GetLedgerEntriesResponse = await jsonrpc.post(
       this.serverURL.toString(),
       "getLedgerEntries",
@@ -174,10 +205,9 @@ export class Server {
   /**
    * Reads the current value of ledger entries directly.
    *
-   * Allows you to directly inspect the current state of contracts,
-   * contract's code, or any other ledger entries. This is a backup way to access
-   * your contract data which may not be available via events or
-   * simulateTransaction.
+   * Allows you to directly inspect the current state of contracts, contract's
+   * code, or any other ledger entries. This is a backup way to access your
+   * contract data which may not be available via events or simulateTransaction.
    *
    * To fetch contract wasm byte-code, use the ContractCode ledger entry key.
    *
@@ -196,7 +226,10 @@ export class Server {
    * });
    *
    * @param {xdr.ScVal} key - The key of the contract data to load.
-   * @returns {Promise<SorobanRpc.GetLedgerEntriesResponse>} Returns a promise to the {@link SorobanRpc.GetLedgerEntriesResponse} object with the current value.
+   *
+   * @returns {Promise<SorobanRpc.GetLedgerEntriesResponse>} Returns a promise
+   *    to the {@link SorobanRpc.GetLedgerEntriesResponse} object with the
+   *    current value.
    */
   public async getLedgerEntries(
     keys: xdr.LedgerKey[],
@@ -469,7 +502,7 @@ export class Server {
     if (simResponse.error) {
       throw simResponse.error;
     }
-    if (!simResponse.results || simResponse.results.length < 1) {
+    if (!simResponse.result) {
       throw new Error("transaction simulation failed");
     }
     return assembleTransaction(transaction, passphrase, simResponse);

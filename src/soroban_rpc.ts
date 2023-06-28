@@ -118,8 +118,8 @@ export namespace SorobanRpc {
   }
 
   export interface SimulateHostFunctionResult {
-    // each string is ContractAuth XDR in base64
-    auth: string[];
+    // each string is SorobanAuthorizationEntry XDR in base64
+    auth?: string[];
     // function response as SCVal XDR in base64
     xdr: string;
   }
@@ -131,7 +131,7 @@ export namespace SorobanRpc {
     transactionData: string;
     events: string[];
     minResourceFee: string;
-    results: SimulateHostFunctionResult[];
+    result: SimulateHostFunctionResult;
     latestLedger: number;
     cost: Cost;
   }
