@@ -151,7 +151,8 @@ export class Server {
    * backup way to access your contract data which may not be available via
    * events or simulateTransaction.
    *
-   * By default, we will request both the 'temporary' and 'persistent' versions of this
+   * By default, we will request both the 'temporary' and 'persistent' versions
+   * of the ledger durability. Only one should exist.
    *
    * @param {string} contractId - The contract ID containing the data to load.
    *    Encoded as Stellar Contract Address e.g.
