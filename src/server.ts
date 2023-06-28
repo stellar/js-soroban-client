@@ -177,12 +177,12 @@ export class Server {
   public async getContractData(
     contractId: string,
     key: xdr.ScVal,
-    expirationType?: 'temporary' | 'persistent' | undefined
+    expirationType?: 'temporary' | 'persistent'
   ): Promise<SorobanRpc.LedgerEntryResult> {
     //
-    // We query both the temporary and persistent keyspace by default so that
+    // We query for both the temporary and persistent versions by default so that
     // the user doesn't have to care about the "durability keyspace" of the
-    // ledger key.
+    // ledger key, but we expect only one of them to work.
     //
     const [ persistentKey, temporaryKey ] = [
       xdr.LedgerKey.contractData(
@@ -218,7 +218,9 @@ export class Server {
         break;
     }
 
-    const getLedgerEntriesResponse: SorobanRpc.GetLedgerEntriesResponse = await jsonrpc.post(
+    const getLedgerEntriesResponse = await jsonrpc.post<
+      SorobanRpc.GetLedgerEntriesResponse
+    >(
       this.serverURL.toString(),
       "getLedgerEntries",
       requested,

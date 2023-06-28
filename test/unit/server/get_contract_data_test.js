@@ -130,7 +130,7 @@ describe("Server#getContractData", function () {
       .returns(Promise.resolve({ data: { result: { entries: [] } } }));
 
     this.server
-      .getContractData(nonHexAddress, key)
+      .getContractData(nonHexAddress, key, "persistent")
       .then(function (_response) {
         done(new Error("Expected error"));
       })
