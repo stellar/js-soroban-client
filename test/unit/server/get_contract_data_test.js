@@ -37,8 +37,10 @@ describe("Server#getContractData", function () {
           [
             xdr.LedgerKey.contractData(
               new xdr.LedgerKeyContractData({
-                contractId: Buffer.from(address, "hex"),
+                contract: new Address(nonHexAddress).toScAddress(),
                 key,
+                durability: xdr.ContractDataDurability.persistent(),
+                bodyType: xdr.ContractEntryBodyType.dataEntry()
               })
             ).toXDR("base64"),
           ],
@@ -55,7 +57,7 @@ describe("Server#getContractData", function () {
       );
 
     this.server
-      .getContractData(address, key)
+      .getContractData(address, key, 'persistent')
       .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -76,8 +78,10 @@ describe("Server#getContractData", function () {
           [
             xdr.LedgerKey.contractData(
               new xdr.LedgerKeyContractData({
-                contractId: Buffer.from(address, "hex"),
+                contract: new Address(nonHexAddress).toScAddress(),
                 key,
+                durability: xdr.ContractDataDurability.persistent(),
+                bodyType: xdr.ContractEntryBodyType.dataEntry()
               })
             ).toXDR("base64"),
           ],
@@ -110,8 +114,10 @@ describe("Server#getContractData", function () {
           [
             xdr.LedgerKey.contractData(
               new xdr.LedgerKeyContractData({
-                contractId: Address.fromString(nonHexAddress).toBuffer(),
+                contract: new Address(nonHexAddress).toScAddress(),
                 key,
+                durability: xdr.ContractDataDurability.persistent(),
+                bodyType: xdr.ContractEntryBodyType.dataEntry()
               })
             ).toXDR("base64"),
           ],

@@ -3,24 +3,33 @@ describe("assembleTransaction", () => {
     // TODO: Add support for fee bump transactions
   });
 
-  const fnAuth = new SorobanClient.xdr.ContractAuth({
-    addressWithNonce: new SorobanClient.xdr.AddressWithNonce({
-      address: SorobanClient.xdr.ScAddress.scAddressTypeAccount(
-        SorobanClient.xdr.PublicKey.publicKeyTypeEd25519(
-          SorobanClient.StrKey.decodeEd25519PublicKey(
-            "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI"
-          )
-        )
+  const scAddress = new SorobanClient.Address(
+    "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI"
+  ).toScAddress();
+
+  const fnAuth = new SorobanClient.xdr.SorobanAuthorizationEntry({
+    // Include a credentials w/ a nonce to trigger this
+    credentials:
+      new SorobanClient.xdr.SorobanCredentials.sorobanCredentialsAddress(
+        new SorobanClient.xdr.SorobanAddressCredentials({
+          address: scAddress,
+          nonce: new SorobanClient.xdr.Int64(0),
+          signatureExpirationLedger: 1,
+          signatureArgs: [],
+        })
       ),
-      nonce: SorobanClient.xdr.Uint64.fromString("0"),
-    }),
-    rootInvocation: new SorobanClient.xdr.AuthorizedInvocation({
-      contractId: Buffer.alloc(32),
-      functionName: Buffer.from("fn"),
-      args: [],
+    // And a basic invocation
+    rootInvocation: new SorobanClient.xdr.SorobanAuthorizedInvocation({
+      function:
+        SorobanClient.xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
+          new SorobanClient.xdr.SorobanAuthorizedContractFunction({
+            contractAddress: scAddress,
+            functionName: "fn",
+            args: [],
+          })
+        ),
       subInvocations: [],
     }),
-    signatureArgs: [],
   });
 
   const sorobanTransactionData = new SorobanClient.xdr.SorobanTransactionData({
@@ -42,12 +51,10 @@ describe("assembleTransaction", () => {
     transactionData: sorobanTransactionData.toXDR("base64"),
     events: [],
     minResourceFee: "115",
-    results: [
-      {
-        auth: [fnAuth.toXDR("base64")],
-        xdr: SorobanClient.xdr.ScVal.scvU32(0).toXDR().toString("base64"),
-      },
-    ],
+    result: {
+      auth: [fnAuth.toXDR("base64")],
+      xdr: SorobanClient.xdr.ScVal.scvU32(0).toXDR().toString("base64"),
+    },
     latestLedger: 3,
     cost: {
       cpuInsns: "0",
@@ -69,7 +76,7 @@ describe("assembleTransaction", () => {
       })
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
-            args: new SorobanClient.xdr.HostFunctionArgs.hostFunctionTypeInvokeContract(
+            func: new SorobanClient.xdr.HostFunction.hostFunctionTypeInvokeContract(
               []
             ),
             auth: [],
@@ -113,9 +120,10 @@ describe("assembleTransaction", () => {
           .operations()[0]
           .body()
           .invokeHostFunctionOp()
-          .functions()[0]
           .auth()[0]
           .rootInvocation()
+          .function()
+          .contractFn()
           .functionName()
           .toString()
       ).to.equal("fn");
@@ -129,9 +137,9 @@ describe("assembleTransaction", () => {
             .operations()[0]
             .body()
             .invokeHostFunctionOp()
-            .functions()[0]
             .auth()[0]
-            .addressWithNonce()
+            .credentials()
+            .address()
             .address()
             .accountId()
             .ed25519()
@@ -142,7 +150,7 @@ describe("assembleTransaction", () => {
     it("simulate ignores non auth from simulation", () => {
       const txn = singleContractFnTransaction();
       let simulateResp = JSON.parse(JSON.stringify(simulationResponse));
-      simulateResp.results[0].auth = null;
+      simulateResp.result.auth = null;
       const result = SorobanClient.assembleTransaction(
         txn,
         networkPassphrase,
@@ -157,7 +165,6 @@ describe("assembleTransaction", () => {
           .operations()[0]
           .body()
           .invokeHostFunctionOp()
-          .functions()[0]
           .auth()
       ).to.have.length(0);
     });
@@ -190,94 +197,6 @@ describe("assembleTransaction", () => {
           "Error: unsupported operation type, must be only one InvokeHostFunctionOp in the transaction."
         );
       }
-    });
-
-    it("throws for mismatched HostFunctions between simulation and tx", () => {
-      const txn = new SorobanClient.TransactionBuilder(source, {
-        fee: 100,
-        networkPassphrase: "Test",
-        v1: true,
-      })
-        .addOperation(
-          SorobanClient.Operation.invokeHostFunctions({
-            functions: [
-              new SorobanClient.xdr.HostFunction({
-                args: new SorobanClient.xdr.HostFunctionArgs.hostFunctionTypeInvokeContract(
-                  []
-                ),
-                auth: [],
-              }),
-              new SorobanClient.xdr.HostFunction({
-                args: new SorobanClient.xdr.HostFunctionArgs.hostFunctionTypeInvokeContract(
-                  []
-                ),
-                auth: [],
-              }),
-            ],
-          })
-        )
-        .setTimeout(SorobanClient.TimeoutInfinite)
-        .build();
-
-      try {
-        SorobanClient.assembleTransaction(
-          txn,
-          networkPassphrase,
-          simulationResponse
-        );
-        expect.fail();
-      } catch (err) {
-        expect(err.toString()).to.equal(
-          "Error: preflight simulation results do not contain same count of HostFunctions that InvokeHostFunctionOp in the transaction has."
-        );
-      }
-    });
-
-    it("handles no host functions", () => {
-      const txn = new SorobanClient.TransactionBuilder(source, {
-        fee: 100,
-        networkPassphrase: "Test",
-        v1: true,
-      })
-        .addOperation(
-          SorobanClient.Operation.invokeHostFunctions({
-            functions: [],
-          })
-        )
-        .setTimeout(SorobanClient.TimeoutInfinite)
-        .build();
-
-      const noSorobanData = new SorobanClient.xdr.SorobanTransactionData({
-        resources: new SorobanClient.xdr.SorobanResources({
-          footprint: new SorobanClient.xdr.LedgerFootprint({
-            readOnly: [],
-            readWrite: [],
-          }),
-          instructions: 0,
-          readBytes: 0,
-          writeBytes: 0,
-          extendedMetaDataSizeBytes: 0,
-        }),
-        refundableFee: SorobanClient.xdr.Int64.fromString("0"),
-        ext: new SorobanClient.xdr.ExtensionPoint(0),
-      }).toXDR("base64");
-
-      const result = SorobanClient.assembleTransaction(txn, networkPassphrase, {
-        results: [],
-        events: [],
-        transactionData: noSorobanData,
-      });
-
-      expect(
-        result
-          .toEnvelope()
-          .v1()
-          .tx()
-          .operations()[0]
-          .body()
-          .invokeHostFunctionOp()
-          .functions()
-      ).to.have.length(0);
     });
   });
 });
