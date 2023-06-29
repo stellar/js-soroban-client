@@ -2,7 +2,6 @@ import {
   Account,
   FeeBumpTransaction,
   Operation,
-  OperationOptions,
   Transaction,
   TransactionBuilder,
   xdr,
@@ -71,7 +70,7 @@ export function assembleTransaction(
           xdr.SorobanAuthorizationEntry.fromXDR(a, "base64")
         ) ?? []
       ),
-    });
+    })
   );
 
   // apply the pre-built Soroban Tx Data from simulation onto the Tx
