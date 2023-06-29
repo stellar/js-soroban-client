@@ -141,7 +141,7 @@ export class Server {
    * @example
    * const contractId = "CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5";
    * const key = xdr.ScVal.scvSymbol("counter");
-   * server.getContractData(contractId, key).then(data => {
+   * server.getContractData(contractId, key, 'temporary').then(data => {
    *   console.log("value:", data.xdr);
    *   console.log("lastModified:", data.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", data.latestLedger);
@@ -151,9 +151,6 @@ export class Server {
    * backup way to access your contract data which may not be available via
    * events or simulateTransaction.
    *
-   * By default, we will request both the 'temporary' and 'persistent' versions
-   * of the ledger durability. Only one should exist.
-   *
    * @param {string} contractId - The contract ID containing the data to load.
    *    Encoded as Stellar Contract Address e.g.
    *    `CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5` or a hex
@@ -161,12 +158,8 @@ export class Server {
    *    future.
    * @param {xdr.ScVal} key - The key of the contract data to load.
    * @param {string} [expirationType] - The "durability keyspace" that this
-   *    ledger key belongs to. By default, it tries requesting both the
-   *    'temporary' and 'persistent' versions so that you don't need to track
-   *    this separately.
-   *
-   *    WARNING: In the default case, only one should *actually* exist! If BOTH
-   *    exist, this function will throw as it cannot distinguish between them.
+   *    ledger key belongs to, which is either 'temporary' (the default) or
+   *    'persistent'.
    *
    * @returns {Promise<SorobanRpc.LedgerEntryResult>} Returns a promise to the
    *    {@link SorobanRpc.LedgerEntryResult} object with the current value.
@@ -178,65 +171,44 @@ export class Server {
   public async getContractData(
     contractId: string,
     key: xdr.ScVal,
-    expirationType?: 'temporary' | 'persistent'
+    expirationType: 'temporary' | 'persistent' = 'temporary'
   ): Promise<SorobanRpc.LedgerEntryResult> {
-    //
-    // We query for both the temporary and persistent versions by default so that
-    // the user doesn't have to care about the "durability keyspace" of the
-    // ledger key, but we expect only one of them to work.
-    //
-    const [ persistentKey, temporaryKey ] = [
-      xdr.LedgerKey.contractData(
-        new xdr.LedgerKeyContractData({
-          contract: new Contract(contractId).address().toScAddress(),
-          key,
-          durability: xdr.ContractDataDurability.persistent(),
-          bodyType: xdr.ContractEntryBodyType.dataEntry() // expirationExtension is internal
-        })
-      ).toXDR("base64"),
-      xdr.LedgerKey.contractData(
-        new xdr.LedgerKeyContractData({
-          contract: new Contract(contractId).address().toScAddress(),
-          key,
-          durability: xdr.ContractDataDurability.temporary(),
-          bodyType: xdr.ContractEntryBodyType.dataEntry()
-        })
-      ).toXDR("base64"),
-    ];
-
-    let requested: string[];
+    let durability: xdr.ContractDataDurability;
     switch (expirationType) {
-      case undefined:
-        requested = [persistentKey, temporaryKey];
-        break;
-
       case 'temporary':
-        requested = [temporaryKey];
+        durability = xdr.ContractDataDurability.temporary();
         break;
 
       case 'persistent':
-        requested = [persistentKey];
+        durability = xdr.ContractDataDurability.persistent();
         break;
+
+      default:
+        throw new TypeError(`invalid expirationType: ${expirationType}`);
     }
+
+    let contractKey: string = xdr.LedgerKey.contractData(
+      new xdr.LedgerKeyContractData({
+        contract: new Contract(contractId).address().toScAddress(),
+        key,
+        durability,
+        bodyType: xdr.ContractEntryBodyType.dataEntry()   // expirationExtension is internal
+      })
+    ).toXDR("base64");
 
     const getLedgerEntriesResponse = await jsonrpc.post<
       SorobanRpc.GetLedgerEntriesResponse
     >(
       this.serverURL.toString(),
       "getLedgerEntries",
-      requested,
+      [contractKey],
     );
 
-    if (getLedgerEntriesResponse.entries.length === 0) {
+    if (getLedgerEntriesResponse.entries.length !== 1) {
       return Promise.reject({
         code: 404,
-        message: `Ledger entry not found. Key(s): [${requested.join(', ')}]`
+        message: `Ledger entry not found. Key: ${contractKey}`
       });
-    } else if (getLedgerEntriesResponse.entries.length > 1) {
-      return Promise.reject({
-        code: 409,
-        message: `Multiple ledger entries found, specify keyspace. Key(s): [${requested.join(', ')}]`,
-      })
     }
 
     return getLedgerEntriesResponse.entries[0];
