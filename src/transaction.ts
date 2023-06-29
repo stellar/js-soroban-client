@@ -32,7 +32,7 @@ export function assembleTransaction(
     );
   }
 
-  if( simulation.results.length !== 1) {
+  if (simulation.results.length !== 1) {
     throw new Error(`simulation results invalid: ${simulation.results}`);
   }
 
