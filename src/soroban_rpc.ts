@@ -131,7 +131,8 @@ export namespace SorobanRpc {
     transactionData: string;
     events: string[];
     minResourceFee: string;
-    results: SimulateHostFunctionResult[]; // always one element, tho
+    // This will only contain a single element, because only a single invokeHostFunctionOperation is supported per transaction.
+    results: SimulateHostFunctionResult[];
     latestLedger: number;
     cost: Cost;
   }
