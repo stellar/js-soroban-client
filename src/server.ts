@@ -157,8 +157,8 @@ export class Server {
    * backup way to access your contract data which may not be available via
    * events or simulateTransaction.
    *
-   * @param {string|Address|Contract} contractId - The contract ID containing
-   *    the data to load. Encoded as Stellar Contract Address string e.g.
+   * @param {string|Address|Contract} contract - The contract ID containing the
+   *    data to load. Encoded as Stellar Contract Address string e.g.
    *    `CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5` or a
    *    {@link Contract} or {@link Address} instance.
    * @param {xdr.ScVal} key - The key of the contract data to load.
