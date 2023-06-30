@@ -4,6 +4,7 @@ import isEmpty from "lodash/isEmpty";
 import merge from "lodash/merge";
 import {
   Account,
+  Address,
   Contract,
   FeeBumpTransaction,
   StrKey,
@@ -25,6 +26,11 @@ export interface GetEventsRequest {
   filters: SorobanRpc.EventFilter[];
   cursor?: string;
   limit?: number;
+}
+
+export enum Durability {
+  Temporary = 'temporary',
+  Persistent = 'persistent',
 }
 
 /**
@@ -151,15 +157,14 @@ export class Server {
    * backup way to access your contract data which may not be available via
    * events or simulateTransaction.
    *
-   * @param {string} contractId - The contract ID containing the data to load.
-   *    Encoded as Stellar Contract Address e.g.
-   *    `CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5` or a hex
-   *    string for backwards compatibility, but will likely be deprecated in the
-   *    future.
+   * @param {string|Address|Contract} contractId - The contract ID containing
+   *    the data to load. Encoded as Stellar Contract Address string e.g.
+   *    `CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5` or a
+   *    {@link Contract} or {@link Address} instance.
    * @param {xdr.ScVal} key - The key of the contract data to load.
-   * @param {string} [expirationType] - The "durability keyspace" that this
-   *    ledger key belongs to, which is either 'temporary' (the default) or
-   *    'persistent'.
+   * @param {Durability} [durability] - The "durability keyspace" that this
+   *    ledger key belongs to, which is either 'temporary' or 'persistent' (the
+   *    default), see {@link Durability}.
    *
    * @returns {Promise<SorobanRpc.LedgerEntryResult>} Returns a promise to the
    *    {@link SorobanRpc.LedgerEntryResult} object with the current value.
@@ -169,49 +174,58 @@ export class Server {
    *    of this client may provide abstractions to handle that.
    */
   public async getContractData(
-    contractId: string,
+    contract: string | Address | Contract,
     key: xdr.ScVal,
-    expirationType: 'temporary' | 'persistent' = 'temporary'
+    durability: Durability = Durability.Persistent,
   ): Promise<SorobanRpc.LedgerEntryResult> {
-    let durability: xdr.ContractDataDurability;
-    switch (expirationType) {
-      case 'temporary':
-        durability = xdr.ContractDataDurability.temporary();
+    // coalesce `contract` param variants to an ScAddress
+    let scAddress: xdr.ScAddress;
+    if (typeof contract === 'string') {
+      scAddress = new Contract(contract).address().toScAddress();
+    } else if (contract instanceof Address) {
+      scAddress = contract.toScAddress();
+    } else if (contract instanceof Contract) {
+      scAddress = contract.address().toScAddress();
+    } else {
+      throw new TypeError(`unknown contract type: ${contract}`);
+    }
+
+    let xdrDurability: xdr.ContractDataDurability;
+    switch (durability) {
+      case Durability.Temporary:
+        xdrDurability = xdr.ContractDataDurability.temporary();
         break;
 
-      case 'persistent':
-        durability = xdr.ContractDataDurability.persistent();
+      case Durability.Persistent:
+        xdrDurability = xdr.ContractDataDurability.persistent();
         break;
 
       default:
-        throw new TypeError(`invalid expirationType: ${expirationType}`);
+        throw new TypeError(`invalid durability: ${durability}`);
     }
 
     let contractKey: string = xdr.LedgerKey.contractData(
       new xdr.LedgerKeyContractData({
-        contract: new Contract(contractId).address().toScAddress(),
+        contract: scAddress,
         key,
-        durability,
+        durability: xdrDurability,
         bodyType: xdr.ContractEntryBodyType.dataEntry()   // expirationExtension is internal
       })
     ).toXDR("base64");
 
-    const getLedgerEntriesResponse = await jsonrpc.post<
-      SorobanRpc.GetLedgerEntriesResponse
-    >(
+    return jsonrpc.post<SorobanRpc.GetLedgerEntriesResponse>(
       this.serverURL.toString(),
       "getLedgerEntries",
       [contractKey],
-    );
-
-    if (getLedgerEntriesResponse.entries.length !== 1) {
-      return Promise.reject({
-        code: 404,
-        message: `Ledger entry not found. Key: ${contractKey}`
-      });
-    }
-
-    return getLedgerEntriesResponse.entries[0];
+    ).then(response => {
+      if (response.entries.length !== 1) {
+        return Promise.reject({
+          code: 404,
+          message: `Ledger entry not found. Key: ${contractKey}`
+        });
+      }
+      return response.entries[0];
+    });
   }
 
   /**
