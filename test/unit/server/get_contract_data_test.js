@@ -1,6 +1,6 @@
 const MockAdapter = require("axios-mock-adapter");
-let xdr = SorobanClient.xdr;
-const { Address } = require("stellar-base");
+const xdr = SorobanClient.xdr;
+const Address = SorobanClient.Address;
 
 describe("Server#getContractData", function () {
   beforeEach(function () {
@@ -37,8 +37,12 @@ describe("Server#getContractData", function () {
           [
             xdr.LedgerKey.contractData(
               new xdr.LedgerKeyContractData({
-                contractId: Buffer.from(address, "hex"),
+                contract: new SorobanClient.Contract(address)
+                  .address()
+                  .toScAddress(),
                 key,
+                durability: xdr.ContractDataDurability.persistent(),
+                bodyType: xdr.ContractEntryBodyType.dataEntry(),
               })
             ).toXDR("base64"),
           ],
@@ -55,7 +59,7 @@ describe("Server#getContractData", function () {
       );
 
     this.server
-      .getContractData(address, key)
+      .getContractData(address, key, "persistent")
       .then(function (response) {
         expect(response).to.be.deep.equal(result);
         done();
@@ -76,8 +80,12 @@ describe("Server#getContractData", function () {
           [
             xdr.LedgerKey.contractData(
               new xdr.LedgerKeyContractData({
-                contractId: Buffer.from(address, "hex"),
+                contract: new SorobanClient.Contract(address)
+                  .address()
+                  .toScAddress(),
                 key,
+                durability: xdr.ContractDataDurability.temporary(),
+                bodyType: xdr.ContractEntryBodyType.dataEntry(),
               })
             ).toXDR("base64"),
           ],
@@ -86,7 +94,7 @@ describe("Server#getContractData", function () {
       .returns(Promise.resolve({ data: { result: { entries: [] } } }));
 
     this.server
-      .getContractData(address, key)
+      .getContractData(address, key, "temporary")
       .then(function (_response) {
         done(new Error("Expected error"));
       })
@@ -110,8 +118,10 @@ describe("Server#getContractData", function () {
           [
             xdr.LedgerKey.contractData(
               new xdr.LedgerKeyContractData({
-                contractId: Address.fromString(nonHexAddress).toBuffer(),
+                contract: new Address(nonHexAddress).toScAddress(),
                 key,
+                durability: xdr.ContractDataDurability.persistent(),
+                bodyType: xdr.ContractEntryBodyType.dataEntry(),
               })
             ).toXDR("base64"),
           ],
@@ -120,7 +130,7 @@ describe("Server#getContractData", function () {
       .returns(Promise.resolve({ data: { result: { entries: [] } } }));
 
     this.server
-      .getContractData(nonHexAddress, key)
+      .getContractData(nonHexAddress, key, "persistent")
       .then(function (_response) {
         done(new Error("Expected error"));
       })

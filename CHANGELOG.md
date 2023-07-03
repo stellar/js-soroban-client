@@ -7,6 +7,24 @@ A breaking change should be clearly marked in this log.
 
 ## Unreleased
 
+## v0.9.0
+
+### Updated
+* `Server.getContractData` has an additional, optional parameter: `expirationType?: string` which should be set to either `'temporary'` or `'persistent'` depending on the type of ledger key. By default, it will attempt to fetch both, returning whichever one it finds ([#103](https://github.com/stellar/js-soroban-client/pull/103)).
+* The XDR library (`stellar-base`) has been upgraded to Preview 10's protocol format. This includes the following changes:
+
+#### Breaking Changes
+
+- Many XDR structures have changed, please refer to the `types/next.d.ts` diff for details ([#633](https://github.com/stellar/js-stellar-base/pull/633)).
+- We have returned to the world in which **one** transaction contains **one** operation which contains **one** host function invocation. This means `Operation.invokeHostFunctions` is gone and `Operation.invokeHostFunction` has changed to accept `{ func, auth }`, where `func` is the correct `xdr.HostFunction` and `auth` is a list of `xdr.SorobanAuthorizationEntry` items that outline the authorization tree for the call stack ([#633](https://github.com/stellar/js-stellar-base/pull/633)). Better abstractions for creating an `xdr.HostFunction` are forthcoming, though you can still refer to `Contract.call()` for help.
+
+#### Added
+
+- A new abstraction for dealing with large integers and `ScVal`s: see `ScInt`, `XdrLargeInt`, and `scValToBigInt` ([#620](https://github.com/stellar/js-stellar-base/pull/620)).
+- A new abstraction for converting between native JavaScript types and complex `ScVal`s: see `nativeToScVal` and `scValToNative` ([#630](https://github.com/stellar/js-stellar-base/pull/630)).
+- We have added two new operations related to state expiration in Soroban: `BumpFootprintExpiration` and `RestoreFootprint`. Please refer to their docstrings for details ([#633](https://github.com/stellar/js-stellar-base/pull/633)).
+
+
 
 ## v0.8.1
 
