@@ -7,6 +7,7 @@ A breaking change should be clearly marked in this log.
 
 ## Unreleased
 
+
 ## v0.9.0
 
 ### Updated
@@ -23,7 +24,6 @@ A breaking change should be clearly marked in this log.
 - A new abstraction for dealing with large integers and `ScVal`s: see `ScInt`, `XdrLargeInt`, and `scValToBigInt` ([#620](https://github.com/stellar/js-stellar-base/pull/620)).
 - A new abstraction for converting between native JavaScript types and complex `ScVal`s: see `nativeToScVal` and `scValToNative` ([#630](https://github.com/stellar/js-stellar-base/pull/630)).
 - We have added two new operations related to state expiration in Soroban: `BumpFootprintExpiration` and `RestoreFootprint`. Please refer to their docstrings for details ([#633](https://github.com/stellar/js-stellar-base/pull/633)).
-
 
 
 ## v0.8.1
