@@ -13,30 +13,28 @@ import { SorobanRpc } from "./soroban_rpc";
 export function assembleTransaction(
   raw: Transaction | FeeBumpTransaction,
   networkPassphrase: string,
-  simulation: SorobanRpc.SimulateTransactionResponse,
+  simulation: SorobanRpc.SimulateTransactionResponse
 ): Transaction {
   if ("innerTransaction" in raw) {
     // TODO: Handle feebump transactions
     return assembleTransaction(
       raw.innerTransaction,
       networkPassphrase,
-      simulation,
+      simulation
     );
   }
 
-  if (
-    raw.operations.length !== 1 ||
-    raw.operations[0].type !== "invokeHostFunction"
-  ) {
-    throw new Error(
-      "unsupported operation type, must be only one InvokeHostFunctionOp in the transaction.",
+  if (!isSorobanTransaction(raw)) {
+    throw new TypeError(
+      "unsupported transaction: must contain exactly one " +
+        "invokeHostFunction, bumpFootprintExpiration, or restoreFootprint " +
+        "operation"
     );
   }
 
   if (simulation.results.length !== 1) {
     throw new Error(`simulation results invalid: ${simulation.results}`);
   }
-
 
   const source = new Account(raw.source, `${parseInt(raw.sequence, 10) - 1}`);
   const classicFeeNum = parseInt(raw.fee, 10) || 0;
@@ -61,25 +59,63 @@ export function assembleTransaction(
     extraSigners: raw.extraSigners,
   });
 
-  // apply the auth from the simulation to the invokeHostFunction op's props
-  const invokeOp: Operation.InvokeHostFunction = raw.operations[0];
-  txnBuilder.addOperation(
-    Operation.invokeHostFunction({
-      func: invokeOp.func,
-      auth: (invokeOp.auth ?? []).concat(
-        simulation.results[0].auth?.map((a: string) =>
-          xdr.SorobanAuthorizationEntry.fromXDR(a, "base64")
-        ) ?? []
-      ),
-    })
-  );
+  switch (raw.operations[0].type) {
+    case "invokeHostFunction":
+      const invokeOp: Operation.InvokeHostFunction = raw.operations[0];
+      txnBuilder.addOperation(
+        Operation.invokeHostFunction({
+          source: invokeOp.source,
+          func: invokeOp.func,
+          // apply the auth from the simulation
+          auth: (invokeOp.auth ?? []).concat(
+            simulation.results[0].auth?.map((a: string) =>
+              xdr.SorobanAuthorizationEntry.fromXDR(a, "base64")
+            ) ?? []
+          ),
+        })
+      );
+      break;
+
+    case "bumpFootprintExpiration":
+      const bumpOp: Operation.BumpFootprintExpiration = raw.operations[0];
+      txnBuilder.addOperation(
+        Operation.bumpFootprintExpiration({
+          source: bumpOp.source,
+          ledgersToExpire: bumpOp.ledgersToExpire,
+        })
+      );
+      break;
+
+    case "restoreFootprint":
+      const restoreOp: Operation.RestoreFootprint = raw.operations[0];
+      txnBuilder.addOperation(
+        Operation.restoreFootprint({ source: restoreOp.source })
+      );
+      break;
+  }
 
   // apply the pre-built Soroban Tx Data from simulation onto the Tx
   const sorobanTxData = xdr.SorobanTransactionData.fromXDR(
     simulation.transactionData,
-    "base64",
+    "base64"
   );
   txnBuilder.setSorobanData(sorobanTxData);
 
   return txnBuilder.build();
+}
+
+function isSorobanTransaction(tx: Transaction): boolean {
+  if (tx.operations.length !== 1) {
+    return false;
+  }
+
+  switch (tx.operations[0].type) {
+    case "invokeHostFunction":
+    case "bumpFootprintExpiration":
+    case "restoreFootprint":
+      return true;
+
+    default:
+      return false;
+  }
 }
