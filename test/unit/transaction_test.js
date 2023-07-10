@@ -195,7 +195,7 @@ describe("assembleTransaction", () => {
         });
         expect.fail();
       } catch (err) {
-        expect(err.toString()).to.match(/Error: unsupported operation type/i);
+        expect(err.toString()).to.match(/TypeError: unsupported transaction/i);
       }
     });
   });
