@@ -8,10 +8,9 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
-## v0.9.0
-
 ### Updated
 * `Server.getContractData` has an additional, optional parameter: `expirationType?: string` which should be set to either `'temporary'` or `'persistent'` depending on the type of ledger key. By default, it will attempt to fetch both, returning whichever one it finds ([#103](https://github.com/stellar/js-soroban-client/pull/103)).
+* `assembleTransaction` now accepts simulation results for the new `BumpFootprintExpirationOp`s and `RestoreFootprintOp`s ([#108](https://github.com/stellar/js-soroban-client/pull/108)).
 * The XDR library (`stellar-base`) has been upgraded to Preview 10's protocol format. This includes the following changes:
 
 #### Breaking Changes
