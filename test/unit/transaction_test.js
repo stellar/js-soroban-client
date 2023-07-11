@@ -215,13 +215,12 @@ describe("assembleTransaction", () => {
           .addOperation(op)
           .build();
 
-        expect(() => {
-          SorobanClient.assembleTransaction(
-            txn,
-            networkPassphrase,
-            simulationResponse
-          );
-        }).to.not.throw();
+        const tx = SorobanClient.assembleTransaction(
+          txn,
+          networkPassphrase,
+          simulationResponse
+        );
+        expect(tx.operations[0].type).to.equal(op.body().switch().name);
       });
     });
   });
