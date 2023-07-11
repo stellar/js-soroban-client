@@ -1,3 +1,5 @@
+const xdr = SorobanClient.xdr; // shorthand
+
 describe("assembleTransaction", () => {
   describe("FeeBumpTransaction", () => {
     // TODO: Add support for fee bump transactions
@@ -7,22 +9,21 @@ describe("assembleTransaction", () => {
     "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI"
   ).toScAddress();
 
-  const fnAuth = new SorobanClient.xdr.SorobanAuthorizationEntry({
+  const fnAuth = new xdr.SorobanAuthorizationEntry({
     // Include a credentials w/ a nonce to trigger this
-    credentials:
-      new SorobanClient.xdr.SorobanCredentials.sorobanCredentialsAddress(
-        new SorobanClient.xdr.SorobanAddressCredentials({
-          address: scAddress,
-          nonce: new SorobanClient.xdr.Int64(0),
-          signatureExpirationLedger: 1,
-          signatureArgs: [],
-        })
-      ),
+    credentials: new xdr.SorobanCredentials.sorobanCredentialsAddress(
+      new xdr.SorobanAddressCredentials({
+        address: scAddress,
+        nonce: new xdr.Int64(0),
+        signatureExpirationLedger: 1,
+        signatureArgs: [],
+      })
+    ),
     // And a basic invocation
-    rootInvocation: new SorobanClient.xdr.SorobanAuthorizedInvocation({
+    rootInvocation: new xdr.SorobanAuthorizedInvocation({
       function:
-        SorobanClient.xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
-          new SorobanClient.xdr.SorobanAuthorizedContractFunction({
+        xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
+          new xdr.SorobanAuthorizedContractFunction({
             contractAddress: scAddress,
             functionName: "fn",
             args: [],
@@ -32,9 +33,9 @@ describe("assembleTransaction", () => {
     }),
   });
 
-  const sorobanTransactionData = new SorobanClient.xdr.SorobanTransactionData({
-    resources: new SorobanClient.xdr.SorobanResources({
-      footprint: new SorobanClient.xdr.LedgerFootprint({
+  const sorobanTransactionData = new xdr.SorobanTransactionData({
+    resources: new xdr.SorobanResources({
+      footprint: new xdr.LedgerFootprint({
         readOnly: [],
         readWrite: [],
       }),
@@ -43,8 +44,8 @@ describe("assembleTransaction", () => {
       writeBytes: 0,
       extendedMetaDataSizeBytes: 0,
     }),
-    refundableFee: SorobanClient.xdr.Int64.fromString("0"),
-    ext: new SorobanClient.xdr.ExtensionPoint(0),
+    refundableFee: xdr.Int64.fromString("0"),
+    ext: new xdr.ExtensionPoint(0),
   });
 
   const simulationResponse = {
@@ -54,7 +55,7 @@ describe("assembleTransaction", () => {
     results: [
       {
         auth: [fnAuth.toXDR("base64")],
-        xdr: SorobanClient.xdr.ScVal.scvU32(0).toXDR().toString("base64"),
+        xdr: xdr.ScVal.scvU32(0).toXDR().toString("base64"),
       },
     ],
     latestLedger: 3,
@@ -78,9 +79,7 @@ describe("assembleTransaction", () => {
       })
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
-            func: new SorobanClient.xdr.HostFunction.hostFunctionTypeInvokeContract(
-              []
-            ),
+            func: new xdr.HostFunction.hostFunctionTypeInvokeContract([]),
             auth: [],
           })
         )
@@ -171,7 +170,7 @@ describe("assembleTransaction", () => {
       ).to.have.length(0);
     });
 
-    it("throws for non-invokehost-fn ops", () => {
+    it("throws for non-Soroban ops", () => {
       const txn = new SorobanClient.TransactionBuilder(source, {
         fee: 100,
         networkPassphrase,
@@ -185,7 +184,7 @@ describe("assembleTransaction", () => {
         .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
 
-      try {
+      expect(() => {
         SorobanClient.assembleTransaction(txn, networkPassphrase, {
           transactionData: {},
           events: [],
@@ -194,9 +193,36 @@ describe("assembleTransaction", () => {
           latestLedger: 3,
         });
         expect.fail();
-      } catch (err) {
-        expect(err.toString()).to.match(/TypeError: unsupported transaction/i);
-      }
+      }).to.throw(/unsupported transaction/i);
+    });
+
+    it("works for all Soroban ops", function () {
+      [
+        SorobanClient.Operation.invokeHostFunction({
+          func: xdr.HostFunction.hostFunctionTypeInvokeContract(),
+        }),
+        SorobanClient.Operation.bumpFootprintExpiration({
+          ledgersToExpire: 27,
+        }),
+        SorobanClient.Operation.restoreFootprint(),
+      ].forEach((op) => {
+        const txn = new SorobanClient.TransactionBuilder(source, {
+          fee: 100,
+          networkPassphrase,
+          v1: true,
+        })
+          .setTimeout(SorobanClient.TimeoutInfinite)
+          .addOperation(op)
+          .build();
+
+        expect(() => {
+          SorobanClient.assembleTransaction(
+            txn,
+            networkPassphrase,
+            simulationResponse
+          );
+        }).to.not.throw();
+      });
     });
   });
 });
