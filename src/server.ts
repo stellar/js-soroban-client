@@ -409,7 +409,7 @@ export class Server {
    *     // Uncomment the following line to build transactions for the live network. Be
    *     // sure to also change the horizon hostname.
    *     // networkPassphrase: SorobanClient.Networks.PUBLIC,
-   *     networkPassphrase: SorobanClient.Networks.STANDALONE
+   *     networkPassphrase: SorobanClient.Networks.FUTURENET
    *   })
    *   // Add a contract.increment soroban contract invocation operation
    *   .addOperation(contract.call("increment"))
@@ -434,11 +434,15 @@ export class Server {
    * });
    *
    * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
-   *    simulate. It should include exactly one operation, which must be a
-   *    {@link InvokeHostFunctionOp}. Any provided footprint will be ignored.
+   *    simulate. It should include exactly one operation, which must be one of
+   *    {@link xdr.InvokeHostFunctionOp}, {@link xdr.BumpFootprintExpirationOp},
+   *    or {@link xdr.RestoreFootprintOp}. Any provided footprint will be
+   *    ignored.
+   *
    * @returns {Promise<SorobanRpc.SimulateTransactionResponse>} Returns a
    *    promise to the {@link SorobanRpc.SimulateTransactionResponse} object
-   *    with the cost, result, footprint, auth, and error of the transaction.
+   *    with the cost, footprint, result/auth requirements (if applicable), and
+   *    error of the transaction.
    */
   public async simulateTransaction(
     transaction: Transaction | FeeBumpTransaction,
@@ -452,18 +456,20 @@ export class Server {
 
   /**
    * Submit a trial contract invocation, first run a simulation of the contract
-   * invocation as defined on the incoming transaction, and apply the results
-   * to a new copy of the transaction which is then returned. Setting the ledger
-   * footprint and authorization, so the resulting transaction is ready for signing & sending.
+   * invocation as defined on the incoming transaction, and apply the results to
+   * a new copy of the transaction which is then returned. Setting the ledger
+   * footprint and authorization, so the resulting transaction is ready for
+   * signing & sending.
    *
-   * The returned transaction will also have an updated fee that is the sum of fee set
-   * on incoming transaction with the contract resource fees estimated from simulation. It is
-   * adviseable to check the fee on returned transaction and validate or take appropriate
-   * measures for interaction with user to confirm it is acceptable.
+   * The returned transaction will also have an updated fee that is the sum of
+   * fee set on incoming transaction with the contract resource fees estimated
+   * from simulation. It is adviseable to check the fee on returned transaction
+   * and validate or take appropriate measures for interaction with user to
+   * confirm it is acceptable.
    *
-   * You can call the {simulateTransaction(transaction)} method directly first if you
-   * want to inspect estimated fees for a given transaction in detail first if that is
-   * of importance.
+   * You can call the {@link Server.simulateTransaction} method directly first
+   * if you want to inspect estimated fees for a given transaction in detail
+   * first, if that is of importance.
    *
    * @example
    * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
@@ -503,17 +509,19 @@ export class Server {
    * });
    *
    * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
-   *    prepare. It should include exactly one operation, which must be a
-   *    {@link InvokeHostFunctionOp}. Any provided footprint will be overwritten.
+   *    prepare. It should include exactly one operation, which must be one of
+   *    {@link xdr.InvokeHostFunctionOp}, {@link xdr.BumpFootprintExpirationOp},
+   *    or {@link xdr.RestoreFootprintOp}. Any provided footprint will be
+   *    overwritten.
    * @param {string} [networkPassphrase] - Explicitly provide a network
-   *    passphrase. If not passed, the current network passphrase will be requested
-   *    from the server via `getNetwork`.
-   * @returns {Promise<Transaction | FeeBumpTransaction>} Returns a copy of the
-   *    transaction, with the expected ledger footprint and authorizations added
-   *    and the transaction fee will automatically be adjusted to the sum of
-   *    the incoming transaction fee and the contract minimum resource fees
-   *    discovered from the simulation,
+   *    passphrase. If not passed, the current network passphrase will be
+   *    requested from the server via {@link Server.getNetwork}.
    *
+   * @returns {Promise<Transaction | FeeBumpTransaction>} Returns a copy of the
+   *    transaction, with the expected authorizations (in the case of
+   *    invocation) and ledger footprint added. The transaction fee will also
+   *    automatically be padded with the contract's minimum resource fees
+   *    discovered from the simulation.
    */
   public async prepareTransaction(
     transaction: Transaction | FeeBumpTransaction,

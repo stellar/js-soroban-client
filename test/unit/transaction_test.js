@@ -195,9 +195,7 @@ describe("assembleTransaction", () => {
         });
         expect.fail();
       } catch (err) {
-        expect(err.toString()).to.equal(
-          "Error: unsupported operation type, must be only one InvokeHostFunctionOp in the transaction."
-        );
+        expect(err.toString()).to.match(/TypeError: unsupported transaction/i);
       }
     });
   });
