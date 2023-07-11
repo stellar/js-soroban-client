@@ -77,6 +77,9 @@ export function assembleTransaction(
       break;
 
     case "bumpFootprintExpiration":
+      txnBuilder.addOperation(Operation.bumpFootprintExpiration(raw.operations[0]));
+      break;
+
     case "restoreFootprint":
       txnBuilder.addOperation(Operation.restoreFootprint(raw.operations[0]));
       break;
