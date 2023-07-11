@@ -77,20 +77,8 @@ export function assembleTransaction(
       break;
 
     case "bumpFootprintExpiration":
-      const bumpOp: Operation.BumpFootprintExpiration = raw.operations[0];
-      txnBuilder.addOperation(
-        Operation.bumpFootprintExpiration({
-          source: bumpOp.source,
-          ledgersToExpire: bumpOp.ledgersToExpire,
-        })
-      );
-      break;
-
     case "restoreFootprint":
-      const restoreOp: Operation.RestoreFootprint = raw.operations[0];
-      txnBuilder.addOperation(
-        Operation.restoreFootprint({ source: restoreOp.source })
-      );
+      txnBuilder.addOperation(Operation.restoreFootprint(raw.operations[0]));
       break;
   }
 
