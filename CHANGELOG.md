@@ -8,6 +8,11 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v0.9.1
+
+### Updated
+* Updated `stellar-base` dependency to fix an issue when building & invoking contract transactions.
+
 ## v0.9.0
 
 ### Updated
