@@ -34,7 +34,7 @@ export namespace SorobanRpc {
   /* Response for jsonrpc method `getLedgerEntries`
    */
   export interface GetLedgerEntriesResponse {
-    entries: LedgerEntryResult[];
+    entries: LedgerEntryResult[] | null;
     latestLedger: number;
   }
 

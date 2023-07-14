@@ -56,8 +56,51 @@ describe("Server#getAccount", function () {
         expect(response).to.be.deep.equal(expected);
         done();
       })
+      .catch(done);
+  });
+
+  it("throws a useful error when the account is not found", function (done) {
+    const address = "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI";
+    const accountId = xdr.PublicKey.publicKeyTypeEd25519(
+      StrKey.decodeEd25519PublicKey(address)
+    );
+
+    this.axiosMock
+      .expects("post")
+      .withArgs(serverUrl, {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "getLedgerEntries",
+        params: [
+          [
+            xdr.LedgerKey.account(
+              new xdr.LedgerKeyAccount({
+                accountId,
+              })
+            ).toXDR("base64"),
+          ],
+        ],
+      })
+      .returns(
+        Promise.resolve({
+          data: {
+            result: {
+              entries: null,
+            },
+          },
+        })
+      );
+
+    this.server.getAccount(address)
+      .then(function (_) {
+        done(new Error("Expected error to be thrown"));
+      })
       .catch(function (err) {
-        done(err);
+        done(
+          err.message === `Account not found: ${address}`
+            ? null
+            : new Error(`Received unexpected error: ${err.message}`)
+        );
       });
   });
 });

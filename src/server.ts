@@ -107,11 +107,11 @@ export class Server {
       "getLedgerEntries",
       [ledgerKey],
     );
-    const ledgerEntries = data.entries;
+    const ledgerEntries = data.entries ?? [];
     if (ledgerEntries.length === 0) {
       return Promise.reject({
         code: 404,
-        message: "Ledger entry not found. Key: " + ledgerKey,
+        message: `Account not found: ${address}`,
       });
     }
     const ledgerEntryData = ledgerEntries[0].xdr;
@@ -218,13 +218,14 @@ export class Server {
       "getLedgerEntries",
       [contractKey],
     ).then(response => {
-      if (response.entries.length !== 1) {
+        const ledgerEntries = response.entries ?? [];
+      if (ledgerEntries.length !== 1) {
         return Promise.reject({
           code: 404,
-          message: `Ledger entry not found. Key: ${contractKey}`
+          message: `Contract data not found. Contract: ${Address.fromScAddress(scAddress).toString()}, Key: ${key.toXDR("base64")}, Durability: ${durability}`,
         });
       }
-      return response.entries[0];
+      return ledgerEntries[0];
     });
   }
 
@@ -251,7 +252,7 @@ export class Server {
    *   console.log("latestLedger:", response.latestLedger);
    * });
    *
-   * @param {xdr.ScVal} key - The key of the contract data to load.
+   * @param {xdr.ScVal[]} keys - The ledger entry keys to load.
    *
    * @returns {Promise<SorobanRpc.GetLedgerEntriesResponse>} Returns a promise
    *    to the {@link SorobanRpc.GetLedgerEntriesResponse} object with the
