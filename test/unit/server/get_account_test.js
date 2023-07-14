@@ -91,7 +91,8 @@ describe("Server#getAccount", function () {
         })
       );
 
-    this.server.getAccount(address)
+    this.server
+      .getAccount(address)
       .then(function (_) {
         done(new Error("Expected error to be thrown"));
       })
