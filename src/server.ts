@@ -699,7 +699,7 @@ function bigIntFromBytes(
   ...bytes: Array<number | bigint>
 ): bigint {
   let sign = BigInt(1);
-  if (signed && bytes[0] === 0x80) {
+  if (signed && bytes[0] & 0x80) {
     // top bit is set, negative number.
     sign = BigInt(-1);
     // tslint:disable-next-line:no-bitwise
