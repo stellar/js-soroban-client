@@ -683,37 +683,11 @@ function findCreatedAccountSequenceInTransactionMeta(
       if (data.switch() !== xdr.LedgerEntryType.account()) {
         continue;
       }
-      const account = data.account();
-      const seqNum = account.seqNum();
-      return bigIntFromBytes(
-        !seqNum.unsigned,
-        seqNum.high,
-        seqNum.low,
-      ).toString();
+
+      return data.account().seqNum().toString();
     }
   }
   throw new Error("No account created in transaction");
-}
-
-function bigIntFromBytes(
-  signed: boolean,
-  ...bytes: Array<number | bigint>
-): bigint {
-  let sign = BigInt(1);
-  if (signed && bytes[0] === 0x80) {
-    // top bit is set, negative number.
-    sign = BigInt(-1);
-    // tslint:disable-next-line:no-bitwise
-    bytes[0] &= 0x7f;
-  }
-  let b = BigInt(0);
-  for (const byte of bytes) {
-    // tslint:disable-next-line:no-bitwise
-    b <<= BigInt(8);
-    // tslint:disable-next-line:no-bitwise
-    b |= BigInt(byte);
-  }
-  return b * sign;
 }
 
 export namespace Server {
