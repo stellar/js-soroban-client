@@ -8,6 +8,12 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v0.9.2
+
+### Updated
+* Updated `stellar-base` dependency to fix the way `scValToNative` converts string and symbol values: they will always decode strings when possible ([TODO](https://github.com/stellar/js-stellar-base/pull/645) for [#645](https://github.com/stellar/js-stellar-base/pull/645)).
+
+
 ## v0.9.1
 
 ### Updated
