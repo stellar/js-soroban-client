@@ -66,18 +66,19 @@ export function assembleTransaction(
         Operation.invokeHostFunction({
           source: invokeOp.source,
           func: invokeOp.func,
-          // apply the auth from the simulation
-          auth: (invokeOp.auth ?? []).concat(
-            simulation.results[0].auth?.map((a: string) =>
-              xdr.SorobanAuthorizationEntry.fromXDR(a, "base64")
-            ) ?? []
-          ),
+          // override auth from the simulation: any existing `invokeOp.auth`
+          // should be a subset of what simulation gives us
+          auth: simulation.results[0].auth?.map(
+            (a) => xdr.SorobanAuthorizationEntry.fromXDR(a, "base64")
+          ) ?? []
         })
       );
       break;
 
     case "bumpFootprintExpiration":
-      txnBuilder.addOperation(Operation.bumpFootprintExpiration(raw.operations[0]));
+      txnBuilder.addOperation(
+        Operation.bumpFootprintExpiration(raw.operations[0])
+      );
       break;
 
     case "restoreFootprint":

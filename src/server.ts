@@ -28,6 +28,9 @@ export interface GetEventsRequest {
   limit?: number;
 }
 
+/**
+ * Specifies the durability namespace of contract-related ledger entries.
+ */
 export enum Durability {
   Temporary = 'temporary',
   Persistent = 'persistent',
@@ -523,6 +526,8 @@ export class Server {
    *    invocation) and ledger footprint added. The transaction fee will also
    *    automatically be padded with the contract's minimum resource fees
    *    discovered from the simulation.
+   *
+   * @throws {jsonrpc.Error<any> | Error} if simulation fails
    */
   public async prepareTransaction(
     transaction: Transaction | FeeBumpTransaction,
