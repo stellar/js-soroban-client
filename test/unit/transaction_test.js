@@ -225,8 +225,12 @@ describe("assembleTransaction", () => {
     });
 
     it("doesn't overwrite auth if it's present", function () {
-      const txn = singleContractFnTransaction([ fnAuth, fnAuth, fnAuth ]);
-      const tx = SorobanClient.assembleTransaction(txn, networkPassphrase, simulationResponse);
+      const txn = singleContractFnTransaction([fnAuth, fnAuth, fnAuth]);
+      const tx = SorobanClient.assembleTransaction(
+        txn,
+        networkPassphrase,
+        simulationResponse
+      );
 
       expect(tx.operations[0].auth.length).to.equal(
         3,
