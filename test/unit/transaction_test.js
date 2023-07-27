@@ -71,7 +71,7 @@ describe("assembleTransaction", () => {
       "1"
     );
 
-    function singleContractFnTransaction() {
+    function singleContractFnTransaction(auth) {
       return new SorobanClient.TransactionBuilder(source, {
         fee: 100,
         networkPassphrase: "Test",
@@ -80,7 +80,7 @@ describe("assembleTransaction", () => {
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
             func: new xdr.HostFunction.hostFunctionTypeInvokeContract([]),
-            auth: [],
+            auth: auth ?? [],
           })
         )
         .setTimeout(SorobanClient.TimeoutInfinite)
@@ -222,6 +222,20 @@ describe("assembleTransaction", () => {
         );
         expect(tx.operations[0].type).to.equal(op.body().switch().name);
       });
+    });
+
+    it("doesn't overwrite auth if it's present", function () {
+      const txn = singleContractFnTransaction([fnAuth, fnAuth, fnAuth]);
+      const tx = SorobanClient.assembleTransaction(
+        txn,
+        networkPassphrase,
+        simulationResponse
+      );
+
+      expect(tx.operations[0].auth.length).to.equal(
+        3,
+        `auths aren't preserved after simulation: ${simulationResponse}, ${tx}`
+      );
     });
   });
 });

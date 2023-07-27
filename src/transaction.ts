@@ -62,22 +62,30 @@ export function assembleTransaction(
   switch (raw.operations[0].type) {
     case "invokeHostFunction":
       const invokeOp: Operation.InvokeHostFunction = raw.operations[0];
+      const existingAuth = invokeOp.auth ?? [];
       txnBuilder.addOperation(
         Operation.invokeHostFunction({
           source: invokeOp.source,
           func: invokeOp.func,
-          // apply the auth from the simulation
-          auth: (invokeOp.auth ?? []).concat(
-            simulation.results[0].auth?.map((a: string) =>
-              xdr.SorobanAuthorizationEntry.fromXDR(a, "base64")
-            ) ?? []
-          ),
+          // if auth entries are already present, we consider this "advanced
+          // usage" and disregard ALL auth entries from the simulation
+          //
+          // the intuition is "if auth exists, this tx has probably been
+          // simulated before"
+          auth:
+            existingAuth.length > 0
+              ? existingAuth
+              : simulation.results[0].auth?.map((a) =>
+                  xdr.SorobanAuthorizationEntry.fromXDR(a, "base64")
+                ) ?? [],
         })
       );
       break;
 
     case "bumpFootprintExpiration":
-      txnBuilder.addOperation(Operation.bumpFootprintExpiration(raw.operations[0]));
+      txnBuilder.addOperation(
+        Operation.bumpFootprintExpiration(raw.operations[0])
+      );
       break;
 
     case "restoreFootprint":

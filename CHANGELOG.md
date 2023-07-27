@@ -8,6 +8,12 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v0.9.3
+
+### Fixed
+* `assembleTransaction()` (and `Server.prepareTransaction()` by proxy) will now override the authorization portion of simulation if you provide a transaction with existing authorization entries. This is because, in complex auth scenarios, you may have signed entries that would be overwritten by simulation, so this just uses your existing entries ([#114](https://github.com/stellar/js-soroban-client/pull/114)).
+
+
 ## v0.9.2
 
 ### Updated

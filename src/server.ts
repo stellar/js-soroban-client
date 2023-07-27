@@ -28,6 +28,9 @@ export interface GetEventsRequest {
   limit?: number;
 }
 
+/**
+ * Specifies the durability namespace of contract-related ledger entries.
+ */
 export enum Durability {
   Temporary = 'temporary',
   Persistent = 'persistent',
@@ -512,8 +515,13 @@ export class Server {
    * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
    *    prepare. It should include exactly one operation, which must be one of
    *    {@link xdr.InvokeHostFunctionOp}, {@link xdr.BumpFootprintExpirationOp},
-   *    or {@link xdr.RestoreFootprintOp}. Any provided footprint will be
-   *    overwritten.
+   *    or {@link xdr.RestoreFootprintOp}.
+   *
+   *    Any provided footprint will be overwritten. However, if your operation
+   *    has existing auth entries, they will be preferred over ALL auth entries
+   *    from the simulation. In other words, if you include auth entries, you
+   *    don't care about the auth returned from the simulation. Other fields
+   *    (footprint, etc.) will be filled as normal.
    * @param {string} [networkPassphrase] - Explicitly provide a network
    *    passphrase. If not passed, the current network passphrase will be
    *    requested from the server via {@link Server.getNetwork}.
@@ -523,6 +531,8 @@ export class Server {
    *    invocation) and ledger footprint added. The transaction fee will also
    *    automatically be padded with the contract's minimum resource fees
    *    discovered from the simulation.
+   *
+   * @throws {jsonrpc.Error<any> | Error} if simulation fails
    */
   public async prepareTransaction(
     transaction: Transaction | FeeBumpTransaction,
