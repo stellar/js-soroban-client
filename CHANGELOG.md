@@ -7,8 +7,13 @@ A breaking change should be clearly marked in this log.
 
 ## Unreleased
 
+## v0.10.0
 
-## v0.9.3
+### Added
+* Updated `stellar-base` dependency to [v10.0.0-soroban.5](https://www.npmjs.com/package/stellar-base/v/10.0.0-soroban.5) which introduces many helpful Soroban abstractions:
+  - Use an existing, immutable `Transaction` as a template for a new one via `TransactionBuilder.cloneFrom(tx, opts = {})` and use `opts` to override fields ([#656](https://github.com/stellar/js-stellar-base/pull/656)).
+  - Use `humanizeEvents` to create human-readable versions of `xdr.ContractEvent`s and `xdr.DiagnosticEvent`s that come out of transaction meta ([#659](https://github.com/stellar/js-stellar-base/pull/659)).
+  - Use `TransactionBuilder.setFootprint()` to easily prepare transaction footprints easily [#660](https://github.com/stellar/js-stellar-base/pull/660).
 
 ### Fixed
 * `assembleTransaction()` (and `Server.prepareTransaction()` by proxy) will now override the authorization portion of simulation if you provide a transaction with existing authorization entries. This is because, in complex auth scenarios, you may have signed entries that would be overwritten by simulation, so this just uses your existing entries ([#114](https://github.com/stellar/js-soroban-client/pull/114)).
