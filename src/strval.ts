@@ -43,13 +43,20 @@ import { Contract } from "..";
 //@ts-ignore Does exist
 import { ScInt, scValToBigInt } from "..";
 
-interface Union<T> {
+export interface Union<T> {
   tag: string;
   value: T;
 }
 
 export class ContractSpec {
-  constructor(public entries: xdr.ScSpecEntry[]) {}
+  public entries: xdr.ScSpecEntry[];
+  constructor(entries: xdr.ScSpecEntry[] | string) {
+    if (typeof entries === "string") {
+      throw new Error("");
+    } else {
+      this.entries = entries;
+    }
+  }
 
   findEntry(name: string): xdr.ScSpecEntry {
     let entry = this.entries.find(
@@ -285,36 +292,26 @@ export class ContractSpec {
       case "number":
       case "bigint": {
         let ty = typeDef ?? xdr.ScSpecTypeDef.scSpecTypeU32();
-        let type_ = undefined;
         switch (ty.switch().name) {
-          case "scSpecTypeU128":
-            type_ = "u128";
-            break;
-          case "scSpecTypeI128":
-            type_ = "i128";
-            break;
-          case "scSpecTypeU256":
-            type_ = "u256";
-            break;
-          case "scSpecTypeI256":
-            type_ = "i256";
-            break;
           case "scSpecTypeU32":
-            type_ = "u32";
-            break;
+            return xdr.ScVal.scvU32(val as number);
           case "scSpecTypeI32":
-            type_ = "i32";
-            break;
+            return xdr.ScVal.scvI32(val as number);
           case "scSpecTypeU64":
-            type_ = "u64";
-            break;
+            return new ScInt(val, { type: "u64" }).toU64();
           case "scSpecTypeI64":
-            type_ = "i64";
-            break;
+            return new ScInt(val, { type: "i64" }).toI64();
+          case "scSpecTypeU128":
+            return new ScInt(val, { type: "u128" }).toU128();
+          case "scSpecTypeI128":
+            return new ScInt(val, { type: "i128" }).toI128();
+          case "scSpecTypeU256":
+            return new ScInt(val, { type: "u256" }).toU256();
+          case "scSpecTypeI256":
+            return new ScInt(val, { type: "i256" }).toI256();
           default:
+            throw new TypeError(`invalid type (${ty}) specified for integer`);
         }
-
-        return new ScInt(val, { type: type_ }).toScVal();
       }
       case "string":
         return stringToScVal(
@@ -528,9 +525,11 @@ export class ContractSpec {
 
       case xdr.ScValType.scvString().value:
       case xdr.ScValType.scvSymbol().value: {
-        const v = scv.value(); 
+        const v = scv.value();
         if (typeof v !== "string") {
-          throw new Error(`Expected a string value from xdr but got ${v}: ${typeof v}`);
+          throw new Error(
+            `Expected a string value from xdr but got ${v}: ${typeof v}`
+          );
         }
         return v as T; // string
       }
@@ -559,7 +558,9 @@ export class ContractSpec {
 
       // in the fallthrough case, just return the underlying value directly
       default:
-        throw new TypeError(`failed to convert ${scv} to native type from type ${typeDef}`);
+        throw new TypeError(
+          `failed to convert ${scv} to native type from type ${typeDef}`
+        );
     }
   }
 
@@ -567,10 +568,7 @@ export class ContractSpec {
     let entry = this.findEntry(udt.name() as string);
     switch (entry.switch()) {
       case xdr.ScSpecEntryKind.scSpecEntryUdtEnumV0():
-        return this.enumToNative(
-          scv,
-          entry.value() as xdr.ScSpecUdtEnumV0
-        );
+        return this.enumToNative(scv, entry.value() as xdr.ScSpecUdtEnumV0);
       case xdr.ScSpecEntryKind.scSpecEntryUdtStructV0():
         return this.structToNative(scv, entry.value() as xdr.ScSpecUdtStructV0);
       case xdr.ScSpecEntryKind.scSpecEntryUdtUnionV0():
@@ -591,7 +589,8 @@ export class ContractSpec {
       throw new Error(`Enum must have a u32 value`);
     }
     let num = scv.value() as number;
-    if (udt.cases().some((entry) => entry.value() === num)) {}
+    if (udt.cases().some((entry) => entry.value() === num)) {
+    }
     return num;
   }
 }
