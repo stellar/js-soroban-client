@@ -401,7 +401,7 @@ export class Server {
    * ledger footprint, expected authorizations, and expected costs.
    *
    * @example
-   * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
+   * const contractId = 'CA3D5KRYM6CB7OWQ6TWYRR3Z4T7GNZLKERYNZGGA5SOAOPIFY6YQGAXE';
    * const contract = new SorobanClient.Contract(contractId);
    *
    * // Right now, this is just the default fee for this example.
@@ -475,7 +475,7 @@ export class Server {
    * first, if that is of importance.
    *
    * @example
-   * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
+   * const contractId = 'CA3D5KRYM6CB7OWQ6TWYRR3Z4T7GNZLKERYNZGGA5SOAOPIFY6YQGAXE';
    * const contract = new SorobanClient.Contract(contractId);
    *
    * // Right now, this is just the default fee for this example.
@@ -560,7 +560,7 @@ export class Server {
    * transaction success/failure.
    *
    * @example
-   * const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
+   * const contractId = 'CA3D5KRYM6CB7OWQ6TWYRR3Z4T7GNZLKERYNZGGA5SOAOPIFY6YQGAXE';
    * const contract = new SorobanClient.Contract(contractId);
    *
    * // Right now, this is just the default fee for this example.
@@ -619,17 +619,22 @@ export class Server {
    * throw an error.  If the request fails, this method will throw an error.
    *
    * @example
-   * server.requestAirdrop("GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4").then(accountCreated => {
-   *   console.log("accountCreated:", accountCreated);
-   * }).catch(error => {
-   *   console.error("error:", error);
-   * });
+   * server
+   *    .requestAirdrop("GBZC6Y2Y7Q3ZQ2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4QZJ2XZ3Z5YXZ6Z7Z2Y4")
+   *    .then(accountCreated => {
+   *      console.log("accountCreated:", accountCreated);
+   *    }).catch(error => {
+   *      console.error("error:", error);
+   *    });
    *
-   * @param {string | Account} address - The address or account we want to create and fund.
+   * @param {string | Account} address - The address or account we want to
+   * create and fund.
    * @param {string} [friendbotUrl] - The optional explicit address for
-   *    friendbot. If not provided, the client will call the Soroban-RPC `getNetwork`
-   *    method to attempt to find this network's friendbot url.
-   * @returns {Promise<Account>} Returns a promise to the {@link Account} object with populated sequence number.
+   *    friendbot. If not provided, the client will call the Soroban-RPC
+   *    `getNetwork` method to attempt to find this network's friendbot url.
+   *
+   * @returns {Promise<Account>} Returns a promise to the {@link Account} object
+   *    with populated sequence number.
    */
   public async requestAirdrop(
     address: string | Pick<Account, "accountId">,
