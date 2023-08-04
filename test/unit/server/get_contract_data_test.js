@@ -110,7 +110,7 @@ describe("Server#getContractData", function () {
       .getContractData(hexAddress, key, "persistent")
       .then((reply) => done(new Error(`should fail, got: ${reply}`)))
       .catch((error) => {
-        expect(error).to.contain(/unsupported contract/i);
+        expect(error).to.contain(/unsupported contract id/i);
         done();
       });
   });
