@@ -86,6 +86,7 @@ export namespace SorobanRpc {
   }
 
   export interface EventResponse {
+    type: EventType;
     ledger: string;
     ledgerClosedAt: string;
     contractId: string;
