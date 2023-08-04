@@ -13,10 +13,7 @@ describe("Server#getContractData", function () {
     this.axiosMock.restore();
   });
 
-  let address =
-    "0000000000000000000000000000000000000000000000000000000000000001";
-  let nonHexAddress =
-    "CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5";
+  let address = "CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5";
   let key = SorobanClient.xdr.ScVal.scvVec([
     SorobanClient.xdr.ScVal.scvSymbol("Admin"),
   ]);
@@ -107,39 +104,14 @@ describe("Server#getContractData", function () {
       });
   });
 
-  it("key not found Non-hex address", function (done) {
-    this.axiosMock
-      .expects("post")
-      .withArgs(serverUrl, {
-        jsonrpc: "2.0",
-        id: 1,
-        method: "getLedgerEntries",
-        params: [
-          [
-            xdr.LedgerKey.contractData(
-              new xdr.LedgerKeyContractData({
-                contract: new Address(nonHexAddress).toScAddress(),
-                key,
-                durability: xdr.ContractDataDurability.persistent(),
-                bodyType: xdr.ContractEntryBodyType.dataEntry(),
-              })
-            ).toXDR("base64"),
-          ],
-        ],
-      })
-      .returns(Promise.resolve({ data: { result: { entries: [] } } }));
-
+  it("fails on hex address (was deprecated now unsupported)", function (done) {
+    let hexAddress = "0".repeat(63) + "1";
     this.server
-      .getContractData(nonHexAddress, key, "persistent")
-      .then(function (_response) {
-        done(new Error("Expected error"));
-      })
-      .catch(function (err) {
-        done(
-          err.code == 404
-            ? null
-            : new Error("Expected error code 404, got: " + err.code)
-        );
+      .getContractData(hexAddress, key, "persistent")
+      .then((reply) => done(new Error(`should fail, got: ${reply}`)))
+      .catch((error) => {
+        expect(error).to.contain(/unsupported contract id/i);
+        done();
       });
   });
 });

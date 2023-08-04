@@ -5,8 +5,8 @@ describe("Server#simulateTransaction", function () {
     "56199647068161"
   );
 
-  let rawContract = Buffer.alloc(32);
-  let contract = new SorobanClient.Contract(rawContract.toString("hex"));
+  let contractId = "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM";
+  let contract = new SorobanClient.Contract(contractId);
   let address = contract.address().toScAddress();
 
   const simulationResponse = {

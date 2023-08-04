@@ -33,7 +33,7 @@ const sourcePublicKey = sourceKeypair.publicKey();
 
 const receiverPublicKey = 'GAIRISXKPLOWZBMFRPU5XRGUUX3VMA3ZEWKBM5MSNRU3CHV6P4PYZ74D';
 
-const contractId = '0000000000000000000000000000000000000000000000000000000000000001';
+const contractId = 'CA3D5KRYM6CB7OWQ6TWYRR3Z4T7GNZLKERYNZGGA5SOAOPIFY6YQGAXE';
 
 // Configure SorobanClient to talk to the soroban-rpc instance running on your
 // local machine.
