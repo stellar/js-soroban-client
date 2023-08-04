@@ -11,9 +11,13 @@ A breaking change should be clearly marked in this log.
 ## v0.10.0
 
 ### Breaking Changes
-* We have dropped all support for the deprecated hex-encoded contract ID format ([#658](https://github.com/stellar/js-stellar-base/pull/658)).
+* We have dropped all support for the deprecated hex-encoded contract ID format ([#117](https://github.com/stellar/js-soroban-client/pull/117), [#658](https://github.com/stellar/js-stellar-base/pull/658)).
 
-You should use the well-supported `C...` strkey format, instead. To migrate, you can do something like `let s = StrKey.decodeContract(Buffer.from(hexContractId, 'hex'));`.
+You should use the well-supported `C...` strkey format, instead. To migrate, you can do something like
+
+```js
+let contractId = StrKey.encodeContract(Buffer.from(hexContractId, 'hex'));
+```
 
 ### Added
 * Updated `stellar-base` dependency to [v10.0.0-soroban.5](https://www.npmjs.com/package/stellar-base/v/10.0.0-soroban.5) which introduces many helpful Soroban abstractions (see [full release notes](https://github.com/stellar/js-stellar-base/pull/661)):
@@ -28,6 +32,7 @@ You should use the well-supported `C...` strkey format, instead. To migrate, you
 
 ### Fixed
 * `assembleTransaction()` (and `Server.prepareTransaction()` by proxy) will now override the authorization portion of simulation if you provide a transaction with existing authorization entries. This is because, in complex auth scenarios, you may have signed entries that would be overwritten by simulation, so this just uses your existing entries ([#114](https://github.com/stellar/js-soroban-client/pull/114)).
+* Added a missing `type` field to the `EventResponse` interface ([#118](https://github.com/stellar/js-soroban-client/pull/118)).
 
 
 ## v0.9.2
