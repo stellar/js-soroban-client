@@ -7,7 +7,7 @@ const version = require("../package.json").version;
 
 // Expose all types
 export * from "./soroban_rpc";
-export * from "./strval";
+export * from "./contract_spec";
 
 // stellar-sdk classes to expose
 export { Server } from "./server";

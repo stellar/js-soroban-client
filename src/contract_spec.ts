@@ -36,12 +36,12 @@
  * ```
  */
 
-import { xdr } from "..";
+import { xdr } from "stellar-base";
 
-import { Address } from "..";
-import { Contract } from "..";
+import { Address } from "stellar-base";
+import { Contract } from "stellar-base";
 //@ts-ignore Does exist
-import { ScInt, scValToBigInt } from "..";
+import { ScInt, scValToBigInt } from "stellar-base";
 
 export interface Union<T> {
   tag: string;
