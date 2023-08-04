@@ -578,10 +578,10 @@ export class ContractSpec {
     }
   }
   unionToNative(val: xdr.ScVal, udt: xdr.ScSpecUdtUnionV0) {
-    throw new Error("Method not implemented.");
+    throw new Error(`Method not implemented. for ${val} - ${udt}`);
   }
   structToNative(val: xdr.ScVal, udt: xdr.ScSpecUdtStructV0) {
-    throw new Error("Method not implemented.");
+    throw new Error(`Method not implemented. for ${val} - ${udt}`);
   }
 
   enumToNative(scv: xdr.ScVal, udt: xdr.ScSpecUdtEnumV0) {
