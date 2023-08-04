@@ -161,9 +161,9 @@ export class Server {
    * events or simulateTransaction.
    *
    * @param {string|Address|Contract} contract - The contract ID containing the
-   *    data to load. Encoded as Stellar Contract Address string e.g.
-   *    `CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5` or a
-   *    {@link Contract} or {@link Address} instance.
+   *    data to load. Encoded as Stellar Contract Address string (e.g.
+   *    `CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5`), a
+   *    {@link Contract}, or an {@link Address} instance.
    * @param {xdr.ScVal} key - The key of the contract data to load.
    * @param {Durability} [durability] - The "durability keyspace" that this
    *    ledger key belongs to, which is either 'temporary' or 'persistent' (the
@@ -242,9 +242,9 @@ export class Server {
    * To fetch contract wasm byte-code, use the ContractCode ledger entry key.
    *
    * @example
-   * const contractId = "0000000000000000000000000000000000000000000000000000000000000001";
+   * const contractId = "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM";
    * const key = xdr.LedgerKey.contractData(new xdr.LedgerKeyContractData({
-   *   contractId: Buffer.from(contractId, "hex"),
+   *   contractId: StrKey.decodeContract(contractId),
    *   key: xdr.ScVal.scvSymbol("counter"),
    * }));
    * server.getLedgerEntries([key]).then(response => {
@@ -286,8 +286,7 @@ export class Server {
    *   console.log("resultXdr:", transaction.resultXdr);
    * });
    *
-   * @param {string} hash - The hash of the transaction to check. Encoded as a
-   *    hex string.
+   * @param {string} hash - The hex-encoded hash of the transaction to check.
    *
    * @returns {Promise<SorobanRpc.GetTransactionResponse>} Returns a
    *    promise to the {@link SorobanRpc.GetTransactionResponse} object
