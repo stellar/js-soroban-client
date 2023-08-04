@@ -105,7 +105,7 @@ describe("Server#getContractData", function () {
   });
 
   it("fails on hex address (was deprecated now unsupported)", function (done) {
-    let hexAddress = '0'.repeat(63) + '1';
+    let hexAddress = "0".repeat(63) + "1";
     this.server
       .getContractData(hexAddress, key, "persistent")
       .then((reply) => done(new Error(`should fail, got: ${reply}`)))
