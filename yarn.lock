@@ -2846,11 +2846,6 @@ cors@~2.8.5:
     object-assign "^4"
     vary "^1"
 
-crc@^4.3.2:
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/crc/-/crc-4.3.2.tgz#49b7821cbf2cf61dfd079ed93863bbebd5469b9a"
-  integrity sha512-uGDHf4KLLh2zsHa8D8hIQ1H/HtFQhyHrc0uhHBcoKGol/Xnb+MPYfUMw7cvON6ze/GUESTudKayDcJC5HnJv1A==
-
 create-ecdh@^4.0.0:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/create-ecdh/-/create-ecdh-4.0.4.tgz#d6e7f4bffa66736085a0762fd3a632684dabcc4e"
@@ -6588,16 +6583,14 @@ statuses@~1.5.0:
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.5.0.tgz#161c7dac177659fd9811f43771fa99381478628c"
   integrity sha512-OpZ3zP+jT1PI7I8nemJX4AKmAX070ZkYPVWV/AaKTJl+tXCTGyVdC1a4SL8RUQYEwk/f34ZX8UTykN68FwrqAA==
 
-stellar-base@10.0.0-soroban.4:
-  version "10.0.0-soroban.4"
-  resolved "https://registry.yarnpkg.com/stellar-base/-/stellar-base-10.0.0-soroban.4.tgz#9baeaec1f750473cb0dc00c6fa0f3ec23cf7177d"
-  integrity sha512-Afl2Mlh+aXokIHhy2x67Df5ofbss83oAOHV7pHLI0fsPlxAgs7YtbClzkNxvpnXyxQI77PMIWFJbT17Y3dR/+A==
+stellar-base@10.0.0-soroban.5:
+  version "10.0.0-soroban.5"
+  resolved "https://registry.yarnpkg.com/stellar-base/-/stellar-base-10.0.0-soroban.5.tgz#bf12f3a947ac15fa22a61121a705e80ee7eb4834"
+  integrity sha512-4gASMPVftdtuG4JqrRVgjjUyy/gIzv3FTJxR9Y8jfYi7KaduXn5YwaNjRC3UABlScqh2G1ax5+7NFkHhZXg5oA==
   dependencies:
     base32.js "^0.1.0"
     bignumber.js "^9.1.1"
     buffer "^6.0.3"
-    crc "^4.3.2"
-    crypto-browserify "^3.12.0"
     js-xdr "^3.0.0"
     sha.js "^2.3.6"
     tweetnacl "^1.0.3"
