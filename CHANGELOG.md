@@ -7,13 +7,24 @@ A breaking change should be clearly marked in this log.
 
 ## Unreleased
 
+
 ## v0.10.0
 
+### Breaking Changes
+* We have dropped all support for the deprecated hex-encoded contract ID format ([#658](https://github.com/stellar/js-stellar-base/pull/658)).
+
+You should use the well-supported `C...` strkey format, instead. To migrate, you can do something like `let s = StrKey.decodeContract(Buffer.from(hexContractId, 'hex'));`.
+
 ### Added
-* Updated `stellar-base` dependency to [v10.0.0-soroban.5](https://www.npmjs.com/package/stellar-base/v/10.0.0-soroban.5) which introduces many helpful Soroban abstractions:
+* Updated `stellar-base` dependency to [v10.0.0-soroban.5](https://www.npmjs.com/package/stellar-base/v/10.0.0-soroban.5) which introduces many helpful Soroban abstractions (see [full release notes](https://github.com/stellar/js-stellar-base/pull/661)):
   - Use an existing, immutable `Transaction` as a template for a new one via `TransactionBuilder.cloneFrom(tx, opts = {})` and use `opts` to override fields ([#656](https://github.com/stellar/js-stellar-base/pull/656)).
+  - Use the new `SorobanDataBuilder` class to easily prepare Soroban transaction footprints [#660](https://github.com/stellar/js-stellar-base/pull/660).
   - Use `humanizeEvents` to create human-readable versions of `xdr.ContractEvent`s and `xdr.DiagnosticEvent`s that come out of transaction meta ([#659](https://github.com/stellar/js-stellar-base/pull/659)).
-  - Use `TransactionBuilder.setFootprint()` to easily prepare transaction footprints easily [#660](https://github.com/stellar/js-stellar-base/pull/660).
+  - Use several helpers to reliably build Soroban authorization entries for complex, multi-party signing scenarios ([#663](https://github.com/stellar/js-stellar-base/pull/663)). These are each at various levels of granularity/complexity:
+    * `authorizeInvocation`
+    * `authorizeInvocationCallback`
+    * `buildAuthEnvelope`
+    * `buildAuthEntry`
 
 ### Fixed
 * `assembleTransaction()` (and `Server.prepareTransaction()` by proxy) will now override the authorization portion of simulation if you provide a transaction with existing authorization entries. This is because, in complex auth scenarios, you may have signed entries that would be overwritten by simulation, so this just uses your existing entries ([#114](https://github.com/stellar/js-soroban-client/pull/114)).
