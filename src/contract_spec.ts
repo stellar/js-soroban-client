@@ -59,8 +59,9 @@ export class ContractSpec {
   }
 
   findEntry(name: string): xdr.ScSpecEntry {
+    console.log(name, JSON.stringify(this.entries, null, 2));
     let entry = this.entries.find(
-      (entry) => entry.value().name.toString() === name
+      (entry) => entry.value().name().toString() === name
     );
     if (!entry) {
       throw new Error(`no such entry: ${name}`);
@@ -614,3 +615,29 @@ function stringToScVal(
 function isNumeric(field: xdr.ScSpecUdtStructFieldV0) {
   return /^\d+$/.test(field.name() as string);
 }
+
+export const STRUCT = xdr.ScSpecEntry.scSpecEntryUdtStructV0(new xdr.ScSpecUdtStructV0(
+  {
+      doc: "This is from the rust doc above the struct Test",
+      lib: "",
+      name: "Test",
+      fields:
+          [
+              // new xdr.ScSpecUdtStructFieldV0({
+              //     doc: "",
+              //     name: "a",
+              //     type: xdr.ScSpecTypeDef.scSpecTypeU32(),
+              // }),
+              new xdr.ScSpecUdtStructFieldV0 ({
+                  doc: "",
+                  name: "b",
+                  type: xdr.ScSpecTypeDef.scSpecTypeBool(),
+              }),
+              // new xdr.ScSpecUdtStructFieldV0 ({
+              //     doc: "",
+              //     name: "c",
+              //     type: xdr.ScSpecTypeDef.scSpecTypeSymbol(),
+              // }),
+          ],
+      
+  }));
