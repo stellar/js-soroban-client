@@ -70,8 +70,8 @@ export function assembleTransaction(
 
   switch (raw.operations[0].type) {
     case "invokeHostFunction":
-      // @ts-ignore
       // In this case, we don't want to clone the operation, so we drop it.
+      // @ts-ignore hack because `TransactionBuilder.operations` is private
       txnBuilder.operations = [];
 
       const invokeOp: Operation.InvokeHostFunction = raw.operations[0];
