@@ -8,6 +8,13 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v0.10.1
+
+### Fixed
+* The `stellar-base` dependency has been upgraded to fix a TypeScript bug ([#665](https://github.com/stellar/js-stellar-base/pull/665)).
+* Decreased bundle size by refactoring `assembleTransaction` to use new abstractions from `stellar-base` ([#120](https://github.com/stellar/js-soroban-client/pull/120)).
+
+
 ## v0.10.0
 
 ### Breaking Changes

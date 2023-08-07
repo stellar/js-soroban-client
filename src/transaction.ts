@@ -1,5 +1,4 @@
 import {
-  Account,
   FeeBumpTransaction,
   Operation,
   Transaction,
@@ -9,7 +8,23 @@ import {
 
 import { SorobanRpc } from "./soroban_rpc";
 
-// TODO: Transaction is immutable, so we need to re-build it here. :(
+/**
+ * Combines the given raw transaction alongside the simulation results.
+ *
+ * @param raw   the initial transaction, w/o simulation applied
+ * @param networkPassphrase   the network this simulation applies to
+ * @param simulation  the Soroban RPC simulation result
+ *
+ * @returns a new, cloned transaction with the proper auth and resource (fee,
+ *    footprint) simulation data applied
+ *
+ * @note if the given transaction already has authorization entries in a host
+ *    function invocation (see {@link Operation.invokeHostFunction}), **the
+ *    simulation entries are ignored**.
+ *
+ * @see {Server.simulateTransaction}
+ * @see {Server.prepareTransaction}
+ */
 export function assembleTransaction(
   raw: Transaction | FeeBumpTransaction,
   networkPassphrase: string,
@@ -36,10 +51,10 @@ export function assembleTransaction(
     throw new Error(`simulation results invalid: ${simulation.results}`);
   }
 
-  const source = new Account(raw.source, `${parseInt(raw.sequence, 10) - 1}`);
   const classicFeeNum = parseInt(raw.fee, 10) || 0;
   const minResourceFeeNum = parseInt(simulation.minResourceFee, 10) || 0;
-  const txnBuilder = new TransactionBuilder(source, {
+
+  const txnBuilder = TransactionBuilder.cloneFrom(raw, {
     // automatically update the tx fee that will be set on the resulting tx to
     // the sum of 'classic' fee provided from incoming tx.fee and minResourceFee
     // provided by simulation.
@@ -49,18 +64,16 @@ export function assembleTransaction(
     // in the tx, so can make simplification of total classic fees for the
     // soroban transaction will be equal to incoming tx.fee + minResourceFee.
     fee: (classicFeeNum + minResourceFeeNum).toString(),
-    memo: raw.memo,
-    networkPassphrase,
-    timebounds: raw.timeBounds,
-    ledgerbounds: raw.ledgerBounds,
-    minAccountSequence: raw.minAccountSequence,
-    minAccountSequenceAge: raw.minAccountSequenceAge,
-    minAccountSequenceLedgerGap: raw.minAccountSequenceLedgerGap,
-    extraSigners: raw.extraSigners,
+    // apply the pre-built Soroban Tx Data from simulation onto the Tx
+    sorobanData: simulation.transactionData,
   });
 
   switch (raw.operations[0].type) {
     case "invokeHostFunction":
+      // In this case, we don't want to clone the operation, so we drop it.
+      // @ts-ignore hack because `TransactionBuilder.operations` is private
+      txnBuilder.operations = [];
+
       const invokeOp: Operation.InvokeHostFunction = raw.operations[0];
       const existingAuth = invokeOp.auth ?? [];
       txnBuilder.addOperation(
@@ -81,24 +94,7 @@ export function assembleTransaction(
         })
       );
       break;
-
-    case "bumpFootprintExpiration":
-      txnBuilder.addOperation(
-        Operation.bumpFootprintExpiration(raw.operations[0])
-      );
-      break;
-
-    case "restoreFootprint":
-      txnBuilder.addOperation(Operation.restoreFootprint(raw.operations[0]));
-      break;
   }
-
-  // apply the pre-built Soroban Tx Data from simulation onto the Tx
-  const sorobanTxData = xdr.SorobanTransactionData.fromXDR(
-    simulation.transactionData,
-    "base64"
-  );
-  txnBuilder.setSorobanData(sorobanTxData);
 
   return txnBuilder.build();
 }
