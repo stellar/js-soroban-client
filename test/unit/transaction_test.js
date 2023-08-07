@@ -16,14 +16,14 @@ describe("assembleTransaction", () => {
         address: scAddress,
         nonce: new xdr.Int64(0),
         signatureExpirationLedger: 1,
-        signatureArgs: [],
+        signature: xdr.ScVal.scvVoid(),
       })
     ),
     // And a basic invocation
     rootInvocation: new xdr.SorobanAuthorizedInvocation({
       function:
         xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
-          new xdr.SorobanAuthorizedContractFunction({
+          new xdr.InvokeContractArgs({
             contractAddress: scAddress,
             functionName: "fn",
             args: [],
@@ -42,7 +42,7 @@ describe("assembleTransaction", () => {
       instructions: 0,
       readBytes: 5,
       writeBytes: 0,
-      extendedMetaDataSizeBytes: 0,
+      contractEventsSizeBytes: 0,
     }),
     refundableFee: xdr.Int64.fromString("0"),
     ext: new xdr.ExtensionPoint(0),
@@ -79,7 +79,13 @@ describe("assembleTransaction", () => {
       })
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
-            func: new xdr.HostFunction.hostFunctionTypeInvokeContract([]),
+            func: new xdr.HostFunction.hostFunctionTypeInvokeContract(
+              new xdr.InvokeContractArgs({
+                contractAddress: scAddress,
+                functionName: "empty",
+                args: [],
+              })
+            ),
             auth: auth ?? [],
           })
         )

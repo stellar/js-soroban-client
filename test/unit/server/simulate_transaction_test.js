@@ -19,7 +19,7 @@ describe("Server#simulateTransaction", function () {
         instructions: 0,
         readBytes: 0,
         writeBytes: 0,
-        extendedMetaDataSizeBytes: 0,
+        contractEventsSizeBytes: 0,
       }),
       refundableFee: SorobanClient.xdr.Int64.fromString("0"),
       ext: new SorobanClient.xdr.ExtensionPoint(0),
@@ -36,14 +36,14 @@ describe("Server#simulateTransaction", function () {
                 address: address,
                 nonce: new SorobanClient.xdr.Int64(1234),
                 signatureExpirationLedger: 1,
-                signatureArgs: [],
+                signature: SorobanClient.nativeToScVal(null),
               })
             ),
           // Basic fake invocation
           rootInvocation: new SorobanClient.xdr.SorobanAuthorizedInvocation({
             function:
               SorobanClient.xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
-                new SorobanClient.xdr.SorobanAuthorizedContractFunction({
+                new SorobanClient.xdr.InvokeContractArgs({
                   contractAddress: address,
                   functionName: "test",
                   args: [],
@@ -78,7 +78,11 @@ describe("Server#simulateTransaction", function () {
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
             func: new SorobanClient.xdr.HostFunction.hostFunctionTypeInvokeContract(
-              []
+              new SorobanClient.xdr.InvokeContractArgs({
+                contractAddress: address,
+                functionName: "",
+                args: [],
+              })
             ),
             auth: [],
           })
