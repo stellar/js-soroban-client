@@ -8,6 +8,15 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v0.10.1
+
+### Fixed
+* Bundle size has decreased by refactoring `assembleTransaction` to use new abstractions from `stellar-base` ([TODO]()).
+
+### Updated
+* The `stellar-base` dependency has been upgraded to fix a TypeScript bug ([#665](https://github.com/stellar/js-stellar-base/pull/665)).
+
+
 ## v0.10.0
 
 ### Breaking Changes
