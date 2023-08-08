@@ -1,6 +1,6 @@
 /**
- * Provides conversions from smart contract XDR values ({@link xdr.ScVal}) to
- * native JavaScript types.
+ * Provides a ContractSpec class which can contains the XDR types defined by the contract.
+ * This allows the class to be used to convert between native and raw `xdr.ScVal`s.
  *
  * @example
  * ```js
@@ -616,28 +616,99 @@ function isNumeric(field: xdr.ScSpecUdtStructFieldV0) {
   return /^\d+$/.test(field.name() as string);
 }
 
-export const STRUCT = xdr.ScSpecEntry.scSpecEntryUdtStructV0(new xdr.ScSpecUdtStructV0(
-  {
-      doc: "This is from the rust doc above the struct Test",
-      lib: "",
-      name: "Test",
-      fields:
-          [
-              // new xdr.ScSpecUdtStructFieldV0({
-              //     doc: "",
-              //     name: "a",
-              //     type: xdr.ScSpecTypeDef.scSpecTypeU32(),
-              // }),
-              new xdr.ScSpecUdtStructFieldV0 ({
-                  doc: "",
-                  name: "b",
-                  type: xdr.ScSpecTypeDef.scSpecTypeBool(),
-              }),
-              // new xdr.ScSpecUdtStructFieldV0 ({
-              //     doc: "",
-              //     name: "c",
-              //     type: xdr.ScSpecTypeDef.scSpecTypeSymbol(),
-              // }),
-          ],
-      
-  }));
+export const STRUCT = xdr.ScSpecEntry.scSpecEntryUdtStructV0(
+  new xdr.ScSpecUdtStructV0({
+    doc: "This is from the rust doc above the struct Test",
+    lib: "",
+    name: "GigaMap",
+    fields: [
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "bool",
+        type: xdr.ScSpecTypeDef.scSpecTypeBool(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "i128",
+        type: xdr.ScSpecTypeDef.scSpecTypeI128(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "u128",
+        type: xdr.ScSpecTypeDef.scSpecTypeU128(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "i256",
+        type: xdr.ScSpecTypeDef.scSpecTypeI256(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "u256",
+        type: xdr.ScSpecTypeDef.scSpecTypeU256(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "i32",
+        type: xdr.ScSpecTypeDef.scSpecTypeI32(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "u32",
+        type: xdr.ScSpecTypeDef.scSpecTypeU32(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "i64",
+        type: xdr.ScSpecTypeDef.scSpecTypeI64(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "u64",
+        type: xdr.ScSpecTypeDef.scSpecTypeU64(),
+      }),
+      // new xdr.ScSpecUdtStructFieldV0 ({
+      //     doc: "",
+      //     name: "c",
+      //     type: xdr.ScSpecTypeDef.scSpecTypeSymbol(),
+      // }),
+    ],
+  })
+);
+/*
+   • Struct: InnerMap
+     Fields:
+      • arbitrary: U64
+      • etc: Bool
+      • nested: String
+
+ • Struct: GigaMap
+     Docs: This is a kitchen sink of all the types
+     Fields:
+      • bool: Bool
+      • i128: I128
+      • i256: I256
+      • i32: I32
+      • i64: I64
+      • map: Udt(
+            ScSpecTypeUdt {
+                name: StringM(InnerMap),
+            },
+        )
+      • u128: U128
+      • u256: U256
+      • u32: U32
+      • u64: U64
+      • vec: Vec(
+            ScSpecTypeVec {
+                element_type: String,
+            },
+        )
+      • void: Tuple(
+            ScSpecTypeTuple {
+                value_types: VecM(
+                    [],
+                ),
+            },
+        )
+        */
