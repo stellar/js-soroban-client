@@ -1,5 +1,4 @@
 import { AssetType } from "stellar-base";
-import * as jsonrpc from "./jsonrpc";
 
 // TODO: Better parsing for hashes, and base64-encoded xdr
 
