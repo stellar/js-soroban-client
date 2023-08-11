@@ -1,29 +1,150 @@
-const xdr = SorobanClient.xdr;
-const ScInt = SorobanClient.ScInt; // shorthand
-const [scValToNative, nativeToScVal] = [
-  SorobanClient.scValToNative,
-  SorobanClient.nativeToScVal
-];
+import { xdr, ScInt, ContractSpec } from "../..";
 
-describe('parsing and building ScVals', function () {
-
-  it('Can parse entries', function () {
-    
-    let spec = new SorobanClient.ContractSpec([SorobanClient.STRUCT]);
-    console.log(spec.findEntry('Test'))
-
+describe("parsing and building ScVals", function () {
+  it("Can parse entries", function () {
+    let spec = new ContractSpec([STRUCT, func]);
+    let fn = spec.findEntry("giga_map");
+    let entry = spec.findEntry("GigaMap");
+    console.log(entry, fn)
   });
-
 });
 
+export const STRUCT = xdr.ScSpecEntry.scSpecEntryUdtStructV0(
+  new xdr.ScSpecUdtStructV0({
+    doc: "This is a kitchen sink of all the types",
+    lib: "",
+    name: "GigaMap",
+    fields: [
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "bool",
+        type: xdr.ScSpecTypeDef.scSpecTypeBool(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "i128",
+        type: xdr.ScSpecTypeDef.scSpecTypeI128(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "u128",
+        type: xdr.ScSpecTypeDef.scSpecTypeU128(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "i256",
+        type: xdr.ScSpecTypeDef.scSpecTypeI256(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "u256",
+        type: xdr.ScSpecTypeDef.scSpecTypeU256(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "i32",
+        type: xdr.ScSpecTypeDef.scSpecTypeI32(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "u32",
+        type: xdr.ScSpecTypeDef.scSpecTypeU32(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "i64",
+        type: xdr.ScSpecTypeDef.scSpecTypeI64(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "u64",
+        type: xdr.ScSpecTypeDef.scSpecTypeU64(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "symbol",
+        type: xdr.ScSpecTypeDef.scSpecTypeSymbol(),
+      }),
+      new xdr.ScSpecUdtStructFieldV0({
+        doc: "",
+        name: "string",
+        type: xdr.ScSpecTypeDef.scSpecTypeString(),
+      }),
+    ],
+  })
+);
+const GIGA_MAP_TYPE = xdr.ScSpecTypeDef.scSpecTypeUdt(
+  new xdr.ScSpecTypeUdt({ name: "GigaMap" })
+)
 
-function custom_types_spec() {
-  return SorobanClient.ContractSpec(xdr.Sp)
-}
+let func = xdr.ScSpecEntry.scSpecEntryFunctionV0(
+  new xdr.ScSpecFunctionV0({
+    doc: "Kitchen Sink",
+    name: "giga_map",
+    inputs: [
+      new xdr.ScSpecFunctionInputV0({
+        doc: "",
+        name: "giga_map",
+        type: GIGA_MAP_TYPE,
+      }),
+    ],
+    outputs: [GIGA_MAP_TYPE],
+  })
+);
 
+// FunctionV0(
+//   ScSpecFunctionV0 {
+//       doc: "",
+//       name: ScSymbol(
+//           "woid",
+//       ),
+//       inputs: VecM(
+//           [],
+//       ),
+//       outputs: VecM(
+//           [],
+//       ),
+//   },
 
+/*
+   • Struct: InnerMap
+     Fields:
+      • arbitrary: U64
+      • etc: Bool
+      • nested: String
 
-// const Test = 
+ • Struct: GigaMap
+     Docs: 
+     Fields:
+      • bool: Bool
+      • i128: I128
+      • i256: I256
+      • i32: I32
+      • i64: I64
+      • map: Udt(
+            ScSpecTypeUdt {
+                name: StringM(InnerMap),
+            },
+        )
+      • u128: U128
+      • u256: U256
+      • u32: U32
+      • u64: U64
+      • vec: Vec(
+            ScSpecTypeVec {
+                element_type: String,
+            },
+        )
+      • void: Tuple(
+            ScSpecTypeTuple {
+                value_types: VecM(
+                    [],
+                ),
+            },
+        )
+        */
+
+// const Test =
 
 //   UdtStructV0(
 //       ScSpecUdtStructV0 {
@@ -1858,7 +1979,8 @@ function custom_types_spec() {
 //   ),
 // )
 
-const CUSTOM_TYPES_XDR = ["AAAAAQAAAC9UaGlzIGlzIGZyb20gdGhlIHJ1c3QgZG9jIGFib3ZlIHRoZSBzdHJ1Y3QgVGVzdAAAAAAAAAAABFRlc3QAAAADAAAAAAAAAAFhAAAAAAAABAAAAAAAAAABYgAAAAAAAAEAAAAAAAAAAWMAAAAAAAAR",
+const CUSTOM_TYPES_XDR = [
+  "AAAAAQAAAC9UaGlzIGlzIGZyb20gdGhlIHJ1c3QgZG9jIGFib3ZlIHRoZSBzdHJ1Y3QgVGVzdAAAAAAAAAAABFRlc3QAAAADAAAAAAAAAAFhAAAAAAAABAAAAAAAAAABYgAAAAAAAAEAAAAAAAAAAWMAAAAAAAAR",
   "AAAAAgAAAAAAAAAAAAAAClNpbXBsZUVudW0AAAAAAAMAAAAAAAAAAAAAAAVGaXJzdAAAAAAAAAAAAAAAAAAABlNlY29uZAAAAAAAAAAAAAAAAAAFVGhpcmQAAAA=",
   "AAAAAwAAAAAAAAAAAAAACVJveWFsQ2FyZAAAAAAAAAMAAAAAAAAABEphY2sAAAALAAAAAAAAAAVRdWVlbgAAAAAAAAwAAAAAAAAABEtpbmcAAAAN",
   "AAAAAQAAAAAAAAAAAAAAC1R1cGxlU3RydWN0AAAAAAIAAAAAAAAAATAAAAAAAAfQAAAABFRlc3QAAAAAAAAAATEAAAAAAAfQAAAAClNpbXBsZUVudW0AAA==",
@@ -1891,4 +2013,5 @@ const CUSTOM_TYPES_XDR = ["AAAAAQAAAC9UaGlzIGlzIGZyb20gdGhlIHJ1c3QgZG9jIGFib3ZlI
   "AAAAAAAAAAAAAAAEdTI1NgAAAAEAAAAAAAAABHUyNTYAAAAMAAAAAQAAAAw=",
   "AAAAAAAAAAAAAAAEaTI1NgAAAAEAAAAAAAAABGkyNTYAAAANAAAAAQAAAA0=",
   "AAAAAAAAAAAAAAAGc3RyaW5nAAAAAAABAAAAAAAAAAZzdHJpbmcAAAAAABAAAAABAAAAEA==",
-  "AAAAAAAAAAAAAAAMdHVwbGVfc3RydWt0AAAAAQAAAAAAAAAMdHVwbGVfc3RydWt0AAAH0AAAAAtUdXBsZVN0cnVjdAAAAAABAAAH0AAAAAtUdXBsZVN0cnVjdAA="]
+  "AAAAAAAAAAAAAAAMdHVwbGVfc3RydWt0AAAAAQAAAAAAAAAMdHVwbGVfc3RydWt0AAAH0AAAAAtUdXBsZVN0cnVjdAAAAAABAAAH0AAAAAtUdXBsZVN0cnVjdAA=",
+];

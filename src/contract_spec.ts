@@ -48,6 +48,15 @@ export interface Union<T> {
   value: T;
 }
 
+function readObj(args: object, input: xdr.ScSpecFunctionInputV0): any {
+  let inputName = input.name() as string;
+  let entry = Object.entries(args).find(([name, _]) => name === inputName);
+  if (!entry) {
+    throw new Error(`Missing field ${inputName}`);
+  }
+  return entry[1];
+}
+
 export class ContractSpec {
   public entries: xdr.ScSpecEntry[];
   constructor(entries: xdr.ScSpecEntry[] | string) {
@@ -56,6 +65,39 @@ export class ContractSpec {
     } else {
       this.entries = entries;
     }
+  }
+
+  getFunc(name: string): xdr.ScSpecFunctionV0 {
+    let entry = this.findEntry(name);
+    if (entry.switch().name !== "scSpecEntryFunctionV0") {
+      throw new Error(`${name} is not a function`);
+    }
+    return entry.value() as xdr.ScSpecFunctionV0;
+  }
+
+  funcArgsToScVals(name: string, args: object): xdr.ScVal[] {
+    let fn = this.getFunc(name);
+    return fn
+      .inputs()
+      .map((input) => this.nativeToScVal(readObj(args, input), input.type()));
+  }
+
+  funcResToNative(name: string, val: xdr.ScVal): any {
+    let func = this.getFunc(name);
+    let outputs = func.outputs();
+    if (outputs.length === 0) {
+      let type = val.switch().name 
+      if (type !== "scvVoid") {
+        throw new Error(`Expected void, got ${type}`);
+      }
+      return null;
+    }
+    if (outputs.length > 1) {
+      throw new Error(`Multiple outputs not supported`);
+    }
+    let output = outputs[0];
+    return this.scValToNative(val, output);
+
   }
 
   findEntry(name: string): xdr.ScSpecEntry {
@@ -581,11 +623,17 @@ export class ContractSpec {
   unionToNative(val: xdr.ScVal, udt: xdr.ScSpecUdtUnionV0) {
     throw new Error(`Method not implemented. for ${val} - ${udt}`);
   }
-  structToNative(val: xdr.ScVal, udt: xdr.ScSpecUdtStructV0) {
-    throw new Error(`Method not implemented. for ${val} - ${udt}`);
+  structToNative(val: xdr.ScVal, udt: xdr.ScSpecUdtStructV0): any {
+    let res: any = {};
+    let fields = udt.fields();
+    val.vec()?.forEach((entry, i) => {
+      let field = fields[i];
+      res[field.name() as string] = this.scValToNative(entry, field.type());
+    });
+    res;
   }
 
-  enumToNative(scv: xdr.ScVal, udt: xdr.ScSpecUdtEnumV0) {
+  enumToNative(scv: xdr.ScVal, udt: xdr.ScSpecUdtEnumV0): any {
     if (scv.switch().name !== "scvU32") {
       throw new Error(`Enum must have a u32 value`);
     }
@@ -615,100 +663,3 @@ function stringToScVal(
 function isNumeric(field: xdr.ScSpecUdtStructFieldV0) {
   return /^\d+$/.test(field.name() as string);
 }
-
-export const STRUCT = xdr.ScSpecEntry.scSpecEntryUdtStructV0(
-  new xdr.ScSpecUdtStructV0({
-    doc: "This is from the rust doc above the struct Test",
-    lib: "",
-    name: "GigaMap",
-    fields: [
-      new xdr.ScSpecUdtStructFieldV0({
-        doc: "",
-        name: "bool",
-        type: xdr.ScSpecTypeDef.scSpecTypeBool(),
-      }),
-      new xdr.ScSpecUdtStructFieldV0({
-        doc: "",
-        name: "i128",
-        type: xdr.ScSpecTypeDef.scSpecTypeI128(),
-      }),
-      new xdr.ScSpecUdtStructFieldV0({
-        doc: "",
-        name: "u128",
-        type: xdr.ScSpecTypeDef.scSpecTypeU128(),
-      }),
-      new xdr.ScSpecUdtStructFieldV0({
-        doc: "",
-        name: "i256",
-        type: xdr.ScSpecTypeDef.scSpecTypeI256(),
-      }),
-      new xdr.ScSpecUdtStructFieldV0({
-        doc: "",
-        name: "u256",
-        type: xdr.ScSpecTypeDef.scSpecTypeU256(),
-      }),
-      new xdr.ScSpecUdtStructFieldV0({
-        doc: "",
-        name: "i32",
-        type: xdr.ScSpecTypeDef.scSpecTypeI32(),
-      }),
-      new xdr.ScSpecUdtStructFieldV0({
-        doc: "",
-        name: "u32",
-        type: xdr.ScSpecTypeDef.scSpecTypeU32(),
-      }),
-      new xdr.ScSpecUdtStructFieldV0({
-        doc: "",
-        name: "i64",
-        type: xdr.ScSpecTypeDef.scSpecTypeI64(),
-      }),
-      new xdr.ScSpecUdtStructFieldV0({
-        doc: "",
-        name: "u64",
-        type: xdr.ScSpecTypeDef.scSpecTypeU64(),
-      }),
-      // new xdr.ScSpecUdtStructFieldV0 ({
-      //     doc: "",
-      //     name: "c",
-      //     type: xdr.ScSpecTypeDef.scSpecTypeSymbol(),
-      // }),
-    ],
-  })
-);
-/*
-   • Struct: InnerMap
-     Fields:
-      • arbitrary: U64
-      • etc: Bool
-      • nested: String
-
- • Struct: GigaMap
-     Docs: This is a kitchen sink of all the types
-     Fields:
-      • bool: Bool
-      • i128: I128
-      • i256: I256
-      • i32: I32
-      • i64: I64
-      • map: Udt(
-            ScSpecTypeUdt {
-                name: StringM(InnerMap),
-            },
-        )
-      • u128: U128
-      • u256: U256
-      • u32: U32
-      • u64: U64
-      • vec: Vec(
-            ScSpecTypeVec {
-                element_type: String,
-            },
-        )
-      • void: Tuple(
-            ScSpecTypeTuple {
-                value_types: VecM(
-                    [],
-                ),
-            },
-        )
-        */
