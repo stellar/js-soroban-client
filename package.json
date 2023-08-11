@@ -145,7 +145,7 @@
     "eventsource": "^2.0.2",
     "lodash": "^4.17.21",
     "randombytes": "^2.1.0",
-    "stellar-base": "git+https://github.com/stellar/js-stellar-base#3b95892",
+    "stellar-base": "git+https://github.com/stellar/js-stellar-base#a04bd64d6354413fcdfa63d1b52fbc20c152957f",
     "toml": "^3.0.0",
     "urijs": "^1.19.1"
   }
