@@ -1,5 +1,4 @@
 import { AssetType } from "stellar-base";
-import * as jsonrpc from "./jsonrpc";
 
 // TODO: Better parsing for hashes, and base64-encoded xdr
 
@@ -127,7 +126,7 @@ export namespace SorobanRpc {
 
   export interface SimulateTransactionResponse {
     id: string;
-    error?: jsonrpc.Error;
+    error?: string;
     // this is SorobanTransactionData XDR in base64
     transactionData: string;
     events: string[];
