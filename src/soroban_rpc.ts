@@ -120,7 +120,7 @@ export namespace SorobanRpc {
 
   export interface SimulateHostFunctionResult {
     auth: xdr.SorobanAuthorizationEntry[];
-    xdr: xdr.ScVal;
+    retval: xdr.ScVal;
   }
 
   export interface SimulateTransactionResponse {
@@ -138,7 +138,7 @@ export namespace SorobanRpc {
   export interface RawSimulateHostFunctionResult {
     // each string is SorobanAuthorizationEntry XDR in base64
     auth?: string[];
-    // invocation response, which is just a hash of the result preimage
+    // invocation return value: the ScVal in base64
     xdr: string;
   }
 

@@ -7,7 +7,6 @@ import {
   Address,
   Contract,
   FeeBumpTransaction,
-  SorobanDataBuilder,
   StrKey,
   Transaction,
   xdr,
@@ -18,7 +17,7 @@ import AxiosClient from "./axios";
 import { Friendbot } from "./friendbot";
 import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
-import { assembleTransaction } from "./transaction";
+import { assembleTransaction, parseRawSimulation } from "./transaction";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -454,24 +453,7 @@ export class Server {
       this.serverURL.toString(),
       "simulateTransaction",
       transaction.toXDR(),
-    ).then((raw) => {
-      return {
-        id: raw.id,
-        error: raw.error,
-        minResourceFee: raw.minResourceFee,
-        latestLedger: raw.latestLedger,
-        cost: raw.cost,
-        transactionData: new SorobanDataBuilder(raw.transactionData),
-        events: raw.events.map(event => xdr.DiagnosticEvent.fromXDR(event, 'base64')),
-        result: raw.results?.map(result => {
-          return {
-            auth: (result.auth ?? []).map(entry =>
-              xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')),
-            xdr: xdr.ScVal.fromXDR(result.xdr, 'base64'),
-          };
-        })[0]
-      }
-    });
+    ).then((raw) => parseRawSimulation(raw));
   }
 
   /**
