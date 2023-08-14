@@ -10,20 +10,7 @@ describe("Server#simulateTransaction", function () {
   let address = contract.address().toScAddress();
 
   const simulationResponse = {
-    transactionData: new SorobanClient.xdr.SorobanTransactionData({
-      resources: new SorobanClient.xdr.SorobanResources({
-        footprint: new SorobanClient.xdr.LedgerFootprint({
-          readOnly: [],
-          readWrite: [],
-        }),
-        instructions: 0,
-        readBytes: 0,
-        writeBytes: 0,
-        extendedMetaDataSizeBytes: 0,
-      }),
-      refundableFee: SorobanClient.xdr.Int64.fromString("0"),
-      ext: new SorobanClient.xdr.ExtensionPoint(0),
-    }).toXDR("base64"),
+    transactionData: new SorobanClient.SorobanDataBuilder(),
     events: [],
     minResourceFee: "15",
     result: {
@@ -51,9 +38,9 @@ describe("Server#simulateTransaction", function () {
               ),
             subInvocations: [],
           }),
-        }).toXDR("base64"),
+        })
       ],
-      xdr: SorobanClient.xdr.ScVal.scvU32(0).toXDR().toString("base64"),
+      xdr: SorobanClient.xdr.ScVal.scvU32(0),
     },
     latestLedger: 3,
     cost: {

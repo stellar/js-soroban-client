@@ -33,29 +33,20 @@ describe("assembleTransaction", () => {
     }),
   });
 
-  const sorobanTransactionData = new xdr.SorobanTransactionData({
-    resources: new xdr.SorobanResources({
-      footprint: new xdr.LedgerFootprint({
-        readOnly: [],
-        readWrite: [],
-      }),
-      instructions: 0,
-      readBytes: 5,
-      writeBytes: 0,
-      extendedMetaDataSizeBytes: 0,
-    }),
-    refundableFee: xdr.Int64.fromString("0"),
-    ext: new xdr.ExtensionPoint(0),
-  });
+  const sorobanTransactionData = new SorobanClient.SorobanDataBuilder()
+    .setResources(0, 5, 0, 0)
+    .build();
 
   const simulationResponse = {
-    transactionData: sorobanTransactionData.toXDR("base64"),
+    transactionData: new SorobanClient.SorobanDataBuilder(
+      sorobanTransactionData
+    ),
     events: [],
     minResourceFee: "115",
     results: [
       {
-        auth: [fnAuth.toXDR("base64")],
-        xdr: xdr.ScVal.scvU32(0).toXDR().toString("base64"),
+        auth: [fnAuth],
+        xdr: xdr.ScVal.scvU32(0),
       },
     ],
     latestLedger: 3,

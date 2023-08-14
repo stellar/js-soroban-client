@@ -7,6 +7,7 @@ import {
   Address,
   Contract,
   FeeBumpTransaction,
+  SorobanDataBuilder,
   StrKey,
   Transaction,
   xdr,
@@ -122,9 +123,8 @@ export class Server {
       ledgerEntryData,
       "base64",
     ).account();
-    const { high, low } = accountEntry.seqNum();
-    const sequence = BigInt(high) * BigInt(4294967296) + BigInt(low);
-    return new Account(address, sequence.toString());
+
+    return new Account(address, accountEntry.seqNum().toString());
   }
 
   /**
@@ -431,7 +431,7 @@ export class Server {
    *
    * server.simulateTransaction(transaction).then(sim => {
    *   console.log("cost:", sim.cost);
-   *   console.log("results:", sim.results);
+   *   console.log("result:", sim.result);
    *   console.log("error:", sim.error);
    *   console.log("latestLedger:", sim.latestLedger);
    * });
@@ -450,11 +450,28 @@ export class Server {
   public async simulateTransaction(
     transaction: Transaction | FeeBumpTransaction,
   ): Promise<SorobanRpc.SimulateTransactionResponse> {
-    return await jsonrpc.post(
+    return await jsonrpc.post<SorobanRpc.RawSimulateTransactionResponse>(
       this.serverURL.toString(),
       "simulateTransaction",
       transaction.toXDR(),
-    );
+    ).then((raw) => {
+      return {
+        id: raw.id,
+        error: raw.error,
+        minResourceFee: raw.minResourceFee,
+        latestLedger: raw.latestLedger,
+        cost: raw.cost,
+        transactionData: new SorobanDataBuilder(raw.transactionData),
+        events: raw.events.map(event => xdr.DiagnosticEvent.fromXDR(event, 'base64')),
+        result: raw.results?.map(result => {
+          return {
+            auth: (result.auth ?? []).map(entry =>
+              xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')),
+            xdr: xdr.ScVal.fromXDR(result.xdr, 'base64'),
+          };
+        })[0]
+      }
+    });
   }
 
   /**
@@ -546,7 +563,7 @@ export class Server {
     if (simResponse.error) {
       throw simResponse.error;
     }
-    if (!simResponse.results || simResponse.results.length !== 1) {
+    if (!simResponse.result) {
       throw new Error("transaction simulation failed");
     }
     return assembleTransaction(transaction, passphrase, simResponse);
