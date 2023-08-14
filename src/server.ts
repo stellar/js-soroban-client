@@ -566,7 +566,8 @@ export class Server {
     if (!simResponse.result) {
       throw new Error("transaction simulation failed");
     }
-    return assembleTransaction(transaction, passphrase, simResponse);
+
+    return assembleTransaction(transaction, passphrase, simResponse).build();
   }
 
   /**

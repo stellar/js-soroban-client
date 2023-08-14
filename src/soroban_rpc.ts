@@ -129,16 +129,13 @@ export namespace SorobanRpc {
     transactionData: SorobanDataBuilder;
     events: xdr.DiagnosticEvent[];
     minResourceFee: string;
-    // This will only contain a single element, because only a single
-    // invokeHostFunctionOperation is supported per transaction.
-    //
     // only present if error isn't
     result?: SimulateHostFunctionResult;
     latestLedger: number;
     cost: Cost;
   }
 
-  export interface RawSimulateHostFunctionResult{
+  export interface RawSimulateHostFunctionResult {
     // each string is SorobanAuthorizationEntry XDR in base64
     auth?: string[];
     // invocation response, which is just a hash of the result preimage
