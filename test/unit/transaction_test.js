@@ -1,9 +1,7 @@
 const xdr = SorobanClient.xdr; // shorthand
 
 describe("assembleTransaction", () => {
-  describe("FeeBumpTransaction", () => {
-    // TODO: Add support for fee bump transactions
-  });
+  xit('works with keybump transactions');
 
   const scAddress = new SorobanClient.Address(
     "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI"
@@ -31,22 +29,20 @@ describe("assembleTransaction", () => {
         ),
       subInvocations: [],
     }),
-  });
+  }).toXDR();
 
   const sorobanTransactionData = new SorobanClient.SorobanDataBuilder()
     .setResources(0, 5, 0, 0)
     .build();
 
   const simulationResponse = {
-    transactionData: new SorobanClient.SorobanDataBuilder(
-      sorobanTransactionData
-    ),
+    transactionData: sorobanTransactionData.toXDR('base64'),
     events: [],
     minResourceFee: "115",
     results: [
       {
         auth: [fnAuth],
-        xdr: xdr.ScVal.scvU32(0),
+        xdr: xdr.ScVal.scvU32(0).toXDR('base64')
       },
     ],
     latestLedger: 3,
@@ -55,6 +51,7 @@ describe("assembleTransaction", () => {
       memBytes: "0",
     },
   };
+
   describe("Transaction", () => {
     const networkPassphrase = SorobanClient.Networks.TESTNET;
     const source = new SorobanClient.Account(
@@ -84,7 +81,7 @@ describe("assembleTransaction", () => {
         txn,
         networkPassphrase,
         simulationResponse
-      );
+      ).build();
 
       // validate it auto updated the tx fees from sim response fees
       // since it was greater than tx.fee
@@ -102,7 +99,7 @@ describe("assembleTransaction", () => {
         txn,
         networkPassphrase,
         simulationResponse
-      );
+      ).build();
 
       expect(
         result
@@ -147,7 +144,7 @@ describe("assembleTransaction", () => {
         txn,
         networkPassphrase,
         simulateResp
-      );
+      ).build();
 
       expect(
         result
@@ -182,7 +179,7 @@ describe("assembleTransaction", () => {
           minResourceFee: "0",
           results: [],
           latestLedger: 3,
-        });
+        }).build();
         expect.fail();
       }).to.throw(/unsupported transaction/i);
     });
@@ -210,7 +207,7 @@ describe("assembleTransaction", () => {
           txn,
           networkPassphrase,
           simulationResponse
-        );
+        ).build();
         expect(tx.operations[0].type).to.equal(op.body().switch().name);
       });
     });
@@ -221,7 +218,7 @@ describe("assembleTransaction", () => {
         txn,
         networkPassphrase,
         simulationResponse
-      );
+      ).build();
 
       expect(tx.operations[0].auth.length).to.equal(
         3,

@@ -1,3 +1,5 @@
+const xdr = SorobanClient.xdr;
+
 describe("Server#simulateTransaction", function () {
   let keypair = SorobanClient.Keypair.random();
   let account = new SorobanClient.Account(
@@ -10,10 +12,12 @@ describe("Server#simulateTransaction", function () {
   let address = contract.address().toScAddress();
 
   const simulationResponse = {
-    transactionData: new SorobanClient.SorobanDataBuilder(),
+    id: 1,
     events: [],
+    latestLedger: 3,
     minResourceFee: "15",
-    result: {
+    transactionData: new SorobanClient.SorobanDataBuilder().build().toXDR('base64'),
+    results: [{
       auth: [
         new SorobanClient.xdr.SorobanAuthorizationEntry({
           // Include a credentials w/ a nonce
@@ -38,16 +42,31 @@ describe("Server#simulateTransaction", function () {
               ),
             subInvocations: [],
           }),
-        })
+        }).toXDR('base64'),
       ],
-      xdr: SorobanClient.xdr.ScVal.scvU32(0),
-    },
-    latestLedger: 3,
+      xdr: SorobanClient.xdr.ScVal.scvU32(0).toXDR('base64'),
+    }],
     cost: {
       cpuInsns: "0",
       memBytes: "0",
     },
   };
+
+  const parsedSimulationResponse = {
+    id: simulationResponse.id,
+    events: simulationResponse.events,
+    latestLedger: simulationResponse.latestLedger,
+    minResourceFee: simulationResponse.minResourceFee,
+    transactionData:
+      new SorobanClient.SorobanDataBuilder(simulationResponse.transactionData),
+    result: {
+      auth: simulationResponse.results[0].auth.map(
+        entry => SorobanClient.xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')
+      ),
+      retval: SorobanClient.xdr.ScVal.fromXDR(simulationResponse.results[0].xdr, 'base64'),
+    },
+    cost: simulationResponse.cost,
+  }
 
   beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
@@ -103,13 +122,56 @@ describe("Server#simulateTransaction", function () {
     this.server
       .simulateTransaction(this.transaction)
       .then(function (response) {
-        expect(response).to.be.deep.equal(simulationResponse);
+        expect(response).to.be.deep.equal(parsedSimulationResponse);
         done();
       })
       .catch(function (err) {
         done(err);
       });
   });
+
+  it("works when there are no results", function() {
+    const simResponseCopy = JSON.parse(JSON.stringify(simulationResponse));
+    simResponseCopy.results = undefined;
+
+    const parsedCopy = JSON.parse(JSON.stringify(parsedSimulationResponse));
+    parsedCopy.result = undefined;
+
+    const parsed = SorobanClient.parseRawSimulation(simResponseCopy)
+    expect(parsed).to.deep.equal(parsedCopy);
+  });
+
+  it("works with no auth", function(done) {
+    const simResponseCopy = JSON.parse(JSON.stringify(simulationResponse));
+    simResponseCopy.results[0].auth = undefined;
+
+    this.axiosMock
+      .expects("post")
+      .withArgs(serverUrl, {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "simulateTransaction",
+        params: [this.blob],
+      })
+      .returns(
+        Promise.resolve({ data: { id: 1, result: simResponseCopy } })
+      );
+
+    this.server
+      .simulateTransaction(this.transaction)
+      .then(function (response) {
+        const parsedCopy = JSON.parse(JSON.stringify(parsedSimulationResponse));
+        parsedCopy.result.auth = [];
+
+        expect(response).to.be.deep.equal(parsedCopy,
+          `.result.auth should be [], got ${JSON.stringify(response)}`);
+        done();
+      })
+      .catch(function (err) {
+        done(err);
+      });
+  })
+
   xit("adds metadata - tx was too small and was immediately deleted");
   xit("adds metadata, order immediately fills");
   xit("adds metadata, order is open");
