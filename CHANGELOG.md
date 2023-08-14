@@ -9,11 +9,14 @@ A breaking change should be clearly marked in this log.
 
 
 ### Breaking Changes
-* The RPC response schemas for simulation have been upgraded to parse the base64-encoded XDR automatically. Succinctly:
+* The RPC response schemas for simulation have been upgraded to parse the base64-encoded XDR automatically. The full interface changes are in the pull request ([https://github.com/stellar/js-soroban-client/pull/127](#127)), but succinctly:
   - `SimulateTransactionResponse` -> `RawSimulateTransactionResponse`
   - `SimulateHostFunctionResult` -> `RawSimulateHostFunctionResult`
   - Now, `SimulateTransactionResponse` and `SimulateHostFunctionResult` now include the full, decoded XDR structures instead of raw, base64-encoded strings for the relevant fields (e.g. `SimulateTransactionResponse.transactionData` is now an instance of `SorobanDataBuilder`, `events` is now an `xdr.DiagnosticEvent[]` [try out `humanizeEvents` for a friendlier representation of this field])
   - The `SimulateTransactionResponse.results[]` field has been moved to `SimulateTransactionResponse.result?`, since it will always be exactly zero or one result.
+
+Not all schemas have been broken in this manner in order to facilitate user feedback on this approach. Please add your :+1: or :-1: to [#128](https://github.com/stellar/js-soroban-client/issues/128) to provide your perspective on whether or not we should do this for the other response schemas.
+
 
 ## v0.10.1
 
