@@ -8,7 +8,14 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v0.11.0
+
+### Fixed
+* The `SimulateTransactionResponse`'s error field now has the correct type (that is, `string`: [#123](https://github.com/stellar/js-soroban-client/pull/123)).
+
 ### Breaking Changes
+* The `stellar-base` dependency has been upgraded with feature additions. Please refer to those release notes for full details ([js-stellar-base#674](https://github.com/stellar/js-stellar-base/pull/674)). The only breaking change is the following:
+  - `Contract.getFootprint()` now returns a two-element array containing both the contract code and the instance.
 * `Server.prepareTransaction` now returns a `TransactionBuilder` instance rather than an immutable `Transaction`, in order to facilitate modifying your transaction after assembling it alongside the simulation response ([https://github.com/stellar/js-soroban-client/pull/127](#127)).
   - The intent is to avoid cloning the transaction again (via `TransactionBuilder.cloneFrom`) if you need to modify parameters such as the storage access footprint.
   - To migrate your code, just call `.build()` on the return value.
@@ -24,14 +31,14 @@ Not all schemas have been broken in this manner in order to facilitate user feed
 ## v0.10.1
 
 ### Fixed
-* The `stellar-base` dependency has been upgraded to fix a TypeScript bug ([#665](https://github.com/stellar/js-stellar-base/pull/665)).
+* The `stellar-base` dependency has been upgraded to fix a TypeScript bug ([js-stellar-base#665](https://github.com/stellar/js-stellar-base/pull/665)).
 * Decreased bundle size by refactoring `assembleTransaction` to use new abstractions from `stellar-base` ([#120](https://github.com/stellar/js-soroban-client/pull/120)).
 
 
 ## v0.10.0
 
 ### Breaking Changes
-* We have dropped all support for the deprecated hex-encoded contract ID format ([#117](https://github.com/stellar/js-soroban-client/pull/117), [#658](https://github.com/stellar/js-stellar-base/pull/658)).
+* We have dropped all support for the deprecated hex-encoded contract ID format ([#117](https://github.com/stellar/js-soroban-client/pull/117), [js-stellar-base#658](https://github.com/stellar/js-stellar-base/pull/658)).
 
 You should use the well-supported `C...` strkey format, instead. To migrate, you can do something like
 
