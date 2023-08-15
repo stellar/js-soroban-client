@@ -2,37 +2,25 @@
  * Provides a ContractSpec class which can contains the XDR types defined by the contract.
  * This allows the class to be used to convert between native and raw `xdr.ScVal`s.
  *
- * @example
- * ```js
- * import { nativeToScVal, scValToNative, ScInt, xdr } from 'stellar-base';
- *
- * let gigaMap = {
- *   bool: true,
- *   void: null,
- *   u32: xdr.ScVal.scvU32(1),
- *   i32: xdr.ScVal.scvI32(1),
- *   u64: 1n,
- *   i64: -1n,
- *   u128: new ScInt(1).toU128(),
- *   i128: new ScInt(1).toI128(),
- *   u256: new ScInt(1).toU256(),
- *   i256: new ScInt(1).toI256(),
- *   map: {
- *     arbitrary: 1n,
- *     nested: 'values',
- *     etc: false
- *   },
- *   vec: ['same', 'type', 'list'],
+ * @example 
+ * ```js 
+ * const specEntries = [...]; // XDR spec entries of a smart contract
+ * const contractSpec = new ContractSpec(specEntries);
+ * 
+ * // Convert native value to ScVal
+ * const args = {  
+ *   arg1: 'value1',
+ *   arg2: 1234
  * };
- *
- * // then, simply:
- * let scv = nativeToScVal(gigaMap);    // scv.switch() == xdr.ScValType.scvMap()
- *
- * // then...
- * someContract.call("method", scv);
- *
- * // Similarly, the inverse should work:
- * scValToNative(scv) == gigaMap;       // true
+ * const scArgs = contractSpec.funcArgsToScVals('funcName', args);
+ * 
+ * // Call contract 
+ * const resultScv = await callContract(contractId, 'funcName', scArgs);
+ *  
+ * // Convert result ScVal back to native value 
+ * const result = contractSpec.funcResToNative('funcName', resultScv);
+ * 
+ * console.log(result); // {success: true}
  * ```
  */
 
@@ -45,11 +33,11 @@ import { ScInt, scValToBigInt } from "stellar-base";
 
 export interface Union<T> {
   tag: string;
-  value: T;
+  values?: T;
 }
 
 function readObj(args: object, input: xdr.ScSpecFunctionInputV0): any {
-  let inputName = input.name() as string;
+  let inputName = input.name().toString();
   let entry = Object.entries(args).find(([name, _]) => name === inputName);
   if (!entry) {
     throw new Error(`Missing field ${inputName}`);
@@ -58,15 +46,35 @@ function readObj(args: object, input: xdr.ScSpecFunctionInputV0): any {
 }
 
 export class ContractSpec {
-  public entries: xdr.ScSpecEntry[];
-  constructor(entries: xdr.ScSpecEntry[] | string) {
-    if (typeof entries === "string") {
-      throw new Error("");
-    } else {
-      this.entries = entries;
+  public entries: xdr.ScSpecEntry[] = [];
+
+  /**
+   * Constructs a new ContractSpec from an array of XDR spec entries.
+   *
+   * @param {xdr.ScSpecEntry[] | string[]} entries - The XDR spec entries
+   * 
+   * @throws {Error} If entries is invalid
+   */
+  constructor(entries: xdr.ScSpecEntry[] | string[]) {
+    if (entries.length > 0) {
+      let entry = entries[0];
+      if (typeof entry === "string") {
+        this.entries = (entries as string[]).map((s) =>
+          xdr.ScSpecEntry.fromXDR(s, "base64")
+        );
+      } else {
+        this.entries = entries as xdr.ScSpecEntry[];
+      }
     }
   }
-
+  /**
+   * Gets the XDR function spec for the given function name.
+   *
+   * @param {string} name - The name of the function
+   * @returns {xdr.ScSpecFunctionV0} The function spec
+   * 
+   * @throws {Error} If no function with the given name exists
+   */
   getFunc(name: string): xdr.ScSpecFunctionV0 {
     let entry = this.findEntry(name);
     if (entry.switch().name !== "scSpecEntryFunctionV0") {
@@ -75,6 +83,24 @@ export class ContractSpec {
     return entry.value() as xdr.ScSpecFunctionV0;
   }
 
+  /**
+   * Converts native JS arguments to ScVals for calling a contract function.
+   *
+   * @param {string} name - The name of the function 
+   * @param {Object} args - The arguments object
+   * @returns {xdr.ScVal[]} The converted arguments
+   *
+   * @throws {Error} If argument is missing or incorrect type
+   * 
+   * @example
+   * ```js
+   * const args = {
+   *   arg1: 'value1',
+   *   arg2: 1234
+   * };
+   * const scArgs = contractSpec.funcArgsToScVals('funcName', args);
+   * ```
+   */
   funcArgsToScVals(name: string, args: object): xdr.ScVal[] {
     let fn = this.getFunc(name);
     return fn
@@ -82,11 +108,30 @@ export class ContractSpec {
       .map((input) => this.nativeToScVal(readObj(args, input), input.type()));
   }
 
-  funcResToNative(name: string, val: xdr.ScVal): any {
+  /**
+   * Converts the result ScVal of a function call to a native JS value.
+   *
+   * @param {string} name - The name of the function
+   * @param {xdr.ScVal | string} val_or_base64 - The result ScVal or base64 encoded string
+   * @returns {any} The converted native value
+   * 
+   * @throws {Error} If return type mismatch or invalid input
+   *
+   * @example
+   * ```js
+   * const resultScv = 'AAA=='; // Base64 encoded ScVal
+   * const result = contractSpec.funcResToNative('funcName', resultScv);
+   * ```
+   */
+  funcResToNative(name: string, val_or_base64: xdr.ScVal | string): any {
+    let val =
+      typeof val_or_base64 === "string"
+        ? xdr.ScVal.fromXDR(val_or_base64, "base64")
+        : val_or_base64;
     let func = this.getFunc(name);
     let outputs = func.outputs();
     if (outputs.length === 0) {
-      let type = val.switch().name 
+      let type = val.switch().name;
       if (type !== "scvVoid") {
         throw new Error(`Expected void, got ${type}`);
       }
@@ -97,11 +142,17 @@ export class ContractSpec {
     }
     let output = outputs[0];
     return this.scValToNative(val, output);
-
   }
 
+  /**
+   * Finds the XDR spec entry for the given name.
+   *
+   * @param {string} name - The name to find
+   * @returns {xdr.ScSpecEntry} The entry
+   * 
+   * @throws {Error} If no entry with the given name exists
+   */
   findEntry(name: string): xdr.ScSpecEntry {
-    console.log(name, JSON.stringify(this.entries, null, 2));
     let entry = this.entries.find(
       (entry) => entry.value().name().toString() === name
     );
@@ -112,111 +163,24 @@ export class ContractSpec {
   }
 
   /**
-   * Attempts to convert native types into smart contract values
-   * ({@link xdr.ScVal}).
+   * Converts a native JS value to an ScVal based on the given type.
    *
-   * The conversions are as follows:
-   *
-   *  - xdr.ScVal -> passthrough
-   *  - null/undefined -> scvVoid
-   *  - string -> scvString (a copy is made)
-   *  - UintArray8 -> scvBytes (a copy is made)
-   *  - boolean -> scvBool
-   *
-   *  - number/bigint -> the smallest possible XDR integer type that will fit the
-   *    input value (if you want a specific type, use {@link ScInt})
-   *
-   *  - {@link Address} or {@link Contract} -> scvAddress (for contracts and
-   *    public keys)
-   *
-   *  - Array<T> -> scvVec after attempting to convert each item of type `T` to an
-   *    xdr.ScVal (recursively). note that all values must be the same type!
-   *
-   *  - object -> scvMap after attempting to convert each key and value to an
-   *    xdr.ScVal (recursively). note that there is no restriction on types
-   *    matching anywhere (unlike arrays)
-   *
-   * When passing an integer-like native value, you can also optionally specify a
-   * type which will force a particular interpretation of that value.
-   *
-   * Note that not all type specifications are compatible with all `ScVal`s, e.g.
-   * `toScVal("a string", {type: "i256"})` will throw.
-   *
-   * @param {any} val -       a native (or convertible) input value to wrap
-   * @param {object} [opts] - an optional set of hints around the type of
-   *    conversion you'd like to see
-   * @param {string} [opts.type] - there is different behavior for different input
-   *    types for `val`:
-   *
-   *     - when `val` is an integer-like type (i.e. number|bigint), this will be
-   *       forwarded to {@link ScInt} or forced to be u32/i32.
-   *
-   *     - when `val` is an array type, this is forwarded to the recursion
-   *
-   *     - when `val` is an object type (key-value entries), this should be an
-   *       object in which each key has a pair of types (to represent forced types
-   *       for the key and the value), where `null` (or a missing entry) indicates
-   *       the default interpretation(s) (refer to the examples, below)
-   *
-   *     - when `val` is a string type, this can be 'string' or 'symbol' to force
-   *       a particular interpretation of `val`.
-   *
-   *     - when `val` is a bytes-like type, this can be 'string', 'symbol', or
-   *       'bytes' to force a particular interpretation
-   *
-   *    As a simple example, `nativeToScVal("hello", {type: 'symbol'})` will
-   *    return an `scvSymbol`, whereas without the type it would have been an
-   *    `scvString`.
-   *
-   * @returns {xdr.ScVal} a wrapped, smart, XDR version of the input value
-   *
-   * @throws {TypeError} if...
-   *  - there are arrays with more than one type in them
-   *  - there are values that do not have a sensible conversion (e.g. random XDR
-   *    types, custom classes)
-   *  - the type of the input object (or some inner value of said object) cannot
-   *    be determined (via `typeof`)
-   *  - the type you specified (via `opts.type`) is incompatible with the value
-   *    you passed in (`val`), e.g. `nativeToScVal("a string", { type: 'i128' })`,
-   *    though this does not apply for types that ignore `opts` (e.g. addresses).
-   *
-   * @example
-   *
-   * ```js
-   * nativeToScVal(1000);                   // gives ScValType === scvU64
-   * nativeToScVal(1000n);                  // gives ScValType === scvU64
-   * nativeToScVal(1n << 100n);             // gives ScValType === scvU128
-   * nativeToScVal(1000, { type: 'u32' });  // gives ScValType === scvU32
-   * nativeToScVal(1000, { type: 'i125' }); // gives ScValType === scvI256
-   * nativeToScVal("a string");                     // gives ScValType === scvString
-   * nativeToScVal("a string", { type: 'symbol' }); // gives scvSymbol
-   * nativeToScVal(new Uint8Array(5));                      // scvBytes
-   * nativeToScVal(new Uint8Array(5), { type: 'symbol' });  // scvSymbol
-   * nativeToScVal(null); // scvVoid
-   * nativeToScVal(true); // scvBool
-   * nativeToScVal([1, 2, 3]);                    // gives scvVec with each element as scvU64
-   * nativeToScVal([1, 2, 3], { type: 'i128' });  // scvVec<scvI128>
-   * nativeToScVal({ 'hello': 1, 'world': [ true, false ] }, {
-   *   type: {
-   *     'hello': [ 'symbol', 'i128' ],
-   *   }
-   * })
-   * // gives scvMap with entries: [
-   * //     [ scvSymbol, scvI128 ],
-   * //     [ scvString, scvArray<scvBool> ]
-   * // ]
-   * ```
+   * @param {any} val - The native JS value
+   * @param {xdr.ScSpecTypeDef} [typeDef] - The expected type
+   * @returns {xdr.ScVal} The converted ScVal
+   * 
+   * @throws {Error} If value cannot be converted to the given type
    */
   nativeToScVal(val: any, typeDef?: xdr.ScSpecTypeDef): xdr.ScVal {
     if (typeDef?.switch().name === "scSpecTypeUdt") {
       let udt = typeDef.value() as xdr.ScSpecTypeUdt;
-      return this.nativeToUdt(val, udt.name() as string);
+      return this.nativeToUdt(val, udt.name().toString());
     }
 
     switch (typeof val) {
       case "object": {
         if (val === null) {
-          let ty = typeDef ?? xdr.ScSpecTypeDef.scSpecTypeVoid();
+          let ty = unwrap_ty(typeDef, xdr.ScSpecTypeDef.scSpecTypeVoid());
           switch (ty.switch().name) {
             case "scSpecTypeVoid":
             case "scSpecTypeOption":
@@ -233,7 +197,7 @@ export class ContractSpec {
         }
 
         if (val instanceof Address) {
-          let ty = typeDef ?? xdr.ScSpecTypeDef.scSpecTypeAddress();
+          let ty = unwrap_ty(typeDef, xdr.ScSpecTypeDef.scSpecTypeAddress());
           if (ty.switch().value !== xdr.ScSpecType.scSpecTypeAddress().value) {
             throw new TypeError(
               `Type ${typeDef} was not address, but value was Address`
@@ -243,7 +207,7 @@ export class ContractSpec {
         }
 
         if (val instanceof Contract) {
-          let ty = typeDef ?? xdr.ScSpecTypeDef.scSpecTypeAddress();
+          let ty = unwrap_ty(typeDef, xdr.ScSpecTypeDef.scSpecTypeAddress());
           if (ty.switch().value !== xdr.ScSpecType.scSpecTypeAddress().value) {
             throw new TypeError(
               `Type ${typeDef} was not address, but value was Address`
@@ -254,10 +218,19 @@ export class ContractSpec {
 
         if (val instanceof Uint8Array || Buffer.isBuffer(val)) {
           const copy = Uint8Array.from(val);
-          let ty = typeDef ?? xdr.ScSpecTypeDef.scSpecTypeBytes();
+          let ty = unwrap_ty(typeDef, xdr.ScSpecTypeDef.scSpecTypeBytes());
           switch (ty.switch().name) {
+            case "scSpecTypeBytesN": {
+              let bytes_n = ty.value() as xdr.ScSpecTypeBytesN;
+              if (copy.length !== bytes_n.n()) {
+                throw new TypeError(
+                  `expected ${bytes_n.n()} bytes, but got ${copy.length}`
+                );
+              }
+              //@ts-ignore
+              return xdr.ScVal.scvBytes(copy);
+            }
             case "scSpecTypeBytes":
-            case "scSpecTypeBytesN":
               //@ts-ignore
               return xdr.ScVal.scvBytes(copy);
             case "scSpecTypeSymbol":
@@ -273,13 +246,26 @@ export class ContractSpec {
           let elementType: xdr.ScSpecTypeDef | undefined = undefined;
           // If type provided
           if (typeDef !== undefined) {
-            if (typeDef.switch().name !== "scSpecTypeVec") {
+            let typeName = typeDef.switch().name;
+            if (typeName === "scSpecTypeVec") {
+              let vec = typeDef.value() as xdr.ScSpecTypeVec;
+              elementType = vec.elementType();
+            } else if (typeName === "scSpecTypeTuple") {
+              let tup = typeDef.value() as xdr.ScSpecTypeTuple;
+              let valTypes = tup.valueTypes();
+              if (val.length !== valTypes.length) {
+                throw new TypeError(
+                  `Tuple expects ${valTypes.length} values, but ${val.length} were provided`
+                );
+              }
+              return xdr.ScVal.scvVec(
+                val.map((v, i) => this.nativeToScVal(v, valTypes[i]))
+              );
+            } else {
               throw new TypeError(
                 `Type ${typeDef} was not vec, but value was Array`
               );
             }
-            let vec = typeDef.value() as xdr.ScSpecTypeVec;
-            elementType = vec.elementType();
           } else {
             // otherwise ensure that the types of the values are all the same
             if (val.length > 0 && val.some((v) => typeof v !== typeof val[0])) {
@@ -303,11 +289,15 @@ export class ContractSpec {
           let scMap = typeDef!.value() as xdr.ScSpecTypeMap;
           let map = val as Map<any, any>;
           let entries: xdr.ScMapEntry[] = [];
-          map.forEach(([k, v]) => {
+          let values =  map.entries();
+          let res = values.next();
+          while (!res.done){
+            let [k, v] = res.value;
             let key = this.nativeToScVal(k, scMap.keyType());
             let val = this.nativeToScVal(v, scMap.valueType());
             entries.push(new xdr.ScMapEntry({ key, val }));
-          });
+            res = values.next();
+          }
           return xdr.ScVal.scvMap(entries);
         }
 
@@ -319,11 +309,9 @@ export class ContractSpec {
           );
         }
 
+        // Don't have any type information, so just assume it's a map
         return xdr.ScVal.scvMap(
           Object.entries(val).map(([k, v]) => {
-            // the type can be specified with an entry for the key and the value,
-            // e.g. val = { 'hello': 1 } and opts.type = { hello: [ 'symbol',
-            // 'u128' ]} or you can use `undefined` for the default interpretation
             return new xdr.ScMapEntry({
               key: this.nativeToScVal(k, undefined),
               val: this.nativeToScVal(v, undefined),
@@ -334,7 +322,7 @@ export class ContractSpec {
 
       case "number":
       case "bigint": {
-        let ty = typeDef ?? xdr.ScSpecTypeDef.scSpecTypeU32();
+        let ty = unwrap_ty(typeDef, xdr.ScSpecTypeDef.scSpecTypeU32());
         switch (ty.switch().name) {
           case "scSpecTypeU32":
             return xdr.ScVal.scvU32(val as number);
@@ -359,7 +347,7 @@ export class ContractSpec {
       case "string":
         return stringToScVal(
           val,
-          typeDef ?? xdr.ScSpecTypeDef.scSpecTypeString()
+          unwrap_ty(typeDef, xdr.ScSpecTypeDef.scSpecTypeString())
         );
 
       case "boolean": {
@@ -413,34 +401,37 @@ export class ContractSpec {
     }
   }
 
-  nativeToUnion(val: Union<any>, union_: xdr.ScSpecUdtUnionV0): xdr.ScVal {
+  private nativeToUnion(val: Union<any>, union_: xdr.ScSpecUdtUnionV0): xdr.ScVal {
     let entry_name = val.tag;
-    let case_ = union_
-      .cases()
-      .find((entry) => entry.value().name() === entry_name);
+    let case_ = union_.cases().find((entry) => {
+      let case_ = entry.value().name().toString();
+      return case_ === entry_name;
+    });
     if (!case_) {
       throw new TypeError(`no such enum entry: ${entry_name} in ${union_}`);
     }
-    let key = xdr.ScVal.scvString(entry_name);
+    let key = xdr.ScVal.scvSymbol(entry_name);
     switch (case_.switch()) {
       case xdr.ScSpecUdtUnionCaseV0Kind.scSpecUdtUnionCaseVoidV0(): {
         return xdr.ScVal.scvVec([key]);
       }
       case xdr.ScSpecUdtUnionCaseV0Kind.scSpecUdtUnionCaseTupleV0(): {
         let types = (case_.value() as xdr.ScSpecUdtUnionCaseTupleV0).type();
-        if (types.length == 1) {
-          return xdr.ScVal.scvVec([
-            key,
-            this.nativeToScVal(val.value, types[0]),
-          ]);
-        }
-        if (Array.isArray(val.value)) {
-          if (val.value.length != types.length) {
+        // if (types.length == 1) {
+        //   return xdr.ScVal.scvVec([
+        //     key,
+        //     this.nativeToScVal(val.values, types[0]),
+        //   ]);
+        // }
+        if (Array.isArray(val.values)) {
+          if (val.values.length != types.length) {
             throw new TypeError(
-              `union ${union_} expects ${types.length} values, but got ${val.value.length}`
+              `union ${union_} expects ${types.length} values, but got ${val.values.length}`
             );
           }
-          let scvals = val.value.map((v, i) => this.nativeToScVal(v, types[i]));
+          let scvals = val.values.map((v, i) =>
+            this.nativeToScVal(v, types[i])
+          );
           scvals.unshift(key);
           return xdr.ScVal.scvVec(scvals);
         }
@@ -453,7 +444,7 @@ export class ContractSpec {
     // enum_.cases()
   }
 
-  nativeToStruct(val: any, struct: xdr.ScSpecUdtStructV0): xdr.ScVal {
+  private nativeToStruct(val: any, struct: xdr.ScSpecUdtStructV0): xdr.ScVal {
     let fields = struct.fields();
     if (fields.some(isNumeric)) {
       if (!fields.every(isNumeric)) {
@@ -467,19 +458,16 @@ export class ContractSpec {
     }
     return xdr.ScVal.scvMap(
       fields.map((field) => {
-        let name = field.name() as string;
-        if (Object.keys(val).includes(name)) {
-          throw new Error(`missing field ${name} in ${struct}`);
-        }
+        let name = field.name().toString();
         return new xdr.ScMapEntry({
-          key: this.nativeToScVal(name, xdr.ScSpecTypeDef.scSpecTypeString()),
+          key: this.nativeToScVal(name, xdr.ScSpecTypeDef.scSpecTypeSymbol()),
           val: this.nativeToScVal(val[name], field.type()),
         });
       })
     );
   }
 
-  nativeToEnum(val: number, enum_: xdr.ScSpecUdtEnumV0): xdr.ScVal {
+  private nativeToEnum(val: number, enum_: xdr.ScSpecUdtEnumV0): xdr.ScVal {
     if (enum_.cases().some((entry) => entry.value() === val)) {
       return xdr.ScVal.scvU32(val);
     }
@@ -487,29 +475,30 @@ export class ContractSpec {
   }
 
   /**
-   * Given a smart contract value, attempt to convert to a native type.
+   * Converts an base64 encoded ScVal back to a native JS value based on the given type.
+   * 
+   * @param {string} scv - The base64 encoded ScVal 
+   * @param {xdr.ScSpecTypeDef} typeDef - The expected type
+   * @returns {any} The converted native JS value
    *
-   * Possible conversions include:
+   * @throws {Error} If ScVal cannot be converted to the given type
+   */
+  scValStrToNative<T>(scv: string, typeDef: xdr.ScSpecTypeDef): T {
+    return this.scValToNative<T>(xdr.ScVal.fromXDR(scv, "base64"), typeDef);
+  }
+
+  /**
+   * Converts an ScVal back to a native JS value based on the given type.
+   * 
+   * @param {xdr.ScVal} scv - The ScVal 
+   * @param {xdr.ScSpecTypeDef} typeDef - The expected type
+   * @returns {any} The converted native JS value
    *
-   *  - void -> null
-   *  - u32, i32 -> number
-   *  - u64, i64, u128, i128, u256, i256 -> bigint
-   *  - vec -> array of any of the above (via recursion)
-   *  - map -> key-value object of any of the above (via recursion)
-   *  - bool -> boolean
-   *  - bytes -> Uint8Array
-   *  - string, symbol -> string|Uint8Array
-   *
-   * If no conversion can be made, this just "unwraps" the smart value to return
-   * its underlying XDR value.
-   *
-   * @param {xdr.ScVal} scv - the input smart contract value
-   *
-   * @returns {any}
+   * @throws {Error} If ScVal cannot be converted to the given type
    */
   scValToNative<T>(scv: xdr.ScVal, typeDef: xdr.ScSpecTypeDef): T {
     if (typeDef.switch().name === "scSpecTypeUdt") {
-      this.scValUdtToNative(scv, typeDef.value() as xdr.ScSpecTypeUdt);
+      return this.scValUdtToNative(scv, typeDef.value() as xdr.ScSpecTypeUdt);
     }
     // we use the verbose xdr.ScValType.<type>.value form here because it's faster
     // than string comparisons and the underlying constants never need to be
@@ -531,13 +520,20 @@ export class ContractSpec {
         return scValToBigInt(scv) as T;
 
       case xdr.ScValType.scvVec().value: {
-        if (typeDef.switch().name !== "scSpecTypeVec") {
-          throw new TypeError(`Type ${typeDef} was not vec, but ${scv} is`);
+        let name = typeDef.switch().name;
+        if (name === "scSpecTypeVec") {
+          let vec = typeDef.value() as xdr.ScSpecTypeVec;
+          return (scv.vec() ?? []).map((elm) =>
+            this.scValToNative(elm, vec.elementType())
+          ) as T;
+        } else if (name == "scSpecTypeTuple") {
+          let tuple = typeDef.value() as xdr.ScSpecTypeTuple;
+          let valTypes = tuple.valueTypes();
+          return (scv.vec() ?? []).map((elm, i) =>
+            this.scValToNative(elm, valTypes[i])
+          ) as T;
         }
-        let vec = typeDef.value() as xdr.ScSpecTypeVec;
-        return (scv.vec() ?? []).map((elm) =>
-          this.scValToNative(elm, vec.elementType())
-        ) as T;
+        throw new TypeError(`Type ${typeDef} was not vec, but ${scv} is`);
       }
 
       case xdr.ScValType.scvAddress().value:
@@ -568,36 +564,22 @@ export class ContractSpec {
 
       case xdr.ScValType.scvString().value:
       case xdr.ScValType.scvSymbol().value: {
-        const v = scv.value();
-        if (typeof v !== "string") {
+        let typeName = typeDef.switch().name;
+        if (
+          typeName !== "scSpecTypeString" &&
+          typeName !== "scSpecTypeSymbol"
+        ) {
           throw new Error(
-            `Expected a string value from xdr but got ${v}: ${typeof v}`
+            `Type ${typeDef} was not string or symbol, but ${scv} is`
           );
         }
-        return v as T; // string
+        return scv.value()?.toString() as T;
       }
 
       // these can be converted to bigint
       case xdr.ScValType.scvTimepoint().value:
       case xdr.ScValType.scvDuration().value:
         return scValToBigInt(xdr.ScVal.scvU64(scv.value() as xdr.Uint64)) as T;
-
-      // case xdr.ScValType.scvStatus().value:
-      //   // TODO: Convert each status type into a human-readable error string?
-      //   switch (scv.value().switch()) {
-      //     case xdr.ScStatusType.sstOk().value:
-      //     case xdr.ScStatusType.sstUnknownError().value:
-      //     case xdr.ScStatusType.sstHostValueError().value:
-      //     case xdr.ScStatusType.sstHostObjectError().value:
-      //     case xdr.ScStatusType.sstHostFunctionError().value:
-      //     case xdr.ScStatusType.sstHostStorageError().value:
-      //     case xdr.ScStatusType.sstHostContextError().value:
-      //     case xdr.ScStatusType.sstVmError().value:
-      //     case xdr.ScStatusType.sstContractError().value:
-      //     case xdr.ScStatusType.sstHostAuthError().value:
-      //     default:
-      //       break;
-      //   }
 
       // in the fallthrough case, just return the underlying value directly
       default:
@@ -607,8 +589,8 @@ export class ContractSpec {
     }
   }
 
-  scValUdtToNative(scv: xdr.ScVal, udt: xdr.ScSpecTypeUdt) {
-    let entry = this.findEntry(udt.name() as string);
+  private scValUdtToNative(scv: xdr.ScVal, udt: xdr.ScSpecTypeUdt): any {
+    let entry = this.findEntry(udt.name().toString());
     switch (entry.switch()) {
       case xdr.ScSpecEntryKind.scSpecEntryUdtEnumV0():
         return this.enumToNative(scv, entry.value() as xdr.ScSpecUdtEnumV0);
@@ -617,23 +599,67 @@ export class ContractSpec {
       case xdr.ScSpecEntryKind.scSpecEntryUdtUnionV0():
         return this.unionToNative(scv, entry.value() as xdr.ScSpecUdtUnionV0);
       default:
-        throw new Error(`failed to parse udt ${udt.name()}: ${entry}`);
+        throw new Error(
+          `failed to parse udt ${udt.name().toString()}: ${entry}`
+        );
     }
   }
-  unionToNative(val: xdr.ScVal, udt: xdr.ScSpecUdtUnionV0) {
-    throw new Error(`Method not implemented. for ${val} - ${udt}`);
+
+  private unionToNative(val: xdr.ScVal, udt: xdr.ScSpecUdtUnionV0): any {
+    let vec = val.vec();
+    if (!vec) {
+      throw new Error(`${JSON.stringify(val, null, 2)} is not a vec`);
+    }
+    if (vec.length === 0 && udt.cases.length !== 0) {
+      throw new Error(
+        `${val} has length 0, but the there are at least one case in the union`
+      );
+    }
+    let name = vec[0].sym().toString();
+    if (vec[0].switch().name != "scvSymbol") {
+      throw new Error(`{vec[0]} is not a symbol`);
+    }
+    let entry = udt.cases().find(findCase(name));
+    if (!entry) {
+      throw new Error(
+        `failed to find entry ${name} in union {udt.name().toString()}`
+      );
+    }
+    let res: Union<any> = { tag: name, values: undefined };
+    if (entry.switch().name === "scSpecUdtUnionCaseTupleV0") {
+      let tuple = entry.value() as xdr.ScSpecUdtUnionCaseTupleV0;
+      let ty = tuple.type();
+      //@ts-ignore
+      let values = [];
+      for (let i = 0; i < ty.length; i++) {
+        let v = this.scValToNative(vec[i + 1], ty[i]);
+        values.push(v);
+      }
+      let r = { tag: name, values };
+      return r;
+    }
+    return res;
   }
-  structToNative(val: xdr.ScVal, udt: xdr.ScSpecUdtStructV0): any {
+  private structToNative(val: xdr.ScVal, udt: xdr.ScSpecUdtStructV0): any {
     let res: any = {};
     let fields = udt.fields();
-    val.vec()?.forEach((entry, i) => {
+    if (fields.some(isNumeric)) {
+      let r = val
+        .vec()
+        ?.map((entry, i) => this.scValToNative(entry, fields[i].type()));
+      return r;
+    }
+    val.map()?.forEach((entry, i) => {
       let field = fields[i];
-      res[field.name() as string] = this.scValToNative(entry, field.type());
+      res[field.name().toString()] = this.scValToNative(
+        entry.val(),
+        field.type()
+      );
     });
-    res;
+    return res;
   }
 
-  enumToNative(scv: xdr.ScVal, udt: xdr.ScSpecUdtEnumV0): any {
+  private enumToNative(scv: xdr.ScVal, udt: xdr.ScSpecUdtEnumV0): any {
     if (scv.switch().name !== "scvU32") {
       throw new Error(`Enum must have a u32 value`);
     }
@@ -651,15 +677,46 @@ function stringToScVal(
   switch (ty.switch().name) {
     case "scSpecTypeString":
       return xdr.ScVal.scvString(str as string | Buffer);
-
     case "scSpecTypeSymbol":
       return xdr.ScVal.scvSymbol(str as string | Buffer);
+    case "scSpecTypeAddress": {
+      let addr = Address.fromString(str as string);
+      return xdr.ScVal.scvAddress(addr.toScAddress());
+    }
 
     default:
-      throw new TypeError(`invalid type (${ty}) specified for string value`);
+      throw new TypeError(
+        `invalid type (${ty.switch().name}) specified for string value`
+      );
   }
 }
 
 function isNumeric(field: xdr.ScSpecUdtStructFieldV0) {
-  return /^\d+$/.test(field.name() as string);
+  return /^\d+$/.test(field.name().toString());
+}
+
+function findCase(name: string) {
+  return function matches(entry: xdr.ScSpecUdtUnionCaseV0) {
+    switch (entry.switch().name) {
+      case "scSpecUdtUnionCaseTupleV0": {
+        let tuple = entry.value() as xdr.ScSpecUdtUnionCaseTupleV0;
+        return tuple.name().toString() === name;
+      }
+      case "scSpecUdtUnionCaseVoidV0": {
+        let void_case = entry.value() as xdr.ScSpecUdtUnionCaseVoidV0;
+        return void_case.name().toString() === name;
+      }
+    }
+  };
+}
+
+function unwrap_ty(ty: xdr.ScSpecTypeDef | undefined, default_type: xdr.ScSpecTypeDef): xdr.ScSpecTypeDef {
+  if (ty) {
+    if (ty.switch().name === "scSpecTypeOption") {
+      let opt = ty.value() as xdr.ScSpecTypeOption;
+      return opt.valueType();
+    } 
+    return ty;
+  }
+  return default_type;
 }
