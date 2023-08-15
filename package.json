@@ -149,7 +149,7 @@
     "eventsource": "^2.0.2",
     "lodash": "^4.17.21",
     "randombytes": "^2.1.0",
-    "stellar-base": "git+https://github.com/stellar/js-stellar-base.git#fixup-xdrgen",
+    "stellar-base": "10.0.0-soroban.7",
     "toml": "^3.0.0",
     "urijs": "^1.19.1"
   }
