@@ -107,7 +107,7 @@ function isSorobanTransaction(tx: Transaction): boolean {
     case "invokeHostFunction":
     case "bumpFootprintExpiration":
     case "restoreFootprint":
-      return true;
+      return true
 
     default:
       return false;

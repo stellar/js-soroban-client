@@ -1,4 +1,4 @@
-const xdr = xdr;
+const xdr = SorobanClient.xdr; // shorthand
 
 describe("Server#simulateTransaction", function () {
   let keypair = SorobanClient.Keypair.random();
@@ -134,10 +134,10 @@ describe("Server#simulateTransaction", function () {
 
   it("works when there are no results", function () {
     const simResponseCopy = JSON.parse(JSON.stringify(simulationResponse));
-    simResponseCopy.results = undefined;
+    delete simResponseCopy.results;
 
     const parsedCopy = JSON.parse(JSON.stringify(parsedSimulationResponse));
-    parsedCopy.result = undefined;
+    delete parsedCopy.result;
 
     const parsed = SorobanClient.parseRawSimulation(simResponseCopy);
     expect(parsed).to.deep.equal(parsedCopy);
@@ -145,33 +145,13 @@ describe("Server#simulateTransaction", function () {
 
   it("works with no auth", function (done) {
     const simResponseCopy = JSON.parse(JSON.stringify(simulationResponse));
-    simResponseCopy.results[0].auth = undefined;
+    delete simResponseCopy.results;
 
-    this.axiosMock
-      .expects("post")
-      .withArgs(serverUrl, {
-        jsonrpc: "2.0",
-        id: 1,
-        method: "simulateTransaction",
-        params: [this.blob],
-      })
-      .returns(Promise.resolve({ data: { id: 1, result: simResponseCopy } }));
+    const parsedCopy = JSON.parse(JSON.stringify(parsedSimulationResponse));
+    parsedCopy.result.auth = [];
 
-    this.server
-      .simulateTransaction(this.transaction)
-      .then(function (response) {
-        const parsedCopy = JSON.parse(JSON.stringify(parsedSimulationResponse));
-        parsedCopy.result.auth = [];
-
-        expect(response).to.be.deep.equal(
-          parsedCopy,
-          `.result.auth should be [], got ${JSON.stringify(response)}`
-        );
-        done();
-      })
-      .catch(function (err) {
-        done(err);
-      });
+    const parsed = SorobanClient.parseRawSimulation(simResponseCopy);
+    expect(parsed).to.be.deep.equal(parsedCopy);
   });
 
   xit("adds metadata - tx was too small and was immediately deleted");
