@@ -14,6 +14,7 @@ A breaking change should be clearly marked in this log.
 * The `SimulateTransactionResponse`'s error field now has the correct type (that is, `string`: [#123](https://github.com/stellar/js-soroban-client/pull/123)).
 
 ### Breaking Changes
+* The minimum version of NodeJS to run this library is v16 ([#126](https://github.com/stellar/js-soroban-client/pull/126)).
 * The `stellar-base` dependency has been upgraded with feature additions. Please refer to those release notes for full details ([js-stellar-base#674](https://github.com/stellar/js-stellar-base/pull/674)). The only breaking change is the following:
   - `Contract.getFootprint()` now returns a two-element array containing both the contract code and the instance.
 * `Server.prepareTransaction` now returns a `TransactionBuilder` instance rather than an immutable `Transaction`, in order to facilitate modifying your transaction after assembling it alongside the simulation response ([https://github.com/stellar/js-soroban-client/pull/127](#127)).
