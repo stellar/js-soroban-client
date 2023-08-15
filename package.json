@@ -34,7 +34,7 @@
     "clean": "rm -rf lib/ dist/ coverage/ .nyc_output/ jsdoc/",
     "docs": "yarn build:docs && jsdoc -c .jsdoc.json --verbose",
     "pretest": "yarn tsc -p ./test/tsconfig.json",
-    "test": "yarn test:node && yarn test:integration && yarn test:browser",
+    "test": "yarn pretest && yarn test:node && yarn test:integration && yarn test:browser",
     "test:node": "yarn _nyc mocha --recursive 'test/unit/**/*.js'",
     "test:integration": "yarn _nyc mocha --recursive 'test/integration/**/*.js'",
     "test:browser": "karma start ./karma.conf.js",
