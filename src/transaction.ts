@@ -3,7 +3,8 @@ import {
   Operation,
   Transaction,
   TransactionBuilder,
-  xdr,
+  SorobanDataBuilder,
+  xdr
 } from "stellar-base";
 
 import { SorobanRpc } from "./soroban_rpc";
@@ -28,8 +29,10 @@ import { SorobanRpc } from "./soroban_rpc";
 export function assembleTransaction(
   raw: Transaction | FeeBumpTransaction,
   networkPassphrase: string,
-  simulation: SorobanRpc.SimulateTransactionResponse
-): Transaction {
+  simulation:
+    | SorobanRpc.SimulateTransactionResponse
+    | SorobanRpc.RawSimulateTransactionResponse
+): TransactionBuilder {
   if ("innerTransaction" in raw) {
     // TODO: Handle feebump transactions
     return assembleTransaction(
@@ -47,12 +50,13 @@ export function assembleTransaction(
     );
   }
 
-  if (simulation.results.length !== 1) {
-    throw new Error(`simulation results invalid: ${simulation.results}`);
+  const coalesced = parseRawSimulation(simulation);
+  if (!coalesced.result) {
+    throw new Error(`simulation incorrect: ${JSON.stringify(coalesced)}`);
   }
 
-  const classicFeeNum = parseInt(raw.fee, 10) || 0;
-  const minResourceFeeNum = parseInt(simulation.minResourceFee, 10) || 0;
+  const classicFeeNum = parseInt(raw.fee);
+  const minResourceFeeNum = parseInt(coalesced.minResourceFee);
 
   const txnBuilder = TransactionBuilder.cloneFrom(raw, {
     // automatically update the tx fee that will be set on the resulting tx to
@@ -65,7 +69,7 @@ export function assembleTransaction(
     // soroban transaction will be equal to incoming tx.fee + minResourceFee.
     fee: (classicFeeNum + minResourceFeeNum).toString(),
     // apply the pre-built Soroban Tx Data from simulation onto the Tx
-    sorobanData: simulation.transactionData,
+    sorobanData: coalesced.transactionData.build(),
   });
 
   switch (raw.operations[0].type) {
@@ -85,18 +89,13 @@ export function assembleTransaction(
           //
           // the intuition is "if auth exists, this tx has probably been
           // simulated before"
-          auth:
-            existingAuth.length > 0
-              ? existingAuth
-              : simulation.results[0].auth?.map((a) =>
-                  xdr.SorobanAuthorizationEntry.fromXDR(a, "base64")
-                ) ?? [],
+          auth: existingAuth.length > 0 ? existingAuth : coalesced.result.auth,
         })
       );
       break;
   }
 
-  return txnBuilder.build();
+  return txnBuilder;
 }
 
 function isSorobanTransaction(tx: Transaction): boolean {
@@ -108,9 +107,67 @@ function isSorobanTransaction(tx: Transaction): boolean {
     case "invokeHostFunction":
     case "bumpFootprintExpiration":
     case "restoreFootprint":
-      return true;
+      return true
 
     default:
       return false;
   }
+}
+
+/**
+ * Converts a raw response schema into one with parsed XDR fields and a
+ * simplified interface.
+ *
+ * @param raw   the raw response schema (parsed ones are allowed, best-effort
+ *    detected, and returned untouched)
+ *
+ * @returns the original parameter (if already parsed), parsed otherwise
+ */
+export function parseRawSimulation(
+  sim:
+    | SorobanRpc.SimulateTransactionResponse
+    | SorobanRpc.RawSimulateTransactionResponse
+): SorobanRpc.SimulateTransactionResponse {
+  const looksRaw = isSimulationRaw(sim);
+  if (!looksRaw) {
+    // Gordon Ramsey in shambles
+    return sim;
+  }
+
+  return {
+    id: sim.id,
+    minResourceFee: sim.minResourceFee,
+    latestLedger: sim.latestLedger,
+    cost: sim.cost,
+    transactionData: new SorobanDataBuilder(sim.transactionData),
+    events: sim.events.map((event) =>
+      xdr.DiagnosticEvent.fromXDR(event, "base64")
+    ),
+    ...(sim.error !== undefined && { error: sim.error }), // only if present
+    // ^ XOR v
+    ...((sim.results ?? []).length > 0 && {
+      result: sim.results?.map((result) => {
+        return {
+          auth: (result.auth ?? []).map((entry) =>
+            xdr.SorobanAuthorizationEntry.fromXDR(entry, "base64")
+          ),
+          retval: xdr.ScVal.fromXDR(result.xdr, "base64"),
+        };
+      })[0], // only if present
+    }),
+  };
+}
+
+function isSimulationRaw(
+  sim:
+    | SorobanRpc.SimulateTransactionResponse
+    | SorobanRpc.RawSimulateTransactionResponse
+): sim is SorobanRpc.RawSimulateTransactionResponse {
+  // lazy check to determine parameter type
+  return (
+    (sim as SorobanRpc.SimulateTransactionResponse).result === undefined ||
+    (typeof sim.transactionData === "string" ||
+      ((sim as SorobanRpc.RawSimulateTransactionResponse).results ?? [])
+        .length > 0)
+  );
 }

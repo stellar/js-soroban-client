@@ -1,9 +1,10 @@
-import { AssetType } from "stellar-base";
+import { AssetType, SorobanDataBuilder, xdr } from "stellar-base";
 
-// TODO: Better parsing for hashes, and base64-encoded xdr
+// TODO: Better parsing for hashes
 
 /* tslint:disable-next-line:no-namespace */
-/* @namespace SorobanRpc
+/**
+ * @namespace SorobanRpc
  */
 export namespace SorobanRpc {
   export interface Balance {
@@ -118,13 +119,30 @@ export namespace SorobanRpc {
   }
 
   export interface SimulateHostFunctionResult {
-    // each string is SorobanAuthorizationEntry XDR in base64
-    auth?: string[];
-    // function response as SCVal XDR in base64
-    xdr: string;
+    auth: xdr.SorobanAuthorizationEntry[];
+    retval: xdr.ScVal;
   }
 
   export interface SimulateTransactionResponse {
+    id: string;
+    error?: string;
+    transactionData: SorobanDataBuilder;
+    events: xdr.DiagnosticEvent[];
+    minResourceFee: string;
+    // only present if error isn't
+    result?: SimulateHostFunctionResult;
+    latestLedger: number;
+    cost: Cost;
+  }
+
+  export interface RawSimulateHostFunctionResult {
+    // each string is SorobanAuthorizationEntry XDR in base64
+    auth?: string[];
+    // invocation return value: the ScVal in base64
+    xdr: string;
+  }
+
+  export interface RawSimulateTransactionResponse {
     id: string;
     error?: string;
     // this is SorobanTransactionData XDR in base64
@@ -133,7 +151,7 @@ export namespace SorobanRpc {
     minResourceFee: string;
     // This will only contain a single element, because only a single
     // invokeHostFunctionOperation is supported per transaction.
-    results: SimulateHostFunctionResult[];
+    results?: RawSimulateHostFunctionResult[];
     latestLedger: number;
     cost: Cost;
   }

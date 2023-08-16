@@ -1,9 +1,7 @@
 const xdr = SorobanClient.xdr; // shorthand
 
 describe("assembleTransaction", () => {
-  describe("FeeBumpTransaction", () => {
-    // TODO: Add support for fee bump transactions
-  });
+  xit("works with keybump transactions");
 
   const scAddress = new SorobanClient.Address(
     "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI"
@@ -31,22 +29,11 @@ describe("assembleTransaction", () => {
         ),
       subInvocations: [],
     }),
-  });
+  }).toXDR();
 
-  const sorobanTransactionData = new xdr.SorobanTransactionData({
-    resources: new xdr.SorobanResources({
-      footprint: new xdr.LedgerFootprint({
-        readOnly: [],
-        readWrite: [],
-      }),
-      instructions: 0,
-      readBytes: 5,
-      writeBytes: 0,
-      extendedMetaDataSizeBytes: 0,
-    }),
-    refundableFee: xdr.Int64.fromString("0"),
-    ext: new xdr.ExtensionPoint(0),
-  });
+  const sorobanTransactionData = new SorobanClient.SorobanDataBuilder()
+    .setResources(0, 5, 0, 0)
+    .build();
 
   const simulationResponse = {
     transactionData: sorobanTransactionData.toXDR("base64"),
@@ -54,8 +41,8 @@ describe("assembleTransaction", () => {
     minResourceFee: "115",
     results: [
       {
-        auth: [fnAuth.toXDR("base64")],
-        xdr: xdr.ScVal.scvU32(0).toXDR().toString("base64"),
+        auth: [fnAuth],
+        xdr: xdr.ScVal.scvU32(0).toXDR("base64"),
       },
     ],
     latestLedger: 3,
@@ -64,6 +51,7 @@ describe("assembleTransaction", () => {
       memBytes: "0",
     },
   };
+
   describe("Transaction", () => {
     const networkPassphrase = SorobanClient.Networks.TESTNET;
     const source = new SorobanClient.Account(
@@ -93,7 +81,7 @@ describe("assembleTransaction", () => {
         txn,
         networkPassphrase,
         simulationResponse
-      );
+      ).build();
 
       // validate it auto updated the tx fees from sim response fees
       // since it was greater than tx.fee
@@ -111,7 +99,7 @@ describe("assembleTransaction", () => {
         txn,
         networkPassphrase,
         simulationResponse
-      );
+      ).build();
 
       expect(
         result
@@ -156,7 +144,7 @@ describe("assembleTransaction", () => {
         txn,
         networkPassphrase,
         simulateResp
-      );
+      ).build();
 
       expect(
         result
@@ -191,7 +179,7 @@ describe("assembleTransaction", () => {
           minResourceFee: "0",
           results: [],
           latestLedger: 3,
-        });
+        }).build();
         expect.fail();
       }).to.throw(/unsupported transaction/i);
     });
@@ -219,7 +207,7 @@ describe("assembleTransaction", () => {
           txn,
           networkPassphrase,
           simulationResponse
-        );
+        ).build();
         expect(tx.operations[0].type).to.equal(op.body().switch().name);
       });
     });
@@ -230,7 +218,7 @@ describe("assembleTransaction", () => {
         txn,
         networkPassphrase,
         simulationResponse
-      );
+      ).build();
 
       expect(tx.operations[0].auth.length).to.equal(
         3,

@@ -17,7 +17,7 @@ import AxiosClient from "./axios";
 import { Friendbot } from "./friendbot";
 import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
-import { assembleTransaction } from "./transaction";
+import { assembleTransaction, parseRawSimulation } from "./transaction";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -122,9 +122,8 @@ export class Server {
       ledgerEntryData,
       "base64",
     ).account();
-    const { high, low } = accountEntry.seqNum();
-    const sequence = BigInt(high) * BigInt(4294967296) + BigInt(low);
-    return new Account(address, sequence.toString());
+
+    return new Account(address, accountEntry.seqNum().toString());
   }
 
   /**
@@ -431,7 +430,7 @@ export class Server {
    *
    * server.simulateTransaction(transaction).then(sim => {
    *   console.log("cost:", sim.cost);
-   *   console.log("results:", sim.results);
+   *   console.log("result:", sim.result);
    *   console.log("error:", sim.error);
    *   console.log("latestLedger:", sim.latestLedger);
    * });
@@ -450,11 +449,11 @@ export class Server {
   public async simulateTransaction(
     transaction: Transaction | FeeBumpTransaction,
   ): Promise<SorobanRpc.SimulateTransactionResponse> {
-    return await jsonrpc.post(
+    return await jsonrpc.post<SorobanRpc.RawSimulateTransactionResponse>(
       this.serverURL.toString(),
       "simulateTransaction",
       transaction.toXDR(),
-    );
+    ).then((raw) => parseRawSimulation(raw));
   }
 
   /**
@@ -546,10 +545,11 @@ export class Server {
     if (simResponse.error) {
       throw simResponse.error;
     }
-    if (!simResponse.results || simResponse.results.length !== 1) {
+    if (!simResponse.result) {
       throw new Error("transaction simulation failed");
     }
-    return assembleTransaction(transaction, passphrase, simResponse);
+
+    return assembleTransaction(transaction, passphrase, simResponse).build();
   }
 
   /**
