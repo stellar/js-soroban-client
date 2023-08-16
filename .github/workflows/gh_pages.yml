@@ -19,7 +19,7 @@ jobs:
           ref: soroban
           path: js-stellar-base
 
-      - name: Install Node 61
+      - name: Install Node 16
         uses: actions/setup-node@v2
         with:
           node-version: 16
