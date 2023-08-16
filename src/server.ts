@@ -287,18 +287,46 @@ export class Server {
    *
    * @param {string} hash - The hex-encoded hash of the transaction to check.
    *
-   * @returns {Promise<SorobanRpc.GetTransactionResponse>} Returns a
-   *    promise to the {@link SorobanRpc.GetTransactionResponse} object
-   *    with the status, result, and other details about the transaction.
+   * @returns {Promise<SorobanRpc.GetTransactionResponse>} Returns a promise to
+   *    the {@link SorobanRpc.GetTransactionResponse} object with the status,
+   *    result, and other details about the transaction. Raw XDR fields are
+   *    parsed into their appropriate structures wherever possible.
    */
   public async getTransaction(
     hash: string,
   ): Promise<SorobanRpc.GetTransactionResponse> {
-    return await jsonrpc.post(
+    return await jsonrpc.post<SorobanRpc.RawGetTransactionResponse>(
       this.serverURL.toString(),
       "getTransaction",
       hash,
-    );
+    ).then(raw => {
+      let successInfo: any = {};
+
+      if (raw.status === 'SUCCESS') {
+        const meta = xdr.TransactionMeta.fromXDR(raw.resultMetaXdr!, 'base64');
+        successInfo = {
+          ledger: raw.ledger,
+          createdAt: raw.createdAt,
+          applicationOrder: raw.applicationOrder,
+          feeBump: raw.feeBump,
+          envelopeXdr: xdr.TransactionEnvelope.fromXDR(raw.envelopeXdr!, 'base64'),
+          resultXdr: xdr.TransactionResult.fromXDR(raw.resultXdr!, 'base64'),
+          resultMetaXdr: meta,
+          ...(meta.switch() === 3 && meta.v3().sorobanMeta() !== null && {
+            returnValue: meta.v3().sorobanMeta()?.returnValue()
+          }),
+        };
+      }
+
+      return {
+        status: raw.status,
+        latestLedger: raw.latestLedger,
+        latestLedgerCloseTime: raw.latestLedgerCloseTime,
+        oldestLedger: raw.oldestLedger,
+        oldestLedgerCloseTime: raw.oldestLedgerCloseTime,
+        ...successInfo,
+      };
+    });
   }
 
   /**
@@ -347,8 +375,6 @@ export class Server {
     // is an ScSymbol and the last is a U32.
     //
     // The difficulty comes in matching up the correct integer primitives.
-    //
-    // It also means this library will rely on the XDR definitions.
     return await jsonrpc.postObject(this.serverURL.toString(), "getEvents", {
       filters: request.filters ?? [],
       pagination: {

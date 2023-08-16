@@ -64,6 +64,24 @@ export namespace SorobanRpc {
     oldestLedgerCloseTime: number;
 
     // the fields below are set if status is SUCCESS
+    ledger?: number;
+    createdAt?: number;
+    applicationOrder?: number;
+    feeBump?: boolean;
+    envelopeXdr?: xdr.TransactionEnvelope;
+    resultXdr?: xdr.TransactionResult;
+    resultMetaXdr?: xdr.TransactionMeta;
+    returnValue?: xdr.ScVal;  // present iff resultMeta is a v3
+  }
+
+  export interface RawGetTransactionResponse {
+    status: GetTransactionStatus;
+    latestLedger: number;
+    latestLedgerCloseTime: number;
+    oldestLedger: number;
+    oldestLedgerCloseTime: number;
+
+    // the fields below are set if status is SUCCESS
     applicationOrder?: number;
     feeBump?: boolean;
     envelopeXdr?: string;
