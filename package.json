@@ -29,7 +29,7 @@
     "build:prod": "cross-env NODE_ENV=production yarn _build",
     "build:node": "yarn _babel && yarn build:ts",
     "build:ts": "tsc -p ./tsconfig.json",
-    "build:test": "yarn tsc -p ./test/tsconfig.json",
+    "build:test": "tsc -p ./test/tsconfig.json",
     "build:browser": "webpack -c ./webpack.config.browser.js",
     "build:docs": "cross-env NODE_ENV=docs yarn _babel",
     "clean": "rm -rf lib/ dist/ coverage/ .nyc_output/ jsdoc/",

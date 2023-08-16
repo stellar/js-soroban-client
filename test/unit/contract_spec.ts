@@ -5,9 +5,17 @@ import { expect } from "chai";
 
 const publicKey = "GCBVOLOM32I7OD5TWZQCIXCXML3TK56MDY7ZMTAILIBQHHKPCVU42XYW";
 const addr = Address.fromString(publicKey);
+let SPEC: ContractSpec;
 
-describe("Can parse base64 entries", function () {
-  const SPEC = new ContractSpec(spec);
+before(() => {
+  SPEC = new ContractSpec(spec);
+})
+
+it("throws if no entries", () => {
+  expect(() => new ContractSpec([])).to.throw(/Contract spec must have at least one entry/i);
+});
+
+describe("Can round trip custom types", function () {
 
   function getResultType(funcName: string): xdr.ScSpecTypeDef {
     let fn = SPEC.findEntry(funcName).value();
@@ -142,8 +150,10 @@ describe("Can parse base64 entries", function () {
     const map = new Map();
     map.set(1, true);
     map.set(2, false);
-    // map.set(3, 'hahaha') // should throw an error
     roundtrip("map", map);
+    
+    map.set(3, "hahaha")
+    expect(() => roundtrip("map", map)).to.throw(/invalid type scSpecTypeBool specified for string value/i);
   });
 
   it("vec", () => {
@@ -163,6 +173,7 @@ describe("Can parse base64 entries", function () {
 
   it("u256", () => {
     roundtrip("u256", 1n);
+    expect(() =>roundtrip("u256", -1n)).to.throw(/expected a positive value, got: -1/i)
   });
 
   it("i256", () => {

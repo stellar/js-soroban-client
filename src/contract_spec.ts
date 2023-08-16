@@ -28,8 +28,7 @@ import { ScIntType, XdrLargeInt, xdr } from "stellar-base";
 
 import { Address } from "stellar-base";
 import { Contract } from "stellar-base";
-//@ts-ignore Does exist
-import { ScInt, scValToBigInt } from "stellar-base";
+import { scValToBigInt } from "stellar-base";
 
 export interface Union<T> {
   tag: string;
@@ -664,7 +663,7 @@ function stringToScVal(str: string, ty: xdr.ScSpecType): xdr.ScVal {
 
     default:
       throw new TypeError(
-        `invalid type (${ty.name}) specified for string value`
+        `invalid type ${ty.name} specified for string value`
       );
   }
 }
