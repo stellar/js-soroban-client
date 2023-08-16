@@ -24,7 +24,7 @@
  * ```
  */
 
-import { xdr } from "stellar-base";
+import { ScIntType, XdrLargeInt, xdr } from "stellar-base";
 
 import { Address } from "stellar-base";
 import { Contract } from "stellar-base";
@@ -306,17 +306,14 @@ export class ContractSpec {
           case  xdr.ScSpecType.scSpecTypeI32().value:
             return xdr.ScVal.scvI32(val as number);
           case  xdr.ScSpecType.scSpecTypeU64().value:
-            return new ScInt(val, { type: "u64" }).toU64();
           case  xdr.ScSpecType.scSpecTypeI64().value:
-            return new ScInt(val, { type: "i64" }).toI64();
           case  xdr.ScSpecType.scSpecTypeU128().value:
-            return new ScInt(val, { type: "u128" }).toU128();
           case  xdr.ScSpecType.scSpecTypeI128().value:
-            return new ScInt(val, { type: "i128" }).toI128();
           case  xdr.ScSpecType.scSpecTypeU256().value:
-            return new ScInt(val, { type: "u256" }).toU256();
-          case  xdr.ScSpecType.scSpecTypeI256().value:
-            return new ScInt(val, { type: "i256" }).toI256();
+          case  xdr.ScSpecType.scSpecTypeI256().value: {
+            const intType = t.name.substring(10).toLowerCase() as ScIntType;
+            return new XdrLargeInt(intType, val as bigint).toScVal();
+          }
           default:
             throw new TypeError(`invalid type (${ty}) specified for integer`);
         }
