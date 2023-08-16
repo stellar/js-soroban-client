@@ -174,7 +174,7 @@ function cloneSimulation(sim) {
       sim.transactionData.build()
     ),
     result: {
-      auth: sim.result.auth.map(entry =>
+      auth: sim.result.auth.map((entry) =>
         xdr.SorobanAuthorizationEntry.fromXDR(entry.toXDR())
       ),
       retval: xdr.ScVal.fromXDR(sim.result.retval.toXDR()),

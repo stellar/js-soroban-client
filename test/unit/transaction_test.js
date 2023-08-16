@@ -1,7 +1,7 @@
 const xdr = SorobanClient.xdr; // shorthand
 
 describe("assembleTransaction", () => {
-  xit('works with keybump transactions');
+  xit("works with keybump transactions");
 
   const scAddress = new SorobanClient.Address(
     "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI"
@@ -36,13 +36,13 @@ describe("assembleTransaction", () => {
     .build();
 
   const simulationResponse = {
-    transactionData: sorobanTransactionData.toXDR('base64'),
+    transactionData: sorobanTransactionData.toXDR("base64"),
     events: [],
     minResourceFee: "115",
     results: [
       {
         auth: [fnAuth],
-        xdr: xdr.ScVal.scvU32(0).toXDR('base64')
+        xdr: xdr.ScVal.scvU32(0).toXDR("base64"),
       },
     ],
     latestLedger: 3,
