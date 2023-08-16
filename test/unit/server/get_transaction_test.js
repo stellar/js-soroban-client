@@ -91,9 +91,7 @@ describe("Server#getTransaction", function () {
       .then((resp) => {
         expect(Object.keys(resp)).to.eql(Object.keys(expected));
         expect(resp).to.eql(expected);
-        expect(resp.returnValue).to.eql(
-          new XdrLargeInt("u64", 1234).toScVal()
-        );
+        expect(resp.returnValue).to.eql(new XdrLargeInt("u64", 1234).toScVal());
         done();
       })
       .catch((err) => done(err));
@@ -117,18 +115,21 @@ describe("Server#getTransaction", function () {
 });
 
 function makeTxResult(status, addSoroban = true) {
-  const metaV3 = new xdr.TransactionMeta(3, new xdr.TransactionMetaV3({
-    ext: new xdr.ExtensionPoint(0),
-    txChangesBefore: [],
-    operations: [],
-    txChangesAfter: [],
-    sorobanMeta: new xdr.SorobanTransactionMeta({
+  const metaV3 = new xdr.TransactionMeta(
+    3,
+    new xdr.TransactionMetaV3({
       ext: new xdr.ExtensionPoint(0),
-      events: [],
-      diagnosticEvents: [],
-      returnValue: nativeToScVal(1234),
-    }),
-  }));
+      txChangesBefore: [],
+      operations: [],
+      txChangesAfter: [],
+      sorobanMeta: new xdr.SorobanTransactionMeta({
+        ext: new xdr.ExtensionPoint(0),
+        events: [],
+        diagnosticEvents: [],
+        returnValue: nativeToScVal(1234),
+      }),
+    })
+  );
 
   // only injected in the success case
   //
