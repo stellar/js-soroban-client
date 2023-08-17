@@ -88,7 +88,6 @@
     "@istanbuljs/nyc-config-babel": "3.0.0",
     "@stellar/tsconfig": "^1.0.2",
     "@types/chai": "^4.3.5",
-    "@types/eventsource": "^1.1.2",
     "@types/mocha": "^10.0.1",
     "@types/node": "^20.5.0",
     "@types/sinon": "^10.0.16",
@@ -140,7 +139,6 @@
     "axios": "^1.4.0",
     "bignumber.js": "^9.1.1",
     "buffer": "^6.0.3",
-    "eventsource": "^2.0.2",
     "stellar-base": "10.0.0-soroban.7",
     "toml": "^3.0.0",
     "urijs": "^1.19.1"
