@@ -13,6 +13,7 @@ A breaking change should be clearly marked in this log.
 
 ### Fixed
 * The `SimulateTransactionResponse`'s error field now has the correct type (that is, `string`: [#123](https://github.com/stellar/js-soroban-client/pull/123)).
+* Many irrelevant or unused dependencies have been eliminated (such as `eventsource`, `lodash`, and others), lowering overall bundle size ([#126](https://github.com/stellar/js-soroban-client/pull/126)).
 
 ### Added
 * A new `ContractSpec` class to facilitate building native JavaScript structures from custom contract types. Given a specification for the data structure (i.e. `xdr.ScSpecEntry[]`), it will interpret the values via the specified type ([#115](https://github.com/stellar/js-soroban-client/pull/115)).
