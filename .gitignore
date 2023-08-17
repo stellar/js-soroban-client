@@ -10,3 +10,6 @@
 .nyc_output/
 js-stellar-base/
 .envrc
+build
+
+test/unit/contract_spec.js
