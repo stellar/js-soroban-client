@@ -10,23 +10,29 @@ A breaking change should be clearly marked in this log.
 
 ## v0.11.0
 
+
 ### Fixed
 * The `SimulateTransactionResponse`'s error field now has the correct type (that is, `string`: [#123](https://github.com/stellar/js-soroban-client/pull/123)).
 
+### Added
+* A new `ContractSpec` class to facilitate building native JavaScript structures from custom contract types. Given a specification for the data structure (i.e. `xdr.ScSpecEntry[]`), it will interpret the values via the specified type ([#115](https://github.com/stellar/js-soroban-client/pull/115)).
+
 ### Breaking Changes
-* The minimum version of NodeJS to run this library is v16 ([#126](https://github.com/stellar/js-soroban-client/pull/126)).
-* The `stellar-base` dependency has been upgraded with feature additions. Please refer to those release notes for full details ([js-stellar-base#674](https://github.com/stellar/js-stellar-base/pull/674)). The only breaking change is the following:
-  - `Contract.getFootprint()` now returns a two-element array containing both the contract code and the instance.
-* `Server.prepareTransaction` now returns a `TransactionBuilder` instance rather than an immutable `Transaction`, in order to facilitate modifying your transaction after assembling it alongside the simulation response ([https://github.com/stellar/js-soroban-client/pull/127](#127)).
+* The minimum supported NodeJS version is now Node 16.
+* `Server.prepareTransaction` now returns a `TransactionBuilder` instance rather than an immutable `Transaction`, in order to facilitate modifying your transaction after assembling it alongside the simulation response ([#127](https://github.com/stellar/js-soroban-client/pull/127)).
   - The intent is to avoid cloning the transaction again (via `TransactionBuilder.cloneFrom`) if you need to modify parameters such as the storage access footprint.
   - To migrate your code, just call `.build()` on the return value.
-* The RPC response schemas for simulation have been upgraded to parse the base64-encoded XDR automatically. The full interface changes are in the pull request ([https://github.com/stellar/js-soroban-client/pull/127](#127)), but succinctly:
+* The RPC response schemas for simulation (see `Server.simulateTransaction()`) have been upgraded to parse the base64-encoded XDR automatically. The full interface changes are in the pull request ([#127](https://github.com/stellar/js-soroban-client/pull/127)), but succinctly:
   - `SimulateTransactionResponse` -> `RawSimulateTransactionResponse`
   - `SimulateHostFunctionResult` -> `RawSimulateHostFunctionResult`
-  - Now, `SimulateTransactionResponse` and `SimulateHostFunctionResult` now include the full, decoded XDR structures instead of raw, base64-encoded strings for the relevant fields (e.g. `SimulateTransactionResponse.transactionData` is now an instance of `SorobanDataBuilder`, `events` is now an `xdr.DiagnosticEvent[]` [try out `humanizeEvents` for a friendlier representation of this field])
-  - The `SimulateTransactionResponse.results[]` field has been moved to `SimulateTransactionResponse.result?`, since it will always be exactly zero or one result.
+  - Now, `SimulateTransactionResponse` and `SimulateHostFunctionResult` include the full, decoded XDR structures instead of raw, base64-encoded strings for the relevant fields (e.g. `SimulateTransactionResponse.transactionData` is now an instance of `SorobanDataBuilder`, `events` is now an `xdr.DiagnosticEvent[]` [try out `humanizeEvents` for a friendlier representation of this field]).
+  - The `SimulateTransactionResponse.results[]` field has been moved to `SimulateTransactionResponse.result?`, since there will always be exactly zero or one result.
+* The RPC response schemas for retrieving transaction details (`Server.getTransaction()`) have been upgraded to parse the base64-encoded XDR automatically. The full interface changes are in the pull request ([#129](https://github.com/stellar/js-soroban-client/pull/129)), but succinctly:
+  - `GetTransactionResponse` -> `RawGetTransactionResponse`
+  - All of the `*Xdr` properties are now full, decoded XDR structures.
+  - There is a new `returnValue` field which is a decoded `xdr.ScVal`, present iff the transaction was a successful Soroban function invocation.
 
-Not all schemas have been broken in this manner in order to facilitate user feedback on this approach. Please add your :+1: or :-1: to [#128](https://github.com/stellar/js-soroban-client/issues/128) to provide your perspective on whether or not we should do this for the other response schemas.
+Not all schemas have been broken in this manner in order to facilitate user feedback on this approach. Please add your :+1: or :-1: to [#128](https://github.com/stellar/js-soroban-client/issues/128) to vote on whether or not we should do this for the other response schemas.
 
 
 ## v0.10.1
