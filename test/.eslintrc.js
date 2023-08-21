@@ -1,7 +1,7 @@
 module.exports = {
-  parser: "@babel/eslint-parser",
+  parser: '@babel/eslint-parser',
   env: {
-    mocha: true,
+    mocha: true
   },
   globals: {
     AxiosClient: true,
@@ -10,9 +10,9 @@ module.exports = {
     chai: true,
     expect: true,
     serverUrl: true,
-    sinon: true,
+    sinon: true
   },
   rules: {
-    "no-unused-vars": 0,
-  },
+    'no-unused-vars': 0
+  }
 };

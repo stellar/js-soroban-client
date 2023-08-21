@@ -1,10 +1,10 @@
 const xdr = SorobanClient.xdr; // shorthand
 
-describe("assembleTransaction", () => {
-  xit("works with keybump transactions");
+describe('assembleTransaction', () => {
+  xit('works with keybump transactions');
 
   const scAddress = new SorobanClient.Address(
-    "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI"
+    'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI'
   ).toScAddress();
 
   const fnAuth = new xdr.SorobanAuthorizationEntry({
@@ -14,7 +14,7 @@ describe("assembleTransaction", () => {
         address: scAddress,
         nonce: new xdr.Int64(0),
         signatureExpirationLedger: 1,
-        signatureArgs: [],
+        signatureArgs: []
       })
     ),
     // And a basic invocation
@@ -23,12 +23,12 @@ describe("assembleTransaction", () => {
         xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
           new xdr.SorobanAuthorizedContractFunction({
             contractAddress: scAddress,
-            functionName: "fn",
-            args: [],
+            functionName: 'fn',
+            args: []
           })
         ),
-      subInvocations: [],
-    }),
+      subInvocations: []
+    })
   }).toXDR();
 
   const sorobanTransactionData = new SorobanClient.SorobanDataBuilder()
@@ -36,46 +36,46 @@ describe("assembleTransaction", () => {
     .build();
 
   const simulationResponse = {
-    transactionData: sorobanTransactionData.toXDR("base64"),
+    transactionData: sorobanTransactionData.toXDR('base64'),
     events: [],
-    minResourceFee: "115",
+    minResourceFee: '115',
     results: [
       {
         auth: [fnAuth],
-        xdr: xdr.ScVal.scvU32(0).toXDR("base64"),
-      },
+        xdr: xdr.ScVal.scvU32(0).toXDR('base64')
+      }
     ],
     latestLedger: 3,
     cost: {
-      cpuInsns: "0",
-      memBytes: "0",
-    },
+      cpuInsns: '0',
+      memBytes: '0'
+    }
   };
 
-  describe("Transaction", () => {
+  describe('Transaction', () => {
     const networkPassphrase = SorobanClient.Networks.TESTNET;
     const source = new SorobanClient.Account(
-      "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI",
-      "1"
+      'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI',
+      '1'
     );
 
     function singleContractFnTransaction(auth) {
       return new SorobanClient.TransactionBuilder(source, {
         fee: 100,
-        networkPassphrase: "Test",
-        v1: true,
+        networkPassphrase: 'Test',
+        v1: true
       })
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
             func: new xdr.HostFunction.hostFunctionTypeInvokeContract([]),
-            auth: auth ?? [],
+            auth: auth ?? []
           })
         )
         .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
     }
 
-    it("simulate updates the tx data from simulation response", () => {
+    it('simulate updates the tx data from simulation response', () => {
       const txn = singleContractFnTransaction();
       const result = SorobanClient.assembleTransaction(
         txn,
@@ -93,7 +93,7 @@ describe("assembleTransaction", () => {
       );
     });
 
-    it("simulate adds the auth to the host function in tx operation", () => {
+    it('simulate adds the auth to the host function in tx operation', () => {
       const txn = singleContractFnTransaction();
       const result = SorobanClient.assembleTransaction(
         txn,
@@ -115,7 +115,7 @@ describe("assembleTransaction", () => {
           .contractFn()
           .functionName()
           .toString()
-      ).to.equal("fn");
+      ).to.equal('fn');
 
       expect(
         SorobanClient.StrKey.encodeEd25519PublicKey(
@@ -133,10 +133,10 @@ describe("assembleTransaction", () => {
             .accountId()
             .ed25519()
         )
-      ).to.equal("GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI");
+      ).to.equal('GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI');
     });
 
-    it("simulate ignores non auth from simulation", () => {
+    it('simulate ignores non auth from simulation', () => {
       const txn = singleContractFnTransaction();
       let simulateResp = JSON.parse(JSON.stringify(simulationResponse));
       simulateResp.results[0].auth = null;
@@ -158,15 +158,15 @@ describe("assembleTransaction", () => {
       ).to.have.length(0);
     });
 
-    it("throws for non-Soroban ops", () => {
+    it('throws for non-Soroban ops', () => {
       const txn = new SorobanClient.TransactionBuilder(source, {
         fee: 100,
         networkPassphrase,
-        v1: true,
+        v1: true
       })
         .addOperation(
           SorobanClient.Operation.changeTrust({
-            asset: SorobanClient.Asset.native(),
+            asset: SorobanClient.Asset.native()
           })
         )
         .setTimeout(SorobanClient.TimeoutInfinite)
@@ -176,28 +176,28 @@ describe("assembleTransaction", () => {
         SorobanClient.assembleTransaction(txn, networkPassphrase, {
           transactionData: {},
           events: [],
-          minResourceFee: "0",
+          minResourceFee: '0',
           results: [],
-          latestLedger: 3,
+          latestLedger: 3
         }).build();
         expect.fail();
       }).to.throw(/unsupported transaction/i);
     });
 
-    it("works for all Soroban ops", function () {
+    it('works for all Soroban ops', function () {
       [
         SorobanClient.Operation.invokeHostFunction({
-          func: xdr.HostFunction.hostFunctionTypeInvokeContract(),
+          func: xdr.HostFunction.hostFunctionTypeInvokeContract()
         }),
         SorobanClient.Operation.bumpFootprintExpiration({
-          ledgersToExpire: 27,
+          ledgersToExpire: 27
         }),
-        SorobanClient.Operation.restoreFootprint(),
+        SorobanClient.Operation.restoreFootprint()
       ].forEach((op) => {
         const txn = new SorobanClient.TransactionBuilder(source, {
           fee: 100,
           networkPassphrase,
-          v1: true,
+          v1: true
         })
           .setTimeout(SorobanClient.TimeoutInfinite)
           .addOperation(op)

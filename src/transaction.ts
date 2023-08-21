@@ -13,8 +13,10 @@ import { SorobanRpc } from "./soroban_rpc";
  * Combines the given raw transaction alongside the simulation results.
  *
  * @param raw   the initial transaction, w/o simulation applied
- * @param networkPassphrase   the network this simulation applies to
- * @param simulation  the Soroban RPC simulation result
+ * @param networkPassphrase  the network this simulation applies to (see
+ *    {@link Networks} for options)
+ * @param simulation  the Soroban RPC simulation result (see
+ *    {@link Server.simulateTransaction})
  *
  * @returns a new, cloned transaction with the proper auth and resource (fee,
  *    footprint) simulation data applied
@@ -55,9 +57,8 @@ export function assembleTransaction(
     throw new Error(`simulation incorrect: ${JSON.stringify(coalesced)}`);
   }
 
-  const classicFeeNum = parseInt(raw.fee);
-  const minResourceFeeNum = parseInt(coalesced.minResourceFee);
-
+  const classicFeeNum = parseInt(raw.fee) || 0;
+  const minResourceFeeNum = parseInt(coalesced.minResourceFee) || 0;
   const txnBuilder = TransactionBuilder.cloneFrom(raw, {
     // automatically update the tx fee that will be set on the resulting tx to
     // the sum of 'classic' fee provided from incoming tx.fee and minResourceFee
@@ -70,13 +71,13 @@ export function assembleTransaction(
     fee: (classicFeeNum + minResourceFeeNum).toString(),
     // apply the pre-built Soroban Tx Data from simulation onto the Tx
     sorobanData: coalesced.transactionData.build(),
+    networkPassphrase
   });
 
   switch (raw.operations[0].type) {
     case "invokeHostFunction":
       // In this case, we don't want to clone the operation, so we drop it.
-      // @ts-ignore hack because `TransactionBuilder.operations` is private
-      txnBuilder.operations = [];
+      txnBuilder.clearOperations();
 
       const invokeOp: Operation.InvokeHostFunction = raw.operations[0];
       const existingAuth = invokeOp.auth ?? [];
