@@ -7,7 +7,7 @@ describe("Server#requestAirdrop", function () {
     return new xdr.LedgerEntryData.account(
       new xdr.AccountEntry({
         accountId: xdr.AccountId.publicKeyTypeEd25519(
-          StrKey.decodeEd25519PublicKey(accountId)
+          StrKey.decodeEd25519PublicKey(accountId),
         ),
         balance: xdr.Int64.fromString("1"),
         seqNum: xdr.SequenceNumber.fromString(sequence),
@@ -19,7 +19,7 @@ describe("Server#requestAirdrop", function () {
         thresholds: Buffer.from("AQAAAA==", "base64"),
         signers: [],
         ext: new xdr.AccountEntryExt(0),
-      })
+      }),
     );
   }
 
@@ -33,7 +33,7 @@ describe("Server#requestAirdrop", function () {
               lastModifiedLedgerSeq: 0,
               data: accountLedgerEntryData(accountId, sequence),
               ext: new xdr.LedgerEntryExt(0),
-            })
+            }),
           ),
         ],
       }),
@@ -75,7 +75,7 @@ describe("Server#requestAirdrop", function () {
     mockGetNetwork.call(this, friendbotUrl);
 
     const result_meta_xdr = transactionMetaFor(accountId, "1234").toXDR(
-      "base64"
+      "base64",
     );
     this.axiosMock
       .expects("post")
@@ -109,7 +109,7 @@ describe("Server#requestAirdrop", function () {
             detail:
               "createAccountAlreadyExist (AAAAAAAAAGT/////AAAAAQAAAAAAAAAA/////AAAAAA=)",
           },
-        })
+        }),
       );
 
     this.axiosMock
@@ -123,9 +123,9 @@ describe("Server#requestAirdrop", function () {
             xdr.LedgerKey.account(
               new xdr.LedgerKeyAccount({
                 accountId: xdr.PublicKey.publicKeyTypeEd25519(
-                  StrKey.decodeEd25519PublicKey(accountId)
+                  StrKey.decodeEd25519PublicKey(accountId),
                 ),
-              })
+              }),
             ).toXDR("base64"),
           ],
         ],
@@ -137,13 +137,13 @@ describe("Server#requestAirdrop", function () {
               entries: [
                 {
                   xdr: accountLedgerEntryData(accountId, "1234").toXDR(
-                    "base64"
+                    "base64",
                   ),
                 },
               ],
             },
           },
-        })
+        }),
       );
 
     this.server
@@ -163,7 +163,7 @@ describe("Server#requestAirdrop", function () {
       "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI";
 
     const result_meta_xdr = transactionMetaFor(accountId, "1234").toXDR(
-      "base64"
+      "base64",
     );
     this.axiosMock
       .expects("post")
@@ -202,7 +202,7 @@ describe("Server#requestAirdrop", function () {
                 "base32 decode failed: illegal base32 data at input byte 7",
             },
           },
-        })
+        }),
       );
 
     this.server
@@ -227,7 +227,7 @@ describe("Server#requestAirdrop", function () {
       })
       .catch(function (err) {
         expect(err.message).to.be.equal(
-          "No friendbot URL configured for current network"
+          "No friendbot URL configured for current network",
         );
         done();
       });

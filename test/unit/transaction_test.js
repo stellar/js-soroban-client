@@ -4,7 +4,7 @@ describe("assembleTransaction", () => {
   xit("works with keybump transactions");
 
   const scAddress = new SorobanClient.Address(
-    "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI"
+    "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI",
   ).toScAddress();
 
   const fnAuth = new xdr.SorobanAuthorizationEntry({
@@ -15,7 +15,7 @@ describe("assembleTransaction", () => {
         nonce: new xdr.Int64(0),
         signatureExpirationLedger: 1,
         signatureArgs: [],
-      })
+      }),
     ),
     // And a basic invocation
     rootInvocation: new xdr.SorobanAuthorizedInvocation({
@@ -25,7 +25,7 @@ describe("assembleTransaction", () => {
             contractAddress: scAddress,
             functionName: "fn",
             args: [],
-          })
+          }),
         ),
       subInvocations: [],
     }),
@@ -56,7 +56,7 @@ describe("assembleTransaction", () => {
     const networkPassphrase = SorobanClient.Networks.TESTNET;
     const source = new SorobanClient.Account(
       "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI",
-      "1"
+      "1",
     );
 
     function singleContractFnTransaction(auth) {
@@ -69,7 +69,7 @@ describe("assembleTransaction", () => {
           SorobanClient.Operation.invokeHostFunction({
             func: new xdr.HostFunction.hostFunctionTypeInvokeContract([]),
             auth: auth ?? [],
-          })
+          }),
         )
         .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
@@ -80,7 +80,7 @@ describe("assembleTransaction", () => {
       const result = SorobanClient.assembleTransaction(
         txn,
         networkPassphrase,
-        simulationResponse
+        simulationResponse,
       ).build();
 
       // validate it auto updated the tx fees from sim response fees
@@ -89,7 +89,7 @@ describe("assembleTransaction", () => {
 
       // validate it udpated sorobantransactiondata block in the tx ext
       expect(result.toEnvelope().v1().tx().ext().sorobanData()).to.deep.equal(
-        sorobanTransactionData
+        sorobanTransactionData,
       );
     });
 
@@ -98,7 +98,7 @@ describe("assembleTransaction", () => {
       const result = SorobanClient.assembleTransaction(
         txn,
         networkPassphrase,
-        simulationResponse
+        simulationResponse,
       ).build();
 
       expect(
@@ -114,7 +114,7 @@ describe("assembleTransaction", () => {
           .function()
           .contractFn()
           .functionName()
-          .toString()
+          .toString(),
       ).to.equal("fn");
 
       expect(
@@ -131,8 +131,8 @@ describe("assembleTransaction", () => {
             .address()
             .address()
             .accountId()
-            .ed25519()
-        )
+            .ed25519(),
+        ),
       ).to.equal("GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI");
     });
 
@@ -143,7 +143,7 @@ describe("assembleTransaction", () => {
       const result = SorobanClient.assembleTransaction(
         txn,
         networkPassphrase,
-        simulateResp
+        simulateResp,
       ).build();
 
       expect(
@@ -154,7 +154,7 @@ describe("assembleTransaction", () => {
           .operations()[0]
           .body()
           .invokeHostFunctionOp()
-          .auth()
+          .auth(),
       ).to.have.length(0);
     });
 
@@ -167,7 +167,7 @@ describe("assembleTransaction", () => {
         .addOperation(
           SorobanClient.Operation.changeTrust({
             asset: SorobanClient.Asset.native(),
-          })
+          }),
         )
         .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
@@ -206,7 +206,7 @@ describe("assembleTransaction", () => {
         const tx = SorobanClient.assembleTransaction(
           txn,
           networkPassphrase,
-          simulationResponse
+          simulationResponse,
         ).build();
         expect(tx.operations[0].type).to.equal(op.body().switch().name);
       });
@@ -217,12 +217,12 @@ describe("assembleTransaction", () => {
       const tx = SorobanClient.assembleTransaction(
         txn,
         networkPassphrase,
-        simulationResponse
+        simulationResponse,
       ).build();
 
       expect(tx.operations[0].auth.length).to.equal(
         3,
-        `auths aren't preserved after simulation: ${simulationResponse}, ${tx}`
+        `auths aren't preserved after simulation: ${simulationResponse}, ${tx}`,
       );
     });
   });

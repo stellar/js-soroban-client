@@ -4,7 +4,7 @@ describe("Server#simulateTransaction", function () {
   let keypair = SorobanClient.Keypair.random();
   let account = new SorobanClient.Account(
     keypair.publicKey(),
-    "56199647068161"
+    "56199647068161",
   );
 
   let contractId = "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM";
@@ -30,7 +30,7 @@ describe("Server#simulateTransaction", function () {
                 nonce: new xdr.Int64(1234),
                 signatureExpirationLedger: 1,
                 signatureArgs: [],
-              })
+              }),
             ),
             // Basic fake invocation
             rootInvocation: new xdr.SorobanAuthorizedInvocation({
@@ -40,7 +40,7 @@ describe("Server#simulateTransaction", function () {
                     contractAddress: address,
                     functionName: "test",
                     args: [],
-                  })
+                  }),
                 ),
               subInvocations: [],
             }),
@@ -61,11 +61,11 @@ describe("Server#simulateTransaction", function () {
     latestLedger: simulationResponse.latestLedger,
     minResourceFee: simulationResponse.minResourceFee,
     transactionData: new SorobanClient.SorobanDataBuilder(
-      simulationResponse.transactionData
+      simulationResponse.transactionData,
     ),
     result: {
       auth: simulationResponse.results[0].auth.map((entry) =>
-        xdr.SorobanAuthorizationEntry.fromXDR(entry, "base64")
+        xdr.SorobanAuthorizationEntry.fromXDR(entry, "base64"),
       ),
       retval: xdr.ScVal.fromXDR(simulationResponse.results[0].xdr, "base64"),
     },
@@ -77,7 +77,7 @@ describe("Server#simulateTransaction", function () {
     this.axiosMock = sinon.mock(AxiosClient);
     const source = new SorobanClient.Account(
       "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI",
-      "1"
+      "1",
     );
     function emptyContractTransaction() {
       return new SorobanClient.TransactionBuilder(source, {
@@ -89,7 +89,7 @@ describe("Server#simulateTransaction", function () {
           SorobanClient.Operation.invokeHostFunction({
             func: new xdr.HostFunction.hostFunctionTypeInvokeContract([]),
             auth: [],
-          })
+          }),
         )
         .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
@@ -118,7 +118,7 @@ describe("Server#simulateTransaction", function () {
         params: [this.blob],
       })
       .returns(
-        Promise.resolve({ data: { id: 1, result: simulationResponse } })
+        Promise.resolve({ data: { id: 1, result: simulationResponse } }),
       );
 
     this.server
@@ -171,11 +171,11 @@ function cloneSimulation(sim) {
     latestLedger: sim.latestLedger,
     minResourceFee: sim.minResourceFee,
     transactionData: new SorobanClient.SorobanDataBuilder(
-      sim.transactionData.build()
+      sim.transactionData.build(),
     ),
     result: {
       auth: sim.result.auth.map((entry) =>
-        xdr.SorobanAuthorizationEntry.fromXDR(entry.toXDR())
+        xdr.SorobanAuthorizationEntry.fromXDR(entry.toXDR()),
       ),
       retval: xdr.ScVal.fromXDR(sim.result.retval.toXDR()),
     },
