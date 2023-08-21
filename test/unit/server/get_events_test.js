@@ -20,7 +20,7 @@ describe("Server#getEvents", function () {
         pagination: {},
         startLedger: "1",
       },
-      result,
+      result
     );
 
     this.server
@@ -48,7 +48,7 @@ describe("Server#getEvents", function () {
         ],
         pagination: {},
       },
-      result,
+      result
     );
 
     this.server
@@ -70,7 +70,7 @@ describe("Server#getEvents", function () {
   it("can build matching filters", function (done) {
     let result = filterEvents(
       getEventsResponseFixture,
-      "AAAABQAAAAh0cmFuc2Zlcg==/AAAAAQB6Mcc=",
+      "AAAABQAAAAh0cmFuc2Zlcg==/AAAAAQB6Mcc="
     );
 
     setupMock(
@@ -84,7 +84,7 @@ describe("Server#getEvents", function () {
         ],
         pagination: {},
       },
-      result,
+      result
     );
 
     this.server
@@ -106,7 +106,7 @@ describe("Server#getEvents", function () {
   it("can build mixed filters", function (done) {
     let result = filterEventsByLedger(
       filterEvents(getEventsResponseFixture, "AAAABQAAAAh0cmFuc2Zlcg==/*"),
-      1,
+      1
     );
 
     setupMock(
@@ -120,7 +120,7 @@ describe("Server#getEvents", function () {
         ],
         pagination: {},
       },
-      result,
+      result
     );
 
     this.server
@@ -142,7 +142,7 @@ describe("Server#getEvents", function () {
   it("can paginate", function (done) {
     let result = filterEventsByLedger(
       filterEvents(getEventsResponseFixture, "*/*"),
-      1,
+      1
     );
 
     setupMock(
@@ -158,7 +158,7 @@ describe("Server#getEvents", function () {
           cursor: "0164090849041387521-0000000000",
         },
       },
-      result,
+      result
     );
 
     this.server
@@ -183,7 +183,7 @@ function filterEvents(events, filter) {
   return events.filter(
     (e, i) =>
       e.topic.length == filter.length &&
-      e.topic.every((s, j) => s === filter[j] || s === "*"),
+      e.topic.every((s, j) => s === filter[j] || s === "*")
   );
 }
 

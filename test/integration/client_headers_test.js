@@ -14,7 +14,7 @@ describe("integration tests: client headers", function (done) {
     const requestHandler = (request, response) => {
       expect(request.headers["x-client-name"]).to.be.equal("js-soroban-client");
       expect(request.headers["x-client-version"]).to.match(
-        /^[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+(\.[0-9])?)?$/,
+        /^[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+(\.[0-9])?)?$/
       );
       response.end();
       server.close(() => done());

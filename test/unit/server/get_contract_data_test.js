@@ -40,7 +40,7 @@ describe("Server#getContractData", function () {
                 key,
                 durability: xdr.ContractDataDurability.persistent(),
                 bodyType: xdr.ContractEntryBodyType.dataEntry(),
-              }),
+              })
             ).toXDR("base64"),
           ],
         ],
@@ -52,7 +52,7 @@ describe("Server#getContractData", function () {
               entries: [result],
             },
           },
-        }),
+        })
       );
 
     this.server
@@ -83,7 +83,7 @@ describe("Server#getContractData", function () {
                 key,
                 durability: xdr.ContractDataDurability.temporary(),
                 bodyType: xdr.ContractEntryBodyType.dataEntry(),
-              }),
+              })
             ).toXDR("base64"),
           ],
         ],
@@ -99,7 +99,7 @@ describe("Server#getContractData", function () {
         done(
           err.code == 404
             ? null
-            : new Error("Expected error code 404, got: " + err.code),
+            : new Error("Expected error code 404, got: " + err.code)
         );
       });
   });

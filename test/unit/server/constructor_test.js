@@ -15,13 +15,13 @@ describe("Server.constructor", function () {
 
   it("throws error for insecure server", function () {
     expect(() => new SorobanClient.Server(insecureServerUrl)).to.throw(
-      /Cannot connect to insecure soroban-rpc server/,
+      /Cannot connect to insecure soroban-rpc server/
     );
   });
 
   it("allow insecure server when opts.allowHttp flag is set", function () {
     expect(
-      () => new SorobanClient.Server(insecureServerUrl, { allowHttp: true }),
+      () => new SorobanClient.Server(insecureServerUrl, { allowHttp: true })
     ).to.not.throw();
   });
 });

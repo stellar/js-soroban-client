@@ -16,7 +16,7 @@ describe("Server#getAccount", function () {
   it("requests the correct method", function (done) {
     const address = "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI";
     const accountId = xdr.PublicKey.publicKeyTypeEd25519(
-      StrKey.decodeEd25519PublicKey(address),
+      StrKey.decodeEd25519PublicKey(address)
     );
 
     this.axiosMock
@@ -30,7 +30,7 @@ describe("Server#getAccount", function () {
             xdr.LedgerKey.account(
               new xdr.LedgerKeyAccount({
                 accountId,
-              }),
+              })
             ).toXDR("base64"),
           ],
         ],
@@ -46,7 +46,7 @@ describe("Server#getAccount", function () {
               ],
             },
           },
-        }),
+        })
       );
 
     const expected = new Account(address, "1");
@@ -62,7 +62,7 @@ describe("Server#getAccount", function () {
   it("throws a useful error when the account is not found", function (done) {
     const address = "GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI";
     const accountId = xdr.PublicKey.publicKeyTypeEd25519(
-      StrKey.decodeEd25519PublicKey(address),
+      StrKey.decodeEd25519PublicKey(address)
     );
 
     this.axiosMock
@@ -76,7 +76,7 @@ describe("Server#getAccount", function () {
             xdr.LedgerKey.account(
               new xdr.LedgerKeyAccount({
                 accountId,
-              }),
+              })
             ).toXDR("base64"),
           ],
         ],
@@ -88,7 +88,7 @@ describe("Server#getAccount", function () {
               entries: null,
             },
           },
-        }),
+        })
       );
 
     this.server
@@ -100,7 +100,7 @@ describe("Server#getAccount", function () {
         done(
           err.message === `Account not found: ${address}`
             ? null
-            : new Error(`Received unexpected error: ${err.message}`),
+            : new Error(`Received unexpected error: ${err.message}`)
         );
       });
   });

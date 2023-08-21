@@ -12,7 +12,7 @@ describe("Server#getTransaction", function () {
   let keypair = Keypair.random();
   let account = new SorobanClient.Account(
     keypair.publicKey(),
-    "56199647068161",
+    "56199647068161"
   );
 
   beforeEach(function () {
@@ -29,7 +29,7 @@ describe("Server#getTransaction", function () {
             "GASOCNHNNLYFNMDJYQ3XFMI7BYHIOCFW3GJEOWRPEGK2TDPGTG2E5EDW",
           asset: SorobanClient.Asset.native(),
           amount: "100.50",
-        }),
+        })
       )
       .setTimeout(SorobanClient.TimeoutInfinite)
       .build();
@@ -128,7 +128,7 @@ function makeTxResult(status, addSoroban = true) {
         diagnosticEvents: [],
         returnValue: nativeToScVal(1234),
       }),
-    }),
+    })
   );
 
   // only injected in the success case

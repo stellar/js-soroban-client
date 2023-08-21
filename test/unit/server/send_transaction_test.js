@@ -2,7 +2,7 @@ describe("Server#sendTransaction", function () {
   let keypair = SorobanClient.Keypair.random();
   let account = new SorobanClient.Account(
     keypair.publicKey(),
-    "56199647068161",
+    "56199647068161"
   );
 
   beforeEach(function () {
@@ -19,7 +19,7 @@ describe("Server#sendTransaction", function () {
             "GASOCNHNNLYFNMDJYQ3XFMI7BYHIOCFW3GJEOWRPEGK2TDPGTG2E5EDW",
           asset: SorobanClient.Asset.native(),
           amount: "100.50",
-        }),
+        })
       )
       .setTimeout(SorobanClient.TimeoutInfinite)
       .build();
@@ -47,7 +47,7 @@ describe("Server#sendTransaction", function () {
       .returns(
         Promise.resolve({
           data: { id: 1, result: { id: this.hash, status: "PENDING" } },
-        }),
+        })
       );
 
     this.server
