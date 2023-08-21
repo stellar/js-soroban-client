@@ -32,8 +32,8 @@ export interface GetEventsRequest {
  * Specifies the durability namespace of contract-related ledger entries.
  */
 export enum Durability {
-  Temporary = 'temporary',
-  Persistent = 'persistent',
+  Temporary = "temporary",
+  Persistent = "persistent",
 }
 
 /**
@@ -182,7 +182,7 @@ export class Server {
   ): Promise<SorobanRpc.LedgerEntryResult> {
     // coalesce `contract` param variants to an ScAddress
     let scAddress: xdr.ScAddress;
-    if (typeof contract === 'string') {
+    if (typeof contract === "string") {
       scAddress = new Contract(contract).address().toScAddress();
     } else if (contract instanceof Address) {
       scAddress = contract.toScAddress();
@@ -211,24 +211,30 @@ export class Server {
         contract: scAddress,
         key,
         durability: xdrDurability,
-        bodyType: xdr.ContractEntryBodyType.dataEntry()   // expirationExtension is internal
-      })
+        bodyType: xdr.ContractEntryBodyType.dataEntry(), // expirationExtension is internal
+      }),
     ).toXDR("base64");
 
-    return jsonrpc.post<SorobanRpc.GetLedgerEntriesResponse>(
-      this.serverURL.toString(),
-      "getLedgerEntries",
-      [contractKey],
-    ).then(response => {
+    return jsonrpc
+      .post<SorobanRpc.GetLedgerEntriesResponse>(
+        this.serverURL.toString(),
+        "getLedgerEntries",
+        [contractKey],
+      )
+      .then((response) => {
         const ledgerEntries = response.entries ?? [];
-      if (ledgerEntries.length !== 1) {
-        return Promise.reject({
-          code: 404,
-          message: `Contract data not found. Contract: ${Address.fromScAddress(scAddress).toString()}, Key: ${key.toXDR("base64")}, Durability: ${durability}`,
-        });
-      }
-      return ledgerEntries[0];
-    });
+        if (ledgerEntries.length !== 1) {
+          return Promise.reject({
+            code: 404,
+            message: `Contract data not found. Contract: ${Address.fromScAddress(
+              scAddress,
+            ).toString()}, Key: ${key.toXDR(
+              "base64",
+            )}, Durability: ${durability}`,
+          });
+        }
+        return ledgerEntries[0];
+      });
   }
 
   /**
@@ -295,38 +301,47 @@ export class Server {
   public async getTransaction(
     hash: string,
   ): Promise<SorobanRpc.GetTransactionResponse> {
-    return await jsonrpc.post<SorobanRpc.RawGetTransactionResponse>(
+    const raw = await jsonrpc.post<SorobanRpc.RawGetTransactionResponse>(
       this.serverURL.toString(),
       "getTransaction",
       hash,
-    ).then(raw => {
-      let successInfo: any = {};
+    );
 
-      if (raw.status === 'SUCCESS') {
-        const meta = xdr.TransactionMeta.fromXDR(raw.resultMetaXdr!, 'base64');
-        successInfo = {
-          ledger: raw.ledger,
-          createdAt: raw.createdAt,
-          applicationOrder: raw.applicationOrder,
-          feeBump: raw.feeBump,
-          envelopeXdr: xdr.TransactionEnvelope.fromXDR(raw.envelopeXdr!, 'base64'),
-          resultXdr: xdr.TransactionResult.fromXDR(raw.resultXdr!, 'base64'),
-          resultMetaXdr: meta,
-          ...(meta.switch() === 3 && meta.v3().sorobanMeta() !== null && {
-            returnValue: meta.v3().sorobanMeta()?.returnValue()
+    let successInfo: Omit<
+      SorobanRpc.GetSuccessfulTransactionResponse,
+      keyof SorobanRpc.GetFailedTransactionResponse
+    > = {} as any;
+
+    if (raw.status === SorobanRpc.GetTransactionStatus.SUCCESS) {
+      const meta = xdr.TransactionMeta.fromXDR(raw.resultMetaXdr!, "base64");
+      successInfo = {
+        ledger: raw.ledger!,
+        createdAt: raw.createdAt!,
+        applicationOrder: raw.applicationOrder!,
+        feeBump: raw.feeBump!,
+        envelopeXdr: xdr.TransactionEnvelope.fromXDR(
+          raw.envelopeXdr!,
+          "base64",
+        ),
+        resultXdr: xdr.TransactionResult.fromXDR(raw.resultXdr!, "base64"),
+        resultMetaXdr: meta,
+        ...(meta.switch() === 3 &&
+          meta.v3().sorobanMeta() !== null && {
+            returnValue: meta.v3().sorobanMeta()?.returnValue(),
           }),
-        };
-      }
-
-      return {
-        status: raw.status,
-        latestLedger: raw.latestLedger,
-        latestLedgerCloseTime: raw.latestLedgerCloseTime,
-        oldestLedger: raw.oldestLedger,
-        oldestLedgerCloseTime: raw.oldestLedgerCloseTime,
-        ...successInfo,
       };
-    });
+    }
+
+    const result: SorobanRpc.GetTransactionResponse = {
+      status: raw.status,
+      latestLedger: raw.latestLedger,
+      latestLedgerCloseTime: raw.latestLedgerCloseTime,
+      oldestLedger: raw.oldestLedger,
+      oldestLedgerCloseTime: raw.oldestLedgerCloseTime,
+      ...successInfo,
+    };
+
+    return result;
   }
 
   /**
@@ -475,11 +490,13 @@ export class Server {
   public async simulateTransaction(
     transaction: Transaction | FeeBumpTransaction,
   ): Promise<SorobanRpc.SimulateTransactionResponse> {
-    return await jsonrpc.post<SorobanRpc.RawSimulateTransactionResponse>(
-      this.serverURL.toString(),
-      "simulateTransaction",
-      transaction.toXDR(),
-    ).then((raw) => parseRawSimulation(raw));
+    return await jsonrpc
+      .post<SorobanRpc.RawSimulateTransactionResponse>(
+        this.serverURL.toString(),
+        "simulateTransaction",
+        transaction.toXDR(),
+      )
+      .then((raw) => parseRawSimulation(raw));
   }
 
   /**
