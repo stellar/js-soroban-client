@@ -10,7 +10,6 @@ A breaking change should be clearly marked in this log.
 
 ## v0.11.0
 
-
 ### Fixed
 * The `SimulateTransactionResponse`'s error field now has the correct type (that is, `string`: [#123](https://github.com/stellar/js-soroban-client/pull/123)).
 * Many irrelevant or unused dependencies have been eliminated (such as `eventsource`, `lodash`, and others), lowering overall bundle size ([#126](https://github.com/stellar/js-soroban-client/pull/126)).
@@ -28,8 +27,10 @@ A breaking change should be clearly marked in this log.
   - `SimulateHostFunctionResult` -> `RawSimulateHostFunctionResult`
   - Now, `SimulateTransactionResponse` and `SimulateHostFunctionResult` include the full, decoded XDR structures instead of raw, base64-encoded strings for the relevant fields (e.g. `SimulateTransactionResponse.transactionData` is now an instance of `SorobanDataBuilder`, `events` is now an `xdr.DiagnosticEvent[]` [try out `humanizeEvents` for a friendlier representation of this field]).
   - The `SimulateTransactionResponse.results[]` field has been moved to `SimulateTransactionResponse.result?`, since there will always be exactly zero or one result.
+* The `GetTransactionStatus` is now an `enum` with actual values rather than a `type` ([#129](https://github.com/stellar/js-soroban-client/pull/129)).
 * The RPC response schemas for retrieving transaction details (`Server.getTransaction()`) have been upgraded to parse the base64-encoded XDR automatically. The full interface changes are in the pull request ([#129](https://github.com/stellar/js-soroban-client/pull/129)), but succinctly:
   - `GetTransactionResponse` -> `RawGetTransactionResponse`
+  - `GetTransactionResponse` is now one of `GetSuccessfulTransactionResponse | GetFailedTransactionResponse | GetMissingTransactionResponse`, which gives proper typing to the interface depending on the response's `status` field.
   - All of the `*Xdr` properties are now full, decoded XDR structures.
   - There is a new `returnValue` field which is a decoded `xdr.ScVal`, present iff the transaction was a successful Soroban function invocation.
 
