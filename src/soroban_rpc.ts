@@ -54,9 +54,48 @@ export namespace SorobanRpc {
     protocolVersion: string;
   }
 
-  export type GetTransactionStatus = "SUCCESS" | "NOT_FOUND" | "FAILED";
+  export enum GetTransactionStatus {
+    SUCCESS = "SUCCESS",
+    NOT_FOUND = "NOT_FOUND",
+    FAILED = "FAILED"
+  }
 
-  export interface GetTransactionResponse {
+  export type GetTransactionResponse =
+    | GetSuccessfulTransactionResponse
+    | GetFailedTransactionResponse
+    | GetMissingTransactionResponse;
+
+  interface GetAnyTransactionResponse {
+    status: GetTransactionStatus;
+    latestLedger: number;
+    latestLedgerCloseTime: number;
+    oldestLedger: number;
+    oldestLedgerCloseTime: number;
+  }
+
+  export interface GetMissingTransactionResponse extends GetAnyTransactionResponse {
+    status: GetTransactionStatus.NOT_FOUND;
+  }
+
+  export interface GetFailedTransactionResponse extends GetAnyTransactionResponse {
+    status: GetTransactionStatus.FAILED;
+  }
+
+  export interface GetSuccessfulTransactionResponse extends GetAnyTransactionResponse {
+    status: GetTransactionStatus.SUCCESS;
+
+    ledger: number;
+    createdAt: number;
+    applicationOrder: number;
+    feeBump: boolean;
+    envelopeXdr: xdr.TransactionEnvelope;
+    resultXdr: xdr.TransactionResult;
+    resultMetaXdr: xdr.TransactionMeta;
+
+    returnValue?: xdr.ScVal;  // present iff resultMeta is a v3
+  }
+
+  export interface RawGetTransactionResponse {
     status: GetTransactionStatus;
     latestLedger: number;
     latestLedgerCloseTime: number;
