@@ -19,7 +19,6 @@ A breaking change should be clearly marked in this log.
 
 ### Breaking Changes
 * The minimum supported NodeJS version is now Node 16.
-<<<<<<< HEAD
 * `Server.prepareTransaction` now returns a `TransactionBuilder` instance rather than an immutable `Transaction`, in order to facilitate modifying your transaction after assembling it alongside the simulation response ([#127](https://github.com/stellar/js-soroban-client/pull/127)).
   - The intent is to avoid cloning the transaction again (via `TransactionBuilder.cloneFrom`) if you need to modify parameters such as the storage access footprint.
   - To migrate your code, just call `.build()` on the return value.
