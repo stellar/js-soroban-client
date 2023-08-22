@@ -11,50 +11,6 @@ describe('Server#simulateTransaction', function () {
   let contract = new SorobanClient.Contract(contractId);
   let address = contract.address().toScAddress();
 
-  const simulationResponse = {
-    id: 1,
-    events: [],
-    latestLedger: 3,
-    minResourceFee: '15',
-    transactionData: new SorobanClient.SorobanDataBuilder()
-      .build()
-      .toXDR('base64'),
-    results: [
-      {
-        auth: [
-          new xdr.SorobanAuthorizationEntry({
-            // Include a credentials w/ a nonce
-            credentials: new xdr.SorobanCredentials.sorobanCredentialsAddress(
-              new xdr.SorobanAddressCredentials({
-                address: address,
-                nonce: new xdr.Int64(1234),
-                signatureExpirationLedger: 1,
-                signatureArgs: []
-              })
-            ),
-            // Basic fake invocation
-            rootInvocation: new xdr.SorobanAuthorizedInvocation({
-              function:
-                xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
-                  new xdr.SorobanAuthorizedContractFunction({
-                    contractAddress: address,
-                    functionName: 'test',
-                    args: []
-                  })
-                ),
-              subInvocations: []
-            })
-          }).toXDR('base64')
-        ],
-        xdr: xdr.ScVal.scvU32(0).toXDR('base64')
-      }
-    ],
-    cost: {
-      cpuInsns: '0',
-      memBytes: '0'
-    }
-  };
-
   const parsedSimulationResponse = {
     id: simulationResponse.id,
     events: simulationResponse.events,
@@ -180,5 +136,51 @@ function cloneSimulation(sim) {
       retval: xdr.ScVal.fromXDR(sim.result.retval.toXDR())
     },
     cost: sim.cost
+  };
+}
+
+function invokeSimulationResponse() {
+  return {
+    id: 1,
+    events: [],
+    latestLedger: 3,
+    minResourceFee: '15',
+    transactionData: new SorobanClient.SorobanDataBuilder()
+      .build()
+      .toXDR('base64'),
+    results: [
+      {
+        auth: [
+          new xdr.SorobanAuthorizationEntry({
+            // Include a credentials w/ a nonce
+            credentials: new xdr.SorobanCredentials.sorobanCredentialsAddress(
+              new xdr.SorobanAddressCredentials({
+                address: address,
+                nonce: new xdr.Int64(1234),
+                signatureExpirationLedger: 1,
+                signatureArgs: []
+              })
+            ),
+            // Basic fake invocation
+            rootInvocation: new xdr.SorobanAuthorizedInvocation({
+              function:
+                xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
+                  new xdr.SorobanAuthorizedContractFunction({
+                    contractAddress: address,
+                    functionName: 'test',
+                    args: []
+                  })
+                ),
+              subInvocations: []
+            })
+          }).toXDR('base64')
+        ],
+        xdr: xdr.ScVal.scvU32(0).toXDR('base64')
+      }
+    ],
+    cost: {
+      cpuInsns: '0',
+      memBytes: '0'
+    }
   };
 }

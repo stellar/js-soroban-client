@@ -162,16 +162,71 @@ export namespace SorobanRpc {
     retval: xdr.ScVal;
   }
 
-  export interface SimulateTransactionResponse {
+  /**
+   * Simplifies {@link RawSimulateTransactionResponse} into separate interfaces
+   * based on status:
+   *   - on success, this includes all fields, though `result` is only present
+   *     if an invocation was simulated (since otherwise there's nothing to
+   *     "resultify")
+   *   - if there was an expiration error, this includes error and restoration
+   *     fields
+   *   - for all other errors, this only includes error fields
+   *
+   * @see https://soroban.stellar.org/api/methods/simulateTransaction#returns
+   */
+  export type SimulateTransactionResponse =
+    | SimulateTransactionSuccessResponse
+    | SimulateTransactionErrorResponse;
+
+  interface BaseSimulateTransactionResponse {
+    /** always present: the JSON-RPC request ID */
     id: string;
-    error?: string;
-    transactionData: SorobanDataBuilder;
-    events: xdr.DiagnosticEvent[];
-    minResourceFee: string;
-    // only present if error isn't
-    result?: SimulateHostFunctionResult;
+
+    /** always present: the LCL known to the server when responding */
     latestLedger: number;
+  }
+
+  /** Includes simplified fields only present on success. */
+  export interface SimulateTransactionSuccessResponse
+    extends BaseSimulateTransactionResponse {
+    transactionData: SorobanDataBuilder;
+    minResourceFee: string;
     cost: Cost;
+
+    /** empty in non-invocation, no-event, or non-diagnostic RPC server cases */
+    events: xdr.DiagnosticEvent[];
+
+    /** present only for invocation simulation */
+    result?: SimulateHostFunctionResult;
+
+    /**
+     * Indicates that a restoration is necessary prior to submission.
+     *
+     * In other words, seeing a restoration preamble means that your invocation
+     * was executed AS IF the required ledger entries were present, and this
+     * field includes information about what you need to restore for the
+     * simulation to succeed.
+     */
+    restore?: {
+      minResourceFee: string;
+      transactionData: SorobanDataBuilder;
+    }
+  }
+
+  /** Includes details about why the simulation failed */
+  export interface SimulateTransactionErrorResponse
+    extends BaseSimulateTransactionResponse {
+    error: string;
+  }
+
+  export function isSimulationError(sim: SimulateTransactionResponse):
+    sim is SimulateTransactionErrorResponse {
+    return 'error' in sim;
+  }
+
+  export function isSimulationSuccess(sim: SimulateTransactionResponse):
+    sim is SimulateTransactionSuccessResponse {
+    return 'transactionData' in sim;
   }
 
   export interface RawSimulateHostFunctionResult {
@@ -181,17 +236,24 @@ export namespace SorobanRpc {
     xdr: string;
   }
 
+  /** @see https://soroban.stellar.org/api/methods/simulateTransaction#returns */
   export interface RawSimulateTransactionResponse {
     id: string;
+    latestLedger: number;
     error?: string;
-    // this is SorobanTransactionData XDR in base64
-    transactionData: string;
-    events: string[];
-    minResourceFee: string;
-    // This will only contain a single element, because only a single
+    // this is an xdr.SorobanTransactionData in base64
+    transactionData?: string;
+    // these are xdr.DiagnosticEvents in base64
+    events?: string[];
+    minResourceFee?: string;
+    // This will only contain a single element if present, because only a single
     // invokeHostFunctionOperation is supported per transaction.
     results?: RawSimulateHostFunctionResult[];
-    latestLedger: number;
-    cost: Cost;
+    cost?: Cost;
+    // present if succeeded but has expired ledger entries
+    restorePreamble?: {
+      minResourceFee: string;
+      transactionData: string;
+    }
   }
 }
