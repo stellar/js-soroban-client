@@ -6511,9 +6511,9 @@ statuses@~1.5.0:
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.5.0.tgz#161c7dac177659fd9811f43771fa99381478628c"
   integrity sha512-OpZ3zP+jT1PI7I8nemJX4AKmAX070ZkYPVWV/AaKTJl+tXCTGyVdC1a4SL8RUQYEwk/f34ZX8UTykN68FwrqAA==
 
-"stellar-base@git+https://github.com/stellar/js-stellar-base#a04bd64d6354413fcdfa63d1b52fbc20c152957f":
+"stellar-base@git+https://github.com/stellar/js-stellar-base#0c89490":
   version "10.0.0-soroban.6"
-  resolved "git+https://github.com/stellar/js-stellar-base#a04bd64d6354413fcdfa63d1b52fbc20c152957f"
+  resolved "git+https://github.com/stellar/js-stellar-base#0c89490ab353b68eeb977e2da3391b328fdd2dee"
   dependencies:
     base32.js "^0.1.0"
     bignumber.js "^9.1.1"
