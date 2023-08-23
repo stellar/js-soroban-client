@@ -138,21 +138,21 @@ export function parseRawSimulation(
   let base = {
     id: sim.id,
     latestLedger: sim.latestLedger,
+    events: sim.events?.map(
+      evt => xdr.DiagnosticEvent.fromXDR(evt, 'base64')
+    ) ?? [],
   };
 
   return (typeof sim.error === 'string')
     ? {
       ...base,
-      error: sim.error
+      error: sim.error,
     }
     : {
       ...base,
       transactionData: new SorobanDataBuilder(sim.transactionData!),
       minResourceFee: sim.minResourceFee!,
       cost: sim.cost!,
-      events: sim.events?.map(
-        evt => xdr.DiagnosticEvent.fromXDR(evt, 'base64')
-      ) ?? [],
       ...(
         (sim.results ?? []).length > 0 &&
         {

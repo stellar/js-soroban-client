@@ -11,6 +11,8 @@ describe('Server#simulateTransaction', function () {
   let contract = new SorobanClient.Contract(contractId);
   let address = contract.address().toScAddress();
 
+  const simulationResponse = invokeSimulationResponse(address);
+
   const parsedSimulationResponse = {
     id: simulationResponse.id,
     events: simulationResponse.events,
@@ -139,7 +141,7 @@ function cloneSimulation(sim) {
   };
 }
 
-function invokeSimulationResponse() {
+function invokeSimulationResponse(address) {
   return {
     id: 1,
     events: [],
@@ -155,7 +157,7 @@ function invokeSimulationResponse() {
             // Include a credentials w/ a nonce
             credentials: new xdr.SorobanCredentials.sorobanCredentialsAddress(
               new xdr.SorobanAddressCredentials({
-                address: address,
+                address,
                 nonce: new xdr.Int64(1234),
                 signatureExpirationLedger: 1,
                 signatureArgs: []

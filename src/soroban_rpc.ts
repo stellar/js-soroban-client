@@ -184,6 +184,14 @@ export namespace SorobanRpc {
 
     /** always present: the LCL known to the server when responding */
     latestLedger: number;
+
+    /**
+     * The field is always present, but may be empty in cases where:
+     *   - you didn't simulate an invocation,
+     *   - there were no events, or
+     *   - you are communicating with an RPC server w/o diagnostic events on
+     */
+    events: xdr.DiagnosticEvent[];
   }
 
   /** Includes simplified fields only present on success. */
@@ -192,9 +200,6 @@ export namespace SorobanRpc {
     transactionData: SorobanDataBuilder;
     minResourceFee: string;
     cost: Cost;
-
-    /** empty in non-invocation, no-event, or non-diagnostic RPC server cases */
-    events: xdr.DiagnosticEvent[];
 
     /** present only for invocation simulation */
     result?: SimulateHostFunctionResult;
@@ -217,6 +222,7 @@ export namespace SorobanRpc {
   export interface SimulateTransactionErrorResponse
     extends BaseSimulateTransactionResponse {
     error: string;
+    events: xdr.DiagnosticEvent[];
   }
 
   export function isSimulationError(sim: SimulateTransactionResponse):
