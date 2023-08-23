@@ -168,7 +168,7 @@ export function parseRawSimulation(
       ...(
         sim.restorePreamble !== undefined &&
         {
-          restore: {
+          restorePreamble: {
             minResourceFee: sim.restorePreamble!.minResourceFee,
             transactionData: new SorobanDataBuilder(
               sim.restorePreamble!.transactionData
@@ -191,7 +191,7 @@ function isSimulationRaw(
   return (
     asRaw.restorePreamble !== undefined ||
     !(
-      asGud.restore !== undefined ||
+      asGud.restorePreamble !== undefined ||
       asGud.result !== undefined ||
       typeof asGud.transactionData !== 'string'
     ) ||

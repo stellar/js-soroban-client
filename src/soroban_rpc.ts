@@ -212,7 +212,7 @@ export namespace SorobanRpc {
      * field includes information about what you need to restore for the
      * simulation to succeed.
      */
-    restore?: {
+    restorePreamble?: {
       minResourceFee: string;
       transactionData: SorobanDataBuilder;
     }
