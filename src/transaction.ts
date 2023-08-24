@@ -134,14 +134,15 @@ export function parseRawSimulation(
     // Gordon Ramsey in shambles
     return sim;
   }
-
   return {
     id: sim.id,
     minResourceFee: sim.minResourceFee,
     latestLedger: sim.latestLedger,
     cost: sim.cost,
-    transactionData: new SorobanDataBuilder(sim.transactionData),
-    events: sim.events.map((event) =>
+    transactionData: new SorobanDataBuilder(
+      sim.transactionData === "" ? undefined : sim.transactionData
+    ),
+    events: (sim.events ?? []).map((event) =>
       xdr.DiagnosticEvent.fromXDR(event, "base64")
     ),
     ...(sim.error !== undefined && { error: sim.error }), // only if present
