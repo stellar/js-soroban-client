@@ -141,7 +141,49 @@ function cloneSimulation(sim) {
   };
 }
 
+function buildAuthEntry(address) {
+  return new xdr.SorobanAuthorizationEntry({
+    // Include a credentials w/ a nonce
+    credentials: new xdr.SorobanCredentials.sorobanCredentialsAddress(
+      new xdr.SorobanAddressCredentials({
+        address,
+        nonce: new xdr.Int64(1234),
+        signatureExpirationLedger: 1,
+        signatureArgs: []
+      })
+    ),
+    // Basic fake invocation
+    rootInvocation: new xdr.SorobanAuthorizedInvocation({
+      function:
+        xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
+          new xdr.SorobanAuthorizedContractFunction({
+            contractAddress: address,
+            functionName: 'test',
+            args: []
+          })
+        ),
+      subInvocations: []
+    })
+  });
+}
+
 function invokeSimulationResponse(address) {
+  return baseSimulationResponse([{
+    auth: [buildAuthEntry(address)].map((entry) => entry.toXDR('base64')),
+    xdr: xdr.ScVal.scvU32(0).toXDR('base64')
+  }]);
+}
+
+function invokeSimulationResponseError(events) {
+  return {
+    id: 1,
+    ...(events !== undefined && { events }),
+    latestLedger: 3,
+    error: 'This is an error'
+  };
+}
+
+function baseSimulationResponse(results) {
   return {
     id: 1,
     events: [],
@@ -150,39 +192,22 @@ function invokeSimulationResponse(address) {
     transactionData: new SorobanClient.SorobanDataBuilder()
       .build()
       .toXDR('base64'),
-    results: [
-      {
-        auth: [
-          new xdr.SorobanAuthorizationEntry({
-            // Include a credentials w/ a nonce
-            credentials: new xdr.SorobanCredentials.sorobanCredentialsAddress(
-              new xdr.SorobanAddressCredentials({
-                address,
-                nonce: new xdr.Int64(1234),
-                signatureExpirationLedger: 1,
-                signatureArgs: []
-              })
-            ),
-            // Basic fake invocation
-            rootInvocation: new xdr.SorobanAuthorizedInvocation({
-              function:
-                xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
-                  new xdr.SorobanAuthorizedContractFunction({
-                    contractAddress: address,
-                    functionName: 'test',
-                    args: []
-                  })
-                ),
-              subInvocations: []
-            })
-          }).toXDR('base64')
-        ],
-        xdr: xdr.ScVal.scvU32(0).toXDR('base64')
-      }
-    ],
+    ...(results !== undefined && { results }),
     cost: {
-      cpuInsns: '0',
-      memBytes: '0'
+      cpuInsns: '1',
+      memBytes: '2'
+    }
+  };
+}
+
+function invokeSimulationResponseWithRestoration() {
+  return {
+    ...invokeSimulationResponse(),
+    restorePreamble: {
+      minResourceFee: '51',
+      transactionData: new SorobanClient.SorobanDataBuilder()
+        .build()
+        .toXDR('base64')
     }
   };
 }
