@@ -8,6 +8,12 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v0.11.1
+
+### Fixed
+* This adds sensible defaults `Server.simulateTransaction`'s response when the RPC server omits certain fields in an unexpected way ([#131](https://github.com/stellar/js-soroban-client/pull/131)).
+
+
 ## v0.11.0
 
 ### Fixed
