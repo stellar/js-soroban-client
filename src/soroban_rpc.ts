@@ -190,6 +190,8 @@ export namespace SorobanRpc {
      *   - you didn't simulate an invocation,
      *   - there were no events, or
      *   - you are communicating with an RPC server w/o diagnostic events on
+     *
+     * @see {@link humanizeEvents}
      */
     events: xdr.DiagnosticEvent[];
   }
