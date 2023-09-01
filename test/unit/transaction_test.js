@@ -14,7 +14,7 @@ describe('assembleTransaction', () => {
         address: scAddress,
         nonce: new xdr.Int64(0),
         signatureExpirationLedger: 1,
-        signature: xdr.ScVal.scvVoid(),
+        signature: xdr.ScVal.scvVoid()
       })
     ),
     // And a basic invocation
@@ -68,8 +68,8 @@ describe('assembleTransaction', () => {
             func: xdr.HostFunction.hostFunctionTypeInvokeContract(
               new xdr.InvokeContractArgs({
                 contractAddress: scAddress,
-                functionName: "hello",
-                args: [xdr.ScVal.scvString("hello")],
+                functionName: 'hello',
+                args: [xdr.ScVal.scvString('hello')]
               })
             ),
             auth: auth ?? []
