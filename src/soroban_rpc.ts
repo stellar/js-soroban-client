@@ -25,10 +25,11 @@ export namespace SorobanRpc {
   }
 
   export interface LedgerEntryResult {
-    key: string;
-    // xdr is a base-64 encoded {@link xdr.LedgerEntryData}
-    xdr: string;
     lastModifiedLedgerSeq?: number;
+    /** a base-64 encoded {@link xdr.LedgerKey} instance */
+    key: string;
+    /** a base-64 encoded {@link xdr.LedgerEntryData} instance */
+    xdr: string;
   }
 
   /* Response for jsonrpc method `getLedgerEntries`
@@ -121,7 +122,8 @@ export namespace SorobanRpc {
   }
 
   export interface GetEventsResponse {
-    events?: EventResponse[];
+    latestLedger: number;
+    events: EventResponse[];
   }
 
   export interface EventResponse {
