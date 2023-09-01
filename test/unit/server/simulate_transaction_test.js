@@ -1,3 +1,5 @@
+const { SorobanDataBuilder } = require("stellar-base");
+
 const xdr = SorobanClient.xdr; // shorthand
 
 describe('Server#simulateTransaction', function () {
@@ -38,14 +40,17 @@ describe('Server#simulateTransaction', function () {
       '1'
     );
     function emptyContractTransaction() {
-      return new SorobanClient.TransactionBuilder(source, {
-        fee: 100,
-        networkPassphrase: 'Test',
-        v1: true
-      })
+      return new SorobanClient.TransactionBuilder(source, { fee: 100 })
+        .setNetworkPassphrase('Test')
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
-            func: new xdr.HostFunction.hostFunctionTypeInvokeContract([]),
+            func: new xdr.HostFunction.hostFunctionTypeInvokeContract(
+              new xdr.InvokeContractArgs({
+                contractAddress: address,
+                functionName: 'hello',
+                args: []
+              })
+            ),
             auth: []
           })
         )
@@ -91,31 +96,41 @@ describe('Server#simulateTransaction', function () {
   });
 
   it('works when there are no results', function () {
-    const simResponseCopy = JSON.parse(JSON.stringify(simulationResponse));
-    delete simResponseCopy.results;
-
+    const simResponse = baseSimulationResponse();
     const parsedCopy = cloneSimulation(parsedSimulationResponse);
     delete parsedCopy.result;
 
-    const parsed = SorobanClient.parseRawSimulation(simResponseCopy);
+    const parsed = SorobanClient.parseRawSimulation(simResponse);
     expect(parsed).to.deep.equal(parsedCopy);
   });
 
   it('works with no auth', function () {
-    const simResponseCopy = JSON.parse(JSON.stringify(simulationResponse));
-    delete simResponseCopy.results[0].auth;
+    const simResponse = invokeSimulationResponse();
+    delete simResponse.results[0].auth;
 
     const parsedCopy = cloneSimulation(parsedSimulationResponse);
     parsedCopy.result.auth = [];
-    const parsed = SorobanClient.parseRawSimulation(simResponseCopy);
+    const parsed = SorobanClient.parseRawSimulation(simResponse);
 
     // FIXME: This is a workaround for an xdrgen bug that does not allow you to
-    // build "perfectly-equal" xdr.ExtensionPoint instances (but they will still
-    // be binary-equal, so the test passes), but it should be fixed once we
-    // upgrade the XDR to the final testnet version.
+    // build "perfectly-equal" xdr.ExtensionPoint instances (but they're still
+    // binary-equal, so the test passes).
     parsedCopy.transactionData = parsedCopy.transactionData.build();
     parsed.transactionData = parsed.transactionData.build();
 
+    expect(parsed).to.be.deep.equal(parsedCopy);
+  });
+
+  it('works with restoration', function() {
+    const simResponse = invokeSimulationResponseWithRestoration();
+
+    const parsedCopy = cloneSimulation(parsedSimulationResponse);
+    parsedCopy.restorePreamble = {
+      minResourceFee: '51',
+      transactionData: new SorobanDataBuilder(),
+    };
+
+    const parsed = SorobanClient.parseRawSimulation(simResponse);
     expect(parsed).to.be.deep.equal(parsedCopy);
   });
 
@@ -142,21 +157,25 @@ function cloneSimulation(sim) {
 }
 
 function buildAuthEntry(address) {
+  if (!address) {
+    throw new Error('where address?');
+  }
+
   return new xdr.SorobanAuthorizationEntry({
     // Include a credentials w/ a nonce
-    credentials: new xdr.SorobanCredentials.sorobanCredentialsAddress(
+    credentials: xdr.SorobanCredentials.sorobanCredentialsAddress(
       new xdr.SorobanAddressCredentials({
         address,
         nonce: new xdr.Int64(1234),
         signatureExpirationLedger: 1,
-        signatureArgs: []
+        signature: xdr.ScVal.scvVoid(),
       })
     ),
     // Basic fake invocation
     rootInvocation: new xdr.SorobanAuthorizedInvocation({
       function:
         xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
-          new xdr.SorobanAuthorizedContractFunction({
+          new xdr.InvokeContractArgs({
             contractAddress: address,
             functionName: 'test',
             args: []
