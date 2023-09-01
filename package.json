@@ -84,7 +84,7 @@
     "@babel/preset-env": "^7.22.10",
     "@babel/preset-typescript": "^7.22.11",
     "@babel/register": "^7.22.5",
-    "@definitelytyped/dtslint": "^0.0.168",
+    "@definitelytyped/dtslint": "^0.0.176",
     "@istanbuljs/nyc-config-babel": "3.0.0",
     "@stellar/tsconfig": "^1.0.2",
     "@types/chai": "^4.3.5",
