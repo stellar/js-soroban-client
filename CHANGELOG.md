@@ -8,6 +8,12 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v0.11.2
+
+### Updated
+* The `stellar-base` dependency has been updated to `v10.0.0-soroban.8`. Refer to its release notes ([stellar/js-stellar-base#687](https://github.com/stellar/js-stellar-base/pull/687)) for details on what's changed there.
+
+
 ## v0.11.1
 
 ### Fixed
