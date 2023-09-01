@@ -184,7 +184,7 @@ function isSimulationRaw(
     | SorobanRpc.SimulateTransactionResponse
     | SorobanRpc.RawSimulateTransactionResponse
 ): sim is SorobanRpc.RawSimulateTransactionResponse {
-  const asGud = sim as SorobanRpc.SimulateTransactionSuccessResponse;
+  const asGud = sim as SorobanRpc.SimulateTransactionRestoreResponse;
   const asRaw = sim as SorobanRpc.RawSimulateTransactionResponse;
 
   // lazy checks to determine type: check existence of parsed-only fields note

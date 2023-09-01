@@ -176,6 +176,7 @@ export namespace SorobanRpc {
    */
   export type SimulateTransactionResponse =
     | SimulateTransactionSuccessResponse
+    | SimulateTransactionRestoreResponse
     | SimulateTransactionErrorResponse;
 
   interface BaseSimulateTransactionResponse {
@@ -205,6 +206,18 @@ export namespace SorobanRpc {
 
     /** present only for invocation simulation */
     result?: SimulateHostFunctionResult;
+  }
+
+  /** Includes details about why the simulation failed */
+  export interface SimulateTransactionErrorResponse
+    extends BaseSimulateTransactionResponse {
+    error: string;
+    events: xdr.DiagnosticEvent[];
+  }
+
+  export interface SimulateTransactionRestoreResponse
+    extends SimulateTransactionSuccessResponse {
+    result: SimulateHostFunctionResult; // not optional now
 
     /**
      * Indicates that a restoration is necessary prior to submission.
@@ -214,17 +227,10 @@ export namespace SorobanRpc {
      * field includes information about what you need to restore for the
      * simulation to succeed.
      */
-    restorePreamble?: {
+    restorePreamble: {
       minResourceFee: string;
       transactionData: SorobanDataBuilder;
     }
-  }
-
-  /** Includes details about why the simulation failed */
-  export interface SimulateTransactionErrorResponse
-    extends BaseSimulateTransactionResponse {
-    error: string;
-    events: xdr.DiagnosticEvent[];
   }
 
   export function isSimulationError(sim: SimulateTransactionResponse):
@@ -235,6 +241,11 @@ export namespace SorobanRpc {
   export function isSimulationSuccess(sim: SimulateTransactionResponse):
     sim is SimulateTransactionSuccessResponse {
     return 'transactionData' in sim;
+  }
+
+  export function isSimulationRestore(sim: SimulateTransactionResponse):
+    sim is SimulateTransactionRestoreResponse {
+    return isSimulationSuccess(sim) && 'restorePreamble' in sim;
   }
 
   export interface RawSimulateHostFunctionResult {
