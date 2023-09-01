@@ -210,9 +210,8 @@ export class Server {
     let contractKey: string = xdr.LedgerKey.contractData(
       new xdr.LedgerKeyContractData({
         contract: scAddress,
-        key,
         durability: xdrDurability,
-        bodyType: xdr.ContractEntryBodyType.dataEntry()   // expirationExtension is internal
+        key,
       })
     ).toXDR("base64");
 
@@ -221,13 +220,16 @@ export class Server {
       "getLedgerEntries",
       [contractKey],
     ).then(response => {
-        const ledgerEntries = response.entries ?? [];
+      const ledgerEntries = response.entries ?? [];
       if (ledgerEntries.length !== 1) {
         return Promise.reject({
           code: 404,
-          message: `Contract data not found. Contract: ${Address.fromScAddress(scAddress).toString()}, Key: ${key.toXDR("base64")}, Durability: ${durability}`,
+          message: `Contract data not found. Contract: ${
+            Address.fromScAddress(scAddress).toString()
+          }, Key: ${key.toXDR("base64")}, Durability: ${durability}`,
         });
       }
+
       return ledgerEntries[0];
     });
   }
