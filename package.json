@@ -139,7 +139,7 @@
     "axios": "^1.4.0",
     "bignumber.js": "^9.1.1",
     "buffer": "^6.0.3",
-    "stellar-base": "10.0.0-soroban.8",
+    "stellar-base": "git+https://github.com/stellar/js-stellar-base.git#c909f1c",
     "urijs": "^1.19.1"
   }
 }

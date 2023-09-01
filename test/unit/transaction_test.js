@@ -14,14 +14,14 @@ describe('assembleTransaction', () => {
         address: scAddress,
         nonce: new xdr.Int64(0),
         signatureExpirationLedger: 1,
-        signatureArgs: []
+        signature: xdr.ScVal.scvVoid(),
       })
     ),
     // And a basic invocation
     rootInvocation: new xdr.SorobanAuthorizedInvocation({
       function:
         xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
-          new xdr.SorobanAuthorizedContractFunction({
+          new xdr.InvokeContractArgs({
             contractAddress: scAddress,
             functionName: 'fn',
             args: []
@@ -60,18 +60,21 @@ describe('assembleTransaction', () => {
     );
 
     function singleContractFnTransaction(auth) {
-      return new SorobanClient.TransactionBuilder(source, {
-        fee: 100,
-        networkPassphrase: 'Test',
-        v1: true
-      })
+      return new SorobanClient.TransactionBuilder(source, { fee: 100 })
+        .setNetworkPassphrase('Test')
+        .setTimeout(SorobanClient.TimeoutInfinite)
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
-            func: new xdr.HostFunction.hostFunctionTypeInvokeContract([]),
+            func: xdr.HostFunction.hostFunctionTypeInvokeContract(
+              new xdr.InvokeContractArgs({
+                contractAddress: scAddress,
+                functionName: "hello",
+                args: [xdr.ScVal.scvString("hello")],
+              })
+            ),
             auth: auth ?? []
           })
         )
-        .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
     }
 

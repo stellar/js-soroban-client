@@ -29,14 +29,14 @@ describe('Server#simulateTransaction', function () {
                 address: address,
                 nonce: new xdr.Int64(1234),
                 signatureExpirationLedger: 1,
-                signatureArgs: []
+                signature: xdr.ScVal.scvVoid()
               })
             ),
             // Basic fake invocation
             rootInvocation: new xdr.SorobanAuthorizedInvocation({
               function:
                 xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
-                  new xdr.SorobanAuthorizedContractFunction({
+                  new xdr.InvokeContractArgs({
                     contractAddress: address,
                     functionName: 'test',
                     args: []
@@ -80,18 +80,21 @@ describe('Server#simulateTransaction', function () {
       '1'
     );
     function emptyContractTransaction() {
-      return new SorobanClient.TransactionBuilder(source, {
-        fee: 100,
-        networkPassphrase: 'Test',
-        v1: true
-      })
+      return new SorobanClient.TransactionBuilder(source, { fee: 100 })
+        .setNetworkPassphrase('Test')
+        .setTimeout(SorobanClient.TimeoutInfinite)
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
-            func: new xdr.HostFunction.hostFunctionTypeInvokeContract([]),
+            func: new xdr.HostFunction.hostFunctionTypeInvokeContract(
+              new xdr.InvokeContractArgs({
+                contractAddress: address,
+                functionName: 'fn',
+                args: []
+              })
+            ),
             auth: []
           })
         )
-        .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
     }
 
