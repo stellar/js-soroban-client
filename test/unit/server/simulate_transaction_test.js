@@ -1,4 +1,4 @@
-const { SorobanDataBuilder } = require("stellar-base");
+const { SorobanDataBuilder } = require('stellar-base');
 
 const xdr = SorobanClient.xdr; // shorthand
 
@@ -121,13 +121,13 @@ describe('Server#simulateTransaction', function () {
     expect(parsed).to.be.deep.equal(parsedCopy);
   });
 
-  it('works with restoration', function() {
+  it('works with restoration', function () {
     const simResponse = invokeSimulationResponseWithRestoration();
 
     const parsedCopy = cloneSimulation(parsedSimulationResponse);
     parsedCopy.restorePreamble = {
       minResourceFee: '51',
-      transactionData: new SorobanDataBuilder(),
+      transactionData: new SorobanDataBuilder()
     };
 
     const parsed = SorobanClient.parseRawSimulation(simResponse);
@@ -168,7 +168,7 @@ function buildAuthEntry(address) {
         address,
         nonce: new xdr.Int64(1234),
         signatureExpirationLedger: 1,
-        signature: xdr.ScVal.scvVoid(),
+        signature: xdr.ScVal.scvVoid()
       })
     ),
     // Basic fake invocation
@@ -187,10 +187,12 @@ function buildAuthEntry(address) {
 }
 
 function invokeSimulationResponse(address) {
-  return baseSimulationResponse([{
-    auth: [buildAuthEntry(address)].map((entry) => entry.toXDR('base64')),
-    xdr: xdr.ScVal.scvU32(0).toXDR('base64')
-  }]);
+  return baseSimulationResponse([
+    {
+      auth: [buildAuthEntry(address)].map((entry) => entry.toXDR('base64')),
+      xdr: xdr.ScVal.scvU32(0).toXDR('base64')
+    }
+  ]);
 }
 
 function invokeSimulationResponseError(events) {
