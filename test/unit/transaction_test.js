@@ -33,20 +33,9 @@ describe("assembleTransaction", () => {
     }),
   });
 
-  const sorobanTransactionData = new xdr.SorobanTransactionData({
-    resources: new xdr.SorobanResources({
-      footprint: new xdr.LedgerFootprint({
-        readOnly: [],
-        readWrite: [],
-      }),
-      instructions: 0,
-      readBytes: 5,
-      writeBytes: 0,
-      contractEventsSizeBytes: 0,
-    }),
-    refundableFee: xdr.Int64.fromString("0"),
-    ext: new xdr.ExtensionPoint(0),
-  });
+  const sorobanTransactionData = new SorobanClient.SorobanDataBuilder()
+    .setResources(0, 5, 0)
+    .build();
 
   const simulationResponse = {
     transactionData: sorobanTransactionData.toXDR("base64"),
@@ -72,11 +61,9 @@ describe("assembleTransaction", () => {
     );
 
     function singleContractFnTransaction(auth) {
-      return new SorobanClient.TransactionBuilder(source, {
-        fee: 100,
-        networkPassphrase: "Test",
-        v1: true,
-      })
+      return new SorobanClient.TransactionBuilder(source, { fee: 100 })
+        .setNetworkPassphrase("Test")
+        .setTimeout(SorobanClient.TimeoutInfinite)
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
             func: new xdr.HostFunction.hostFunctionTypeInvokeContract(
@@ -89,7 +76,6 @@ describe("assembleTransaction", () => {
             auth: auth ?? [],
           })
         )
-        .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
     }
 

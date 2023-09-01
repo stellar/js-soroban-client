@@ -34,12 +34,11 @@ describe("Server#getContractData", function () {
           [
             xdr.LedgerKey.contractData(
               new xdr.LedgerKeyContractData({
+                key,
                 contract: new SorobanClient.Contract(address)
                   .address()
                   .toScAddress(),
-                key,
                 durability: xdr.ContractDataDurability.persistent(),
-                bodyType: xdr.ContractEntryBodyType.dataEntry(),
               })
             ).toXDR("base64"),
           ],
@@ -77,12 +76,11 @@ describe("Server#getContractData", function () {
           [
             xdr.LedgerKey.contractData(
               new xdr.LedgerKeyContractData({
+                key,
                 contract: new SorobanClient.Contract(address)
                   .address()
                   .toScAddress(),
-                key,
                 durability: xdr.ContractDataDurability.temporary(),
-                bodyType: xdr.ContractEntryBodyType.dataEntry(),
               })
             ).toXDR("base64"),
           ],
