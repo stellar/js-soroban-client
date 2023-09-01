@@ -678,8 +678,6 @@ export class Server {
         `${friendbotUrl}?addr=${encodeURIComponent(account)}`,
       );
 
-      // FIXME: Why the hell doesn't this just look at the
-      // source_account_sequence of the resulting JSON?
       const meta = xdr.TransactionMeta.fromXDR(
         response.data.result_meta_xdr,
         "base64",
