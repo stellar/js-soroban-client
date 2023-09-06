@@ -212,6 +212,7 @@ export class Server {
         key,
         contract: scAddress,
         durability: xdrDurability,
+        bodyType: xdr.ContractEntryBodyType.dataEntry(),
       }),
     );
 
