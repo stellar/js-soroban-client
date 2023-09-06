@@ -151,7 +151,9 @@ export function parseRawSimulation(
           auth: (result.auth ?? []).map((entry) =>
             xdr.SorobanAuthorizationEntry.fromXDR(entry, "base64")
           ),
-          retval: xdr.ScVal.fromXDR(result.xdr, "base64"),
+          retval: result.xdr
+            ? xdr.ScVal.fromXDR(result.xdr, "base64")
+            : xdr.ScVal.scvVoid()
         };
       })[0], // only if present
     }),

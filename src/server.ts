@@ -486,13 +486,34 @@ export class Server {
   public async simulateTransaction(
     transaction: Transaction | FeeBumpTransaction,
   ): Promise<SorobanRpc.SimulateTransactionResponse> {
-    return await jsonrpc
+    return this._simulateTransaction(transaction)
+      .then((raw) => parseRawSimulation(raw));
+  }
+
+  /**
+   * Performs the same thing as {@link Server.simulateTransaction}, but without
+   * doing helpful parsing of the resulting schema.
+   *
+   * This can be useful to work around bugs in the abstraction layers if you
+   * just want to communicate directly with the RPC server endpoints.
+   *
+   * @param {Transaction | FeeBumpTransaction} transaction - The transaction to
+   *    simulate. It should include exactly one operation, which must be one of
+   *    {@link xdr.InvokeHostFunctionOp}, {@link xdr.BumpFootprintExpirationOp},
+   *    or {@link xdr.RestoreFootprintOp}. Any provided footprint will be
+   *    ignored.
+   *
+   * @returns {SorobanRpc.RawSimulateTransactionResponse}
+   */
+  public async _simulateTransaction(
+    transaction: Transaction | FeeBumpTransaction,
+  ): Promise<SorobanRpc.RawSimulateTransactionResponse> {
+    return jsonrpc
       .post<SorobanRpc.RawSimulateTransactionResponse>(
         this.serverURL.toString(),
         "simulateTransaction",
         transaction.toXDR(),
-      )
-      .then((raw) => parseRawSimulation(raw));
+      );
   }
 
   /**

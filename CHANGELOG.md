@@ -8,6 +8,15 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v0.11.3
+
+### Fixed
+* The `Server.simulateTransaction` would fail unexpectedly if the backing RPC server did not simulate the transaction correctly. When this occurs, the `result?.retval` field will be `scvVoid` ([TODO]()).
+
+### Added
+* Adds a `Server._simulateTransaction()` method to make a raw JSON-RPC request, in case users would like to inspect the raw results without parsing abstractions ([TODO]()).
+
+
 ## v0.11.2
 
 ### Fixed

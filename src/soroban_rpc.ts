@@ -159,6 +159,17 @@ export namespace SorobanRpc {
 
   export interface SimulateHostFunctionResult {
     auth: xdr.SorobanAuthorizationEntry[];
+
+    /**
+     * The parsed return value from the simulation.
+     *
+     * If an error occurs while parsing it, this may be `void`. This typically
+     * indicates a server-side failure, so you can use
+     * {@link Server._simulateTransaction} to acquire a raw RPC result.
+     *
+     * @see scValToNative
+     * @see scValToBigInt
+     */
     retval: xdr.ScVal;
   }
 

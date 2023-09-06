@@ -1,4 +1,4 @@
-const xdr = SorobanClient.xdr; // shorthand
+const { xdr } = SorobanClient; // shorthand
 
 describe('Server#simulateTransaction', function () {
   let keypair = SorobanClient.Keypair.random();

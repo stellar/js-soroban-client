@@ -1,6 +1,6 @@
 {
   "name": "soroban-client",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "description": "A library for working with Stellar's Soroban RPC servers.",
   "author": "Stellar Development Foundation <hello@stellar.org>",
   "homepage": "https://github.com/stellar/js-soroban-client",
@@ -67,7 +67,7 @@
     ],
     "sort": true,
     "recursive": true,
-    "timeout": 60000
+    "timeout": 10000
   },
   "nyc": {
     "instrument": false,
