@@ -146,7 +146,7 @@ export class ContractSpec {
     if (output.switch().value === xdr.ScSpecType.scSpecTypeResult().value) {
       return this.scValToNative(
         val,
-        (output.value() as xdr.ScSpecTypeResult).okType()
+        output.result().okType()
       );
     }
     return this.scValToNative(val, output);
