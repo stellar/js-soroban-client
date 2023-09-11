@@ -1,9 +1,19 @@
+import { ScIntType, XdrLargeInt, xdr } from "stellar-base";
+
+import { Address } from "stellar-base";
+import { Contract } from "stellar-base";
+import { scValToBigInt } from "stellar-base";
+
+export interface Union<T> {
+  tag: string;
+  values?: T;
+}
+
 /**
  * Provides a ContractSpec class which can contains the XDR types defined by the contract.
  * This allows the class to be used to convert between native and raw `xdr.ScVal`s.
  *
  * @example
- * ```js
  * const specEntries = [...]; // XDR spec entries of a smart contract
  * const contractSpec = new ContractSpec(specEntries);
  *
@@ -21,29 +31,7 @@
  * const result = contractSpec.funcResToNative('funcName', resultScv);
  *
  * console.log(result); // {success: true}
- * ```
  */
-
-import { ScIntType, XdrLargeInt, xdr } from "stellar-base";
-
-import { Address } from "stellar-base";
-import { Contract } from "stellar-base";
-import { scValToBigInt } from "stellar-base";
-
-export interface Union<T> {
-  tag: string;
-  values?: T;
-}
-
-function readObj(args: object, input: xdr.ScSpecFunctionInputV0): any {
-  let inputName = input.name().toString();
-  let entry = Object.entries(args).find(([name, _]) => name === inputName);
-  if (!entry) {
-    throw new Error(`Missing field ${inputName}`);
-  }
-  return entry[1];
-}
-
 export class ContractSpec {
   public entries: xdr.ScSpecEntry[] = [];
 
@@ -693,4 +681,13 @@ function findCase(name: string) {
         return false;
     }
   };
+}
+
+function readObj(args: object, input: xdr.ScSpecFunctionInputV0): any {
+  let inputName = input.name().toString();
+  let entry = Object.entries(args).find(([name, _]) => name === inputName);
+  if (!entry) {
+    throw new Error(`Missing field ${inputName}`);
+  }
+  return entry[1];
 }
