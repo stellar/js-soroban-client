@@ -143,6 +143,12 @@ export class ContractSpec {
       throw new Error(`Multiple outputs not supported`);
     }
     let output = outputs[0];
+    if (output.switch().value === xdr.ScSpecType.scSpecTypeResult().value) {
+      return this.scValToNative(
+        val,
+        output.result().okType()
+      );
+    }
     return this.scValToNative(val, output);
   }
 
