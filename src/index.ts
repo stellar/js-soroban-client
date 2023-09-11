@@ -7,7 +7,7 @@ export { ContractSpec } from "./contract_spec";
 // stellar-sdk classes to expose
 export { Server } from "./server";
 export { AxiosClient, version } from "./axios";
-export { assembleTransaction } from "./transaction";
+export * from "./transaction";
 
 // expose classes and functions from stellar-base
 export * from "stellar-base";

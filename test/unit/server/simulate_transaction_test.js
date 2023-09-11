@@ -1,11 +1,7 @@
-const xdr = SorobanClient.xdr; // shorthand
+const { xdr, Keypair, Account, SorobanDataBuilder } = SorobanClient;
 
 describe('Server#simulateTransaction', function () {
-  let keypair = SorobanClient.Keypair.random();
-  let account = new SorobanClient.Account(
-    keypair.publicKey(),
-    '56199647068161'
-  );
+  let keypair = Keypair.random();
 
   let contractId = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
   let contract = new SorobanClient.Contract(contractId);
@@ -16,9 +12,7 @@ describe('Server#simulateTransaction', function () {
     events: [],
     latestLedger: 3,
     minResourceFee: '15',
-    transactionData: new SorobanClient.SorobanDataBuilder()
-      .build()
-      .toXDR('base64'),
+    transactionData: new SorobanDataBuilder().build().toXDR('base64'),
     results: [
       {
         auth: [
@@ -75,7 +69,7 @@ describe('Server#simulateTransaction', function () {
   beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
-    const source = new SorobanClient.Account(
+    const source = new Account(
       'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI',
       '1'
     );
