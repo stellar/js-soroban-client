@@ -1,14 +1,8 @@
-const { SorobanDataBuilder } = require('stellar-base');
-
-const xdr = SorobanClient.xdr; // shorthand
+const { Keypair, Networks, SorobanDataBuilder, authorizeInvocation, xdr } =
+  SorobanClient;
 
 describe('Server#simulateTransaction', function () {
-  let keypair = SorobanClient.Keypair.random();
-  let account = new SorobanClient.Account(
-    keypair.publicKey(),
-    '56199647068161'
-  );
-
+  let keypair = Keypair.random();
   let contractId = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
   let contract = new SorobanClient.Contract(contractId);
   let address = contract.address().toScAddress();
@@ -19,7 +13,7 @@ describe('Server#simulateTransaction', function () {
     events: simulationResponse.events,
     latestLedger: simulationResponse.latestLedger,
     minResourceFee: simulationResponse.minResourceFee,
-    transactionData: new SorobanClient.SorobanDataBuilder(
+    transactionData: new SorobanDataBuilder(
       simulationResponse.transactionData
     ),
     result: {
@@ -104,7 +98,7 @@ describe('Server#simulateTransaction', function () {
   });
 
   it('works with no auth', function () {
-    const simResponse = invokeSimulationResponse();
+    const simResponse = invokeSimulationResponse(address);
     delete simResponse.results[0].auth;
 
     const parsedCopy = cloneSimulation(parsedSimulationResponse);
@@ -121,7 +115,7 @@ describe('Server#simulateTransaction', function () {
   });
 
   it('works with restoration', function () {
-    const simResponse = invokeSimulationResponseWithRestoration();
+    const simResponse = invokeSimulationResponseWithRestoration(address);
 
     const parsedCopy = cloneSimulation(parsedSimulationResponse);
     parsedCopy.restorePreamble = {
@@ -133,6 +127,22 @@ describe('Server#simulateTransaction', function () {
     expect(parsed).to.be.deep.equal(parsedCopy);
   });
 
+  it('works with errors', function () {
+    let simResponse = simulationResponseError();
+
+    const expected = cloneSimulation(parsedSimulationResponse);
+    // drop fields that go away with errors
+    delete expected.result;
+    delete expected.cost;
+    delete expected.transactionData;
+    delete expected.minResourceFee;
+    expected.error = 'This is an error';
+    expected.events = [];
+
+    const parsed = SorobanClient.parseRawSimulation(simResponse);
+    expect(parsed).to.be.deep.equal(expected);
+  });
+
   xit('simulates fee bump transactions');
 });
 
@@ -142,7 +152,7 @@ function cloneSimulation(sim) {
     events: Array.from(sim.events),
     latestLedger: sim.latestLedger,
     minResourceFee: sim.minResourceFee,
-    transactionData: new SorobanClient.SorobanDataBuilder(
+    transactionData: new SorobanDataBuilder(
       sim.transactionData.build()
     ),
     result: {
@@ -160,29 +170,21 @@ function buildAuthEntry(address) {
     throw new Error('where address?');
   }
 
-  return new xdr.SorobanAuthorizationEntry({
-    // Include a credentials w/ a nonce
-    credentials: xdr.SorobanCredentials.sorobanCredentialsAddress(
-      new xdr.SorobanAddressCredentials({
-        address,
-        nonce: new xdr.Int64(1234),
-        signatureExpirationLedger: 1,
-        signature: xdr.ScVal.scvVoid()
-      })
-    ),
-    // Basic fake invocation
-    rootInvocation: new xdr.SorobanAuthorizedInvocation({
-      function:
-        xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
-          new xdr.InvokeContractArgs({
-            contractAddress: address,
-            functionName: 'test',
-            args: []
-          })
-        ),
-      subInvocations: []
-    })
+  // Basic fake invocation
+  const root = new xdr.SorobanAuthorizedInvocation({
+    subInvocations: [],
+    function:
+      xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
+        new xdr.InvokeContractArgs({
+          contractAddress: address,
+          functionName: 'test',
+          args: []
+        })
+      ),
   });
+
+  const kp = Keypair.random();
+  return authorizeInvocation(kp, Networks.FUTURENET, 1, root);
 }
 
 function invokeSimulationResponse(address) {
@@ -194,7 +196,7 @@ function invokeSimulationResponse(address) {
   ]);
 }
 
-function invokeSimulationResponseError(events) {
+function simulationResponseError(events) {
   return {
     id: 1,
     ...(events !== undefined && { events }),
@@ -209,9 +211,7 @@ function baseSimulationResponse(results) {
     events: [],
     latestLedger: 3,
     minResourceFee: '15',
-    transactionData: new SorobanClient.SorobanDataBuilder()
-      .build()
-      .toXDR('base64'),
+    transactionData: new SorobanDataBuilder().build().toXDR('base64'),
     ...(results !== undefined && { results }),
     cost: {
       cpuInsns: '1',
@@ -220,14 +220,12 @@ function baseSimulationResponse(results) {
   };
 }
 
-function invokeSimulationResponseWithRestoration() {
+function invokeSimulationResponseWithRestoration(address) {
   return {
-    ...invokeSimulationResponse(),
+    ...invokeSimulationResponse(address),
     restorePreamble: {
       minResourceFee: '51',
-      transactionData: new SorobanClient.SorobanDataBuilder()
-        .build()
-        .toXDR('base64')
+      transactionData: new SorobanDataBuilder().build().toXDR('base64')
     }
   };
 }

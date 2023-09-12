@@ -135,6 +135,7 @@ export function parseRawSimulation(
     return sim;
   }
 
+  // shared across all responses
   let base = {
     id: sim.id,
     latestLedger: sim.latestLedger,
@@ -144,23 +145,31 @@ export function parseRawSimulation(
   };
 
   return (typeof sim.error === 'string')
+    // error type: just has error string
     ? {
       ...base,
       error: sim.error,
     }
+    // success type: might have a result (if invoking) and might have a
+    // restoration hint (if invoking AND some state is expired)
     : {
       ...base,
       transactionData: new SorobanDataBuilder(sim.transactionData!),
       minResourceFee: sim.minResourceFee!,
       cost: sim.cost!,
       ...(
-        (sim.results ?? []).length > 0 &&
+        // coalesce 0-or-1-element results[] list into a single result struct
+        // with decoded fields if present
+        (sim.results?.length ?? 0 > 0) &&
         {
-          result: sim.results!.map(result => {
+          result: sim.results!.map(row => {
             return {
-              auth: (result.auth ?? []).map((entry) =>
+              auth: (row.auth ?? []).map((entry) =>
                 xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')),
-              retval: xdr.ScVal.fromXDR(result.xdr, 'base64'),
+              // if return value is missing ("falsy") we coalesce to void
+              retval: !!row.xdr
+                ? xdr.ScVal.fromXDR(row.xdr, 'base64')
+                : xdr.ScVal.scvVoid()
             }
           })[0],
         }
@@ -195,6 +204,10 @@ function isSimulationRaw(
       asGud.result !== undefined ||
       typeof asGud.transactionData !== 'string'
     ) ||
+    (asRaw.error !== undefined && (
+      !asRaw.events?.length ||
+      typeof asRaw.events![0] === 'string'
+    )) ||
     (asRaw.results ?? []).length > 0
   );
 }
