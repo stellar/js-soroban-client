@@ -14,7 +14,6 @@ describe('Server#simulateTransaction', function () {
   let address = contract.address().toScAddress();
 
   const simulationResponse = invokeSimulationResponse(address);
-
   const parsedSimulationResponse = {
     id: simulationResponse.id,
     events: simulationResponse.events,
@@ -42,6 +41,7 @@ describe('Server#simulateTransaction', function () {
     function emptyContractTransaction() {
       return new SorobanClient.TransactionBuilder(source, { fee: 100 })
         .setNetworkPassphrase('Test')
+        .setTimeout(SorobanClient.TimeoutInfinite)
         .addOperation(
           SorobanClient.Operation.invokeHostFunction({
             func: new xdr.HostFunction.hostFunctionTypeInvokeContract(
@@ -54,7 +54,6 @@ describe('Server#simulateTransaction', function () {
             auth: []
           })
         )
-        .setTimeout(SorobanClient.TimeoutInfinite)
         .build();
     }
 
