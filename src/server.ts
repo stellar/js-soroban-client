@@ -204,10 +204,9 @@ export class Server {
 
     let contractKey: string = xdr.LedgerKey.contractData(
       new xdr.LedgerKeyContractData({
-        contract: scAddress,
         key,
+        contract: scAddress,
         durability: xdrDurability,
-        bodyType: xdr.ContractEntryBodyType.dataEntry(), // expirationExtension is internal
       }),
     ).toXDR("base64");
 
