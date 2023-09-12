@@ -2215,7 +2215,7 @@ big-integer@^1.6.44:
   resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.51.tgz#0df92a5d9880560d3ff2d5fd20245c889d130686"
   integrity sha512-GPEid2Y9QU1Exl1rpO9B2IPJGHPSupF5GnVIP0blYvNOMer2bTvSWs1jGOUg04hTmu67nmLsQ9TBo1puaotBHg==
 
-bignumber.js@^9.1.1:
+bignumber.js@^9.1.1, bignumber.js@^9.1.2:
   version "9.1.2"
   resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.1.2.tgz#b7c4242259c008903b13707983b5f4bbd31eda0c"
   integrity sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==
@@ -6620,12 +6620,13 @@ statuses@~1.5.0:
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.5.0.tgz#161c7dac177659fd9811f43771fa99381478628c"
   integrity sha512-OpZ3zP+jT1PI7I8nemJX4AKmAX070ZkYPVWV/AaKTJl+tXCTGyVdC1a4SL8RUQYEwk/f34ZX8UTykN68FwrqAA==
 
-"stellar-base@git+https://github.com/stellar/js-stellar-base.git#c909f1c":
-  version "10.0.0-soroban.7"
-  resolved "git+https://github.com/stellar/js-stellar-base.git#c909f1c2fc9054c0d49ac7c3bd14c730eb7fdfd5"
+stellar-base@v10.0.0-beta.0:
+  version "10.0.0-beta.0"
+  resolved "https://registry.yarnpkg.com/stellar-base/-/stellar-base-10.0.0-beta.0.tgz#c8663996ef6fcfd569977f4534688c94b3939a39"
+  integrity sha512-YYUUCERjlok4yzCC3XXuvfvMw1POHCXE6JELjYgFGMaMx8IS8pAN9mdW/H7n1Sdo1c57jaDfPwZYFrgzRtU4kQ==
   dependencies:
     base32.js "^0.1.0"
-    bignumber.js "^9.1.1"
+    bignumber.js "^9.1.2"
     buffer "^6.0.3"
     js-xdr "^3.0.0"
     sha.js "^2.3.6"
