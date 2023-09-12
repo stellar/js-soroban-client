@@ -13,9 +13,7 @@ describe('Server#simulateTransaction', function () {
     events: simulationResponse.events,
     latestLedger: simulationResponse.latestLedger,
     minResourceFee: simulationResponse.minResourceFee,
-    transactionData: new SorobanDataBuilder(
-      simulationResponse.transactionData
-    ),
+    transactionData: new SorobanDataBuilder(simulationResponse.transactionData),
     result: {
       auth: simulationResponse.results[0].auth.map((entry) =>
         xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')
@@ -152,9 +150,7 @@ function cloneSimulation(sim) {
     events: Array.from(sim.events),
     latestLedger: sim.latestLedger,
     minResourceFee: sim.minResourceFee,
-    transactionData: new SorobanDataBuilder(
-      sim.transactionData.build()
-    ),
+    transactionData: new SorobanDataBuilder(sim.transactionData.build()),
     result: {
       auth: sim.result.auth.map((entry) =>
         xdr.SorobanAuthorizationEntry.fromXDR(entry.toXDR())
@@ -180,7 +176,7 @@ function buildAuthEntry(address) {
           functionName: 'test',
           args: []
         })
-      ),
+      )
   });
 
   const kp = Keypair.random();
