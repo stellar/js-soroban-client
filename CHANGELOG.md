@@ -9,7 +9,7 @@ A breaking change should be clearly marked in this log.
 
 
 ## v1.0.0-beta.0
-**Note:** This version is currently only compatible with standalone networks built with stellar/stellar-xdr@9ac0264 (the Protocol 20 preview).
+**Note:** This version is currently only compatible with Stellar networks running `stellar-core@19.13.1-1481.3acf6dd26`, which corresponds to Preview 11, the final Protocol 20 preview (using stellar/stellar-xdr@9ac0264).
 
 ### Breaking Changes
 * The XDR has been upgraded to the final testnet version via the `stellar-base` dependency ([v10.0.0-beta.0](https://github.com/stellar/js-stellar-base/releases/tag/v10.0.0-beta.0), [#135](https://github.com/stellar/js-soroban-client/pull/135)).
