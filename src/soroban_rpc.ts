@@ -188,10 +188,8 @@ export namespace SorobanRpc {
 
     /**
      * The field is always present, but may be empty in cases where:
-     *   - you didn't simulate an invocation,
-     *   - there were no events, or
-     *   - you are communicating with an RPC server w/o diagnostic events on
-     *
+     *   - you didn't simulate an invocation or
+     *   - there were no events
      * @see {@link humanizeEvents}
      */
     events: xdr.DiagnosticEvent[];
