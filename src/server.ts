@@ -580,7 +580,7 @@ export class Server {
         : this.getNetwork(),
       this.simulateTransaction(transaction),
     ]);
-    if (simResponse.error) {
+    if (SorobanRpc.isSimulationError(simResponse)) {
       throw simResponse.error;
     }
     if (!simResponse.result) {

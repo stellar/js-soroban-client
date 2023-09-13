@@ -52,13 +52,13 @@ export function assembleTransaction(
     );
   }
 
-  const coalesced = parseRawSimulation(simulation);
-  if (!coalesced.result) {
-    throw new Error(`simulation incorrect: ${JSON.stringify(coalesced)}`);
+  let success = parseRawSimulation(simulation);
+  if (!SorobanRpc.isSimulationSuccess(success)) {
+    throw new Error(`simulation incorrect: ${JSON.stringify(success)}`);
   }
 
   const classicFeeNum = parseInt(raw.fee) || 0;
-  const minResourceFeeNum = parseInt(coalesced.minResourceFee) || 0;
+  const minResourceFeeNum = parseInt(success.minResourceFee) || 0;
   const txnBuilder = TransactionBuilder.cloneFrom(raw, {
     // automatically update the tx fee that will be set on the resulting tx to
     // the sum of 'classic' fee provided from incoming tx.fee and minResourceFee
@@ -70,7 +70,7 @@ export function assembleTransaction(
     // soroban transaction will be equal to incoming tx.fee + minResourceFee.
     fee: (classicFeeNum + minResourceFeeNum).toString(),
     // apply the pre-built Soroban Tx Data from simulation onto the Tx
-    sorobanData: coalesced.transactionData.build(),
+    sorobanData: success.transactionData.build(),
     networkPassphrase
   });
 
@@ -90,7 +90,7 @@ export function assembleTransaction(
           //
           // the intuition is "if auth exists, this tx has probably been
           // simulated before"
-          auth: existingAuth.length > 0 ? existingAuth : coalesced.result.auth,
+          auth: existingAuth.length > 0 ? existingAuth : success.result!.auth,
         })
       );
       break;
@@ -134,40 +134,96 @@ export function parseRawSimulation(
     // Gordon Ramsey in shambles
     return sim;
   }
-  return {
+
+  // shared across all responses
+  let base: SorobanRpc.BaseSimulateTransactionResponse = {
     id: sim.id,
-    minResourceFee: sim.minResourceFee,
     latestLedger: sim.latestLedger,
-    cost: sim.cost,
-    transactionData: new SorobanDataBuilder(sim.transactionData),
-    events: (sim.events ?? []).map((event) =>
-      xdr.DiagnosticEvent.fromXDR(event, "base64")
-    ),
-    ...(sim.error !== undefined && { error: sim.error }), // only if present
-    // ^ XOR v
-    ...((sim.results ?? []).length > 0 && {
-      result: sim.results?.map((result) => {
-        return {
-          auth: (result.auth ?? []).map((entry) =>
-            xdr.SorobanAuthorizationEntry.fromXDR(entry, "base64")
-          ),
-          retval: xdr.ScVal.fromXDR(result.xdr, "base64"),
-        };
-      })[0], // only if present
-    }),
+    events: sim.events?.map(
+      evt => xdr.DiagnosticEvent.fromXDR(evt, 'base64')
+    ) ?? [],
+  };
+
+  // error type: just has error string
+  if (typeof sim.error === 'string') {
+    return {
+      ...base,
+      error: sim.error,
+    };
+  }
+
+  return parseSuccessful(sim, base);
+}
+
+function parseSuccessful(
+  sim: SorobanRpc.RawSimulateTransactionResponse,
+  partial: SorobanRpc.BaseSimulateTransactionResponse
+):
+  | SorobanRpc.SimulateTransactionRestoreResponse
+  | SorobanRpc.SimulateTransactionSuccessResponse {
+
+  // success type: might have a result (if invoking) and...
+  const success: SorobanRpc.SimulateTransactionSuccessResponse = {
+    ...partial,
+    transactionData: new SorobanDataBuilder(sim.transactionData!),
+    minResourceFee: sim.minResourceFee!,
+    cost: sim.cost!,
+    ...(
+      // coalesce 0-or-1-element results[] list into a single result struct
+      // with decoded fields if present
+      (sim.results?.length ?? 0 > 0) &&
+      {
+        result: sim.results!.map(row => {
+          return {
+            auth: (row.auth ?? []).map((entry) =>
+              xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')),
+            // if return value is missing ("falsy") we coalesce to void
+            retval: !!row.xdr
+              ? xdr.ScVal.fromXDR(row.xdr, 'base64')
+              : xdr.ScVal.scvVoid()
+          }
+        })[0],
+      }
+    )
+  };
+
+  if (!sim.restorePreamble) {
+    return success;
+  }
+
+  // ...might have a restoration hint (if some state is expired)
+  return {
+    ...success,
+    restorePreamble: {
+      minResourceFee: sim.restorePreamble!.minResourceFee,
+      transactionData: new SorobanDataBuilder(
+        sim.restorePreamble!.transactionData
+      ),
+    }
   };
 }
+
 
 function isSimulationRaw(
   sim:
     | SorobanRpc.SimulateTransactionResponse
     | SorobanRpc.RawSimulateTransactionResponse
 ): sim is SorobanRpc.RawSimulateTransactionResponse {
-  // lazy check to determine parameter type
+  const asGud = sim as SorobanRpc.SimulateTransactionRestoreResponse;
+  const asRaw = sim as SorobanRpc.RawSimulateTransactionResponse;
+
+  // lazy checks to determine type: check existence of parsed-only fields note
   return (
-    (sim as SorobanRpc.SimulateTransactionResponse).result === undefined ||
-    (typeof sim.transactionData === "string" ||
-      ((sim as SorobanRpc.RawSimulateTransactionResponse).results ?? [])
-        .length > 0)
+    asRaw.restorePreamble !== undefined ||
+    !(
+      asGud.restorePreamble !== undefined ||
+      asGud.result !== undefined ||
+      typeof asGud.transactionData !== 'string'
+    ) ||
+    (asRaw.error !== undefined && (
+      !asRaw.events?.length ||
+      typeof asRaw.events![0] === 'string'
+    )) ||
+    (asRaw.results ?? []).length > 0
   );
 }

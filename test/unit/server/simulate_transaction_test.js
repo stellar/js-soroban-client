@@ -1,68 +1,19 @@
-const xdr = SorobanClient.xdr; // shorthand
+const { Keypair, Networks, SorobanDataBuilder, authorizeInvocation, xdr } =
+  SorobanClient;
 
 describe('Server#simulateTransaction', function () {
-  let keypair = SorobanClient.Keypair.random();
-  let account = new SorobanClient.Account(
-    keypair.publicKey(),
-    '56199647068161'
-  );
-
+  let keypair = Keypair.random();
   let contractId = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
   let contract = new SorobanClient.Contract(contractId);
   let address = contract.address().toScAddress();
 
-  const simulationResponse = {
-    id: 1,
-    events: [],
-    latestLedger: 3,
-    minResourceFee: '15',
-    transactionData: new SorobanClient.SorobanDataBuilder()
-      .build()
-      .toXDR('base64'),
-    results: [
-      {
-        auth: [
-          new xdr.SorobanAuthorizationEntry({
-            // Include a credentials w/ a nonce
-            credentials: new xdr.SorobanCredentials.sorobanCredentialsAddress(
-              new xdr.SorobanAddressCredentials({
-                address: address,
-                nonce: new xdr.Int64(1234),
-                signatureExpirationLedger: 1,
-                signature: xdr.ScVal.scvVoid()
-              })
-            ),
-            // Basic fake invocation
-            rootInvocation: new xdr.SorobanAuthorizedInvocation({
-              function:
-                xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
-                  new xdr.InvokeContractArgs({
-                    contractAddress: address,
-                    functionName: 'test',
-                    args: []
-                  })
-                ),
-              subInvocations: []
-            })
-          }).toXDR('base64')
-        ],
-        xdr: xdr.ScVal.scvU32(0).toXDR('base64')
-      }
-    ],
-    cost: {
-      cpuInsns: '0',
-      memBytes: '0'
-    }
-  };
-
+  const simulationResponse = invokeSimulationResponse(address);
   const parsedSimulationResponse = {
     id: simulationResponse.id,
     events: simulationResponse.events,
     latestLedger: simulationResponse.latestLedger,
     minResourceFee: simulationResponse.minResourceFee,
-    transactionData: new SorobanClient.SorobanDataBuilder(
-      simulationResponse.transactionData
-    ),
+    transactionData: new SorobanDataBuilder(simulationResponse.transactionData),
     result: {
       auth: simulationResponse.results[0].auth.map((entry) =>
         xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')
@@ -88,7 +39,7 @@ describe('Server#simulateTransaction', function () {
             func: new xdr.HostFunction.hostFunctionTypeInvokeContract(
               new xdr.InvokeContractArgs({
                 contractAddress: address,
-                functionName: 'fn',
+                functionName: 'hello',
                 args: []
               })
             ),
@@ -136,32 +87,62 @@ describe('Server#simulateTransaction', function () {
   });
 
   it('works when there are no results', function () {
-    const simResponseCopy = JSON.parse(JSON.stringify(simulationResponse));
-    delete simResponseCopy.results;
-
+    const simResponse = baseSimulationResponse();
     const parsedCopy = cloneSimulation(parsedSimulationResponse);
     delete parsedCopy.result;
 
-    const parsed = SorobanClient.parseRawSimulation(simResponseCopy);
+    const parsed = SorobanClient.parseRawSimulation(simResponse);
     expect(parsed).to.deep.equal(parsedCopy);
+    expect(SorobanClient.SorobanRpc.isSimulationSuccess(parsed)).to.be.true;
   });
 
   it('works with no auth', function () {
-    const simResponseCopy = JSON.parse(JSON.stringify(simulationResponse));
-    delete simResponseCopy.results[0].auth;
+    const simResponse = invokeSimulationResponse(address);
+    delete simResponse.results[0].auth;
 
     const parsedCopy = cloneSimulation(parsedSimulationResponse);
     parsedCopy.result.auth = [];
-    const parsed = SorobanClient.parseRawSimulation(simResponseCopy);
+    const parsed = SorobanClient.parseRawSimulation(simResponse);
 
     // FIXME: This is a workaround for an xdrgen bug that does not allow you to
-    // build "perfectly-equal" xdr.ExtensionPoint instances (but they will still
-    // be binary-equal, so the test passes), but it should be fixed once we
-    // upgrade the XDR to the final testnet version.
+    // build "perfectly-equal" xdr.ExtensionPoint instances (but they're still
+    // binary-equal, so the test passes).
     parsedCopy.transactionData = parsedCopy.transactionData.build();
     parsed.transactionData = parsed.transactionData.build();
 
     expect(parsed).to.be.deep.equal(parsedCopy);
+    expect(SorobanClient.SorobanRpc.isSimulationSuccess(parsed)).to.be.true;
+  });
+
+  xit('works with restoration', function () {
+    const simResponse = invokeSimulationResponseWithRestoration(address);
+
+    const expected = cloneSimulation(parsedSimulationResponse);
+    expected.restorePreamble = {
+      minResourceFee: '51',
+      transactionData: new SorobanDataBuilder()
+    };
+
+    const parsed = SorobanClient.parseRawSimulation(simResponse);
+    expect(parsed).to.be.deep.equal(expected);
+    expect(SorobanClient.SorobanRpc.isSimulationRestore(parsed)).to.be.true;
+  });
+
+  it('works with errors', function () {
+    let simResponse = simulationResponseError();
+
+    const expected = cloneSimulation(parsedSimulationResponse);
+    // drop fields that go away with errors
+    delete expected.result;
+    delete expected.cost;
+    delete expected.transactionData;
+    delete expected.minResourceFee;
+    expected.error = 'This is an error';
+    expected.events = [];
+
+    const parsed = SorobanClient.parseRawSimulation(simResponse);
+    expect(parsed).to.be.deep.equal(expected);
+    expect(SorobanClient.SorobanRpc.isSimulationError(parsed)).to.be.true;
   });
 
   xit('simulates fee bump transactions');
@@ -173,9 +154,7 @@ function cloneSimulation(sim) {
     events: Array.from(sim.events),
     latestLedger: sim.latestLedger,
     minResourceFee: sim.minResourceFee,
-    transactionData: new SorobanClient.SorobanDataBuilder(
-      sim.transactionData.build()
-    ),
+    transactionData: new SorobanDataBuilder(sim.transactionData.build()),
     result: {
       auth: sim.result.auth.map((entry) =>
         xdr.SorobanAuthorizationEntry.fromXDR(entry.toXDR())
@@ -183,5 +162,70 @@ function cloneSimulation(sim) {
       retval: xdr.ScVal.fromXDR(sim.result.retval.toXDR())
     },
     cost: sim.cost
+  };
+}
+
+function buildAuthEntry(address) {
+  if (!address) {
+    throw new Error('where address?');
+  }
+
+  // Basic fake invocation
+  const root = new xdr.SorobanAuthorizedInvocation({
+    subInvocations: [],
+    function:
+      xdr.SorobanAuthorizedFunction.sorobanAuthorizedFunctionTypeContractFn(
+        new xdr.InvokeContractArgs({
+          contractAddress: address,
+          functionName: 'test',
+          args: []
+        })
+      )
+  });
+
+  const kp = Keypair.random();
+  return authorizeInvocation(kp, Networks.FUTURENET, 1, root);
+}
+
+function invokeSimulationResponse(address) {
+  return baseSimulationResponse([
+    {
+      auth: [buildAuthEntry(address)].map((entry) => entry.toXDR('base64')),
+      xdr: xdr.ScVal.scvU32(0).toXDR('base64')
+    }
+  ]);
+}
+
+function simulationResponseError(events) {
+  return {
+    id: 1,
+    ...(events !== undefined && { events }),
+    latestLedger: 3,
+    error: 'This is an error'
+  };
+}
+
+function baseSimulationResponse(results) {
+  return {
+    id: 1,
+    events: [],
+    latestLedger: 3,
+    minResourceFee: '15',
+    transactionData: new SorobanDataBuilder().build().toXDR('base64'),
+    ...(results !== undefined && { results }),
+    cost: {
+      cpuInsns: '1',
+      memBytes: '2'
+    }
+  };
+}
+
+function invokeSimulationResponseWithRestoration(address) {
+  return {
+    ...invokeSimulationResponse(address),
+    restorePreamble: {
+      minResourceFee: '51',
+      transactionData: new SorobanDataBuilder().build().toXDR('base64')
+    }
   };
 }
