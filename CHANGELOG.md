@@ -8,6 +8,12 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v1.0.0-beta.1
+
+### Fixed
+* This upgrades `stellar-base` which has a critical bugfix for `Contract.call()` not generating valid operations ([TODO](), [stellar-base#692](https://github.com/stellar/js-stellar-base/pull/692)).
+
+
 ## v1.0.0-beta.0
 **Note:** This version is currently only compatible with Stellar networks running `stellar-core@19.13.1-1481.3acf6dd26`, which corresponds to Preview 11, the final Protocol 20 preview (using stellar/stellar-xdr@9ac0264).
 
