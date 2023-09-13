@@ -1,5 +1,11 @@
-const { Keypair, Networks, SorobanDataBuilder, authorizeInvocation, xdr } =
-  SorobanClient;
+const {
+  Account,
+  Keypair,
+  Networks,
+  SorobanDataBuilder,
+  authorizeInvocation,
+  xdr
+} = SorobanClient;
 
 describe('Server#simulateTransaction', function () {
   let keypair = Keypair.random();
