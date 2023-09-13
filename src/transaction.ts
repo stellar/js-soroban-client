@@ -136,7 +136,7 @@ export function parseRawSimulation(
   }
 
   // shared across all responses
-  let base = {
+  let base: SorobanRpc.BaseSimulateTransactionResponse = {
     id: sim.id,
     latestLedger: sim.latestLedger,
     events: sim.events?.map(
@@ -144,49 +144,65 @@ export function parseRawSimulation(
     ) ?? [],
   };
 
-  return (typeof sim.error === 'string')
-    // error type: just has error string
-    ? {
+  // error type: just has error string
+  if (typeof sim.error === 'string') {
+    return {
       ...base,
       error: sim.error,
-    }
-    // success type: might have a result (if invoking) and might have a
-    // restoration hint (if invoking AND some state is expired)
-    : {
-      ...base,
-      transactionData: new SorobanDataBuilder(sim.transactionData!),
-      minResourceFee: sim.minResourceFee!,
-      cost: sim.cost!,
-      ...(
-        // coalesce 0-or-1-element results[] list into a single result struct
-        // with decoded fields if present
-        (sim.results?.length ?? 0 > 0) &&
-        {
-          result: sim.results!.map(row => {
-            return {
-              auth: (row.auth ?? []).map((entry) =>
-                xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')),
-              // if return value is missing ("falsy") we coalesce to void
-              retval: !!row.xdr
-                ? xdr.ScVal.fromXDR(row.xdr, 'base64')
-                : xdr.ScVal.scvVoid()
-            }
-          })[0],
-        }
-      ),
-      ...(
-        sim.restorePreamble !== undefined &&
-        {
-          restorePreamble: {
-            minResourceFee: sim.restorePreamble!.minResourceFee,
-            transactionData: new SorobanDataBuilder(
-              sim.restorePreamble!.transactionData
-            ),
-          }
-        }
-      ),
     };
+  }
+
+  return parseSuccessful(sim, base);
 }
+
+function parseSuccessful(
+  sim: SorobanRpc.RawSimulateTransactionResponse,
+  partial: SorobanRpc.BaseSimulateTransactionResponse
+):
+  | SorobanRpc.SimulateTransactionRestoreResponse
+  | SorobanRpc.SimulateTransactionSuccessResponse {
+
+  // success type: might have a result (if invoking) and...
+  const success: SorobanRpc.SimulateTransactionSuccessResponse = {
+    ...partial,
+    transactionData: new SorobanDataBuilder(sim.transactionData!),
+    minResourceFee: sim.minResourceFee!,
+    cost: sim.cost!,
+    ...(
+      // coalesce 0-or-1-element results[] list into a single result struct
+      // with decoded fields if present
+      (sim.results?.length ?? 0 > 0) &&
+      {
+        result: sim.results!.map(row => {
+          return {
+            auth: (row.auth ?? []).map((entry) =>
+              xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')),
+            // if return value is missing ("falsy") we coalesce to void
+            retval: !!row.xdr
+              ? xdr.ScVal.fromXDR(row.xdr, 'base64')
+              : xdr.ScVal.scvVoid()
+          }
+        })[0],
+      }
+    )
+  };
+
+  if (!sim.restorePreamble) {
+    return success;
+  }
+
+  // ...might have a restoration hint (if some state is expired)
+  return {
+    ...success,
+    restorePreamble: {
+      minResourceFee: sim.restorePreamble!.minResourceFee,
+      transactionData: new SorobanDataBuilder(
+        sim.restorePreamble!.transactionData
+      ),
+    }
+  };
+}
+
 
 function isSimulationRaw(
   sim:

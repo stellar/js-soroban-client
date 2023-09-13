@@ -179,7 +179,7 @@ export namespace SorobanRpc {
     | SimulateTransactionRestoreResponse
     | SimulateTransactionErrorResponse;
 
-  interface BaseSimulateTransactionResponse {
+  export interface BaseSimulateTransactionResponse {
     /** always present: the JSON-RPC request ID */
     id: string;
 
