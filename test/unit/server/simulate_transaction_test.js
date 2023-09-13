@@ -93,6 +93,7 @@ describe('Server#simulateTransaction', function () {
 
     const parsed = SorobanClient.parseRawSimulation(simResponse);
     expect(parsed).to.deep.equal(parsedCopy);
+    expect(SorobanClient.SorobanRpc.isSimulationSuccess(parsed)).to.be.true;
   });
 
   it('works with no auth', function () {
@@ -110,6 +111,7 @@ describe('Server#simulateTransaction', function () {
     parsed.transactionData = parsed.transactionData.build();
 
     expect(parsed).to.be.deep.equal(parsedCopy);
+    expect(SorobanClient.SorobanRpc.isSimulationSuccess(parsed)).to.be.true;
   });
 
   xit('works with restoration', function () {
@@ -123,6 +125,7 @@ describe('Server#simulateTransaction', function () {
 
     const parsed = SorobanClient.parseRawSimulation(simResponse);
     expect(parsed).to.be.deep.equal(expected);
+    expect(SorobanClient.SorobanRpc.isSimulationRestore(parsed)).to.be.true;
   });
 
   it('works with errors', function () {
@@ -139,6 +142,7 @@ describe('Server#simulateTransaction', function () {
 
     const parsed = SorobanClient.parseRawSimulation(simResponse);
     expect(parsed).to.be.deep.equal(expected);
+    expect(SorobanClient.SorobanRpc.isSimulationError(parsed)).to.be.true;
   });
 
   xit('simulates fee bump transactions');

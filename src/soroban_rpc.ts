@@ -246,7 +246,7 @@ export namespace SorobanRpc {
     return isSimulationSuccess(sim) && 'restorePreamble' in sim;
   }
 
-  export interface RawSimulateHostFunctionResult {
+  interface RawSimulateHostFunctionResult {
     // each string is SorobanAuthorizationEntry XDR in base64
     auth?: string[];
     // invocation return value: the ScVal in base64
