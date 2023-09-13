@@ -15,7 +15,7 @@ describe('Server.constructor', function () {
 
   it('throws error for insecure server', function () {
     expect(() => new SorobanClient.Server(insecureServerUrl)).to.throw(
-      /Cannot connect to insecure soroban-rpc server/
+      /Cannot connect to insecure Soroban RPC server/i
     );
   });
 
