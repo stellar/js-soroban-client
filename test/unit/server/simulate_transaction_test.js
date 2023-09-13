@@ -26,7 +26,7 @@ describe('Server#simulateTransaction', function () {
   beforeEach(function () {
     this.server = new SorobanClient.Server(serverUrl);
     this.axiosMock = sinon.mock(AxiosClient);
-    const source = new SorobanClient.Account(
+    const source = new Account(
       'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI',
       '1'
     );

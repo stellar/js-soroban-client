@@ -99,22 +99,6 @@ export function assembleTransaction(
   return txnBuilder;
 }
 
-function isSorobanTransaction(tx: Transaction): boolean {
-  if (tx.operations.length !== 1) {
-    return false;
-  }
-
-  switch (tx.operations[0].type) {
-    case "invokeHostFunction":
-    case "bumpFootprintExpiration":
-    case "restoreFootprint":
-      return true
-
-    default:
-      return false;
-  }
-}
-
 /**
  * Converts a raw response schema into one with parsed XDR fields and a
  * simplified interface.
@@ -226,4 +210,20 @@ function isSimulationRaw(
     )) ||
     (asRaw.results ?? []).length > 0
   );
+}
+
+function isSorobanTransaction(tx: Transaction): boolean {
+  if (tx.operations.length !== 1) {
+    return false;
+  }
+
+  switch (tx.operations[0].type) {
+    case "invokeHostFunction":
+    case "bumpFootprintExpiration":
+    case "restoreFootprint":
+      return true
+
+    default:
+      return false;
+  }
 }
