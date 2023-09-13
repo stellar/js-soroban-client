@@ -8,6 +8,17 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v1.0.0-beta.0
+**Note:** This version is currently only compatible with Stellar networks running `stellar-core@19.13.1-1481.3acf6dd26`, which corresponds to Preview 11, the final Protocol 20 preview (using stellar/stellar-xdr@9ac0264).
+
+### Breaking Changes
+* The XDR has been upgraded to the final testnet version via the `stellar-base` dependency ([v10.0.0-beta.0](https://github.com/stellar/js-stellar-base/releases/tag/v10.0.0-beta.0), [#135](https://github.com/stellar/js-soroban-client/pull/135)).
+* The `simulateTransaction` endpoint will now return a `restorePreamble` structure containing the recommended footprint and minimum resource fee for an `Operation.restoreFootprint` which would have made the simulation succeed ([#132](https://github.com/stellar/js-soroban-client/pull/132)).
+
+### Fixed
+* Result types are now handled correctly by `ContractSpec` ([#138](https://github.com/stellar/js-soroban-client/pull/138)).
+
+
 ## v0.11.2
 
 ### Fixed
