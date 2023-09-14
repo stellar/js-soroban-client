@@ -8,10 +8,16 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v1.0.0-beta.2
+
+### Fixed
+* The variations of responses from `simulateTransaction` were not always being parsed correctly ([#146](https://github.com/stellar/js-soroban-client/pull/146)).
+
+
 ## v1.0.0-beta.1
 
 ### Fixed
-* This upgrades `stellar-base` which has a critical bugfix for `Contract.call()` not generating valid operations ([TODO](), [stellar-base#692](https://github.com/stellar/js-stellar-base/pull/692)).
+* This upgrades `stellar-base` which has a critical bugfix for `Contract.call()` not generating valid operations ([#145](https://github.com/stellar/js-soroban-client/pull/145), [stellar-base#692](https://github.com/stellar/js-stellar-base/pull/692)).
 
 
 ## v1.0.0-beta.0
