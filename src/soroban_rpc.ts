@@ -68,9 +68,9 @@ export namespace SorobanRpc {
 
   interface GetAnyTransactionResponse {
     status: GetTransactionStatus;
-    latestLedger: number;
+    latestLedger: string;
     latestLedgerCloseTime: number;
-    oldestLedger: number;
+    oldestLedger: string;
     oldestLedgerCloseTime: number;
   }
 
@@ -98,9 +98,9 @@ export namespace SorobanRpc {
 
   export interface RawGetTransactionResponse {
     status: GetTransactionStatus;
-    latestLedger: number;
+    latestLedger: string;
     latestLedgerCloseTime: number;
-    oldestLedger: number;
+    oldestLedger: string;
     oldestLedgerCloseTime: number;
 
     // the fields below are set if status is SUCCESS
@@ -122,7 +122,7 @@ export namespace SorobanRpc {
   }
 
   export interface GetEventsResponse {
-    latestLedger: number;
+    latestLedger: string;
     events: EventResponse[];
   }
 
@@ -186,7 +186,7 @@ export namespace SorobanRpc {
     id: string;
 
     /** always present: the LCL known to the server when responding */
-    latestLedger: number;
+    latestLedger: string;
 
     /**
      * The field is always present, but may be empty in cases where:
@@ -195,6 +195,9 @@ export namespace SorobanRpc {
      * @see {@link humanizeEvents}
      */
     events: xdr.DiagnosticEvent[];
+
+    /** a private field to mark the schema as parsed */
+    _parsed: boolean;
   }
 
   /** Includes simplified fields only present on success. */
@@ -245,7 +248,8 @@ export namespace SorobanRpc {
 
   export function isSimulationRestore(sim: SimulateTransactionResponse):
     sim is SimulateTransactionRestoreResponse {
-    return isSimulationSuccess(sim) && 'restorePreamble' in sim;
+    return isSimulationSuccess(sim) && 'restorePreamble' in sim &&
+      !!sim.restorePreamble.transactionData;
   }
 
   interface RawSimulateHostFunctionResult {
@@ -258,7 +262,7 @@ export namespace SorobanRpc {
   /** @see https://soroban.stellar.org/api/methods/simulateTransaction#returns */
   export interface RawSimulateTransactionResponse {
     id: string;
-    latestLedger: number;
+    latestLedger: string;
     error?: string;
     // this is an xdr.SorobanTransactionData in base64
     transactionData?: string;
