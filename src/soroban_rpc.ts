@@ -122,7 +122,7 @@ export namespace SorobanRpc {
   }
 
   export interface GetEventsResponse {
-    latestLedger: number;
+    latestLedger: string;
     events: EventResponse[];
   }
 
