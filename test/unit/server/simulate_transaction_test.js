@@ -26,7 +26,8 @@ describe('Server#simulateTransaction', function () {
       ),
       retval: xdr.ScVal.fromXDR(simulationResponse.results[0].xdr, 'base64')
     },
-    cost: simulationResponse.cost
+    cost: simulationResponse.cost,
+    _parsed: true
   };
 
   beforeEach(function () {
@@ -167,7 +168,8 @@ function cloneSimulation(sim) {
       ),
       retval: xdr.ScVal.fromXDR(sim.result.retval.toXDR())
     },
-    cost: sim.cost
+    cost: sim.cost,
+    _parsed: sim._parsed
   };
 }
 
@@ -235,3 +237,43 @@ function invokeSimulationResponseWithRestoration(address) {
     }
   };
 }
+
+describe('works with real responses', function() {
+  const schema = {
+    "transactionData": "AAAAAAAAAAIAAAAGAAAAAa/6eoLeofDK5ksPljSZ7t/rAj/XR18e40fCB9LBugstAAAAFAAAAAEAAAAHqA0LEZLq3WL+N3rBQLTWuPqdV3Vv6XIAGeBJaz1wMdsAAAAAABg1gAAAAxwAAAAAAAAAAAAAAAk=",
+    "minResourceFee": "27889",
+    "events": [
+      "AAAAAQAAAAAAAAAAAAAAAgAAAAAAAAADAAAADwAAAAdmbl9jYWxsAAAAAA0AAAAgr/p6gt6h8MrmSw+WNJnu3+sCP9dHXx7jR8IH0sG6Cy0AAAAPAAAABWhlbGxvAAAAAAAADwAAAAVBbG9oYQAAAA==",
+      "AAAAAQAAAAAAAAABr/p6gt6h8MrmSw+WNJnu3+sCP9dHXx7jR8IH0sG6Cy0AAAACAAAAAAAAAAIAAAAPAAAACWZuX3JldHVybgAAAAAAAA8AAAAFaGVsbG8AAAAAAAAQAAAAAQAAAAIAAAAPAAAABUhlbGxvAAAAAAAADwAAAAVBbG9oYQAAAA=="
+    ],
+    "results": [
+      {
+        "auth": [],
+        "xdr": "AAAAEAAAAAEAAAACAAAADwAAAAVIZWxsbwAAAAAAAA8AAAAFQWxvaGEAAAA="
+      }
+    ],
+    "cost": {
+      "cpuInsns": "1322134",
+      "memBytes": "1207047"
+    },
+    "restorePreamble": {
+      "transactionData": "",
+      "minResourceFee": "0"
+    },
+    "latestLedger": "2634"
+  };
+
+  it('parses the schema', function() {
+    expect(SorobanClient.isSimulationRaw(schema)).to.be.true;
+
+    const parsed = SorobanClient.parseRawSimulation(schema);
+
+    expect(parsed.results).to.be.undefined;
+    expect(parsed.result.auth).to.be.empty;
+    expect(parsed.result.retval).to.be.instanceOf(xdr.ScVal);
+    expect(parsed.transactionData).to.be.instanceOf(SorobanDataBuilder);
+    expect(parsed.events).to.be.lengthOf(2);
+    expect(parsed.events[0]).to.be.instanceOf(xdr.DiagnosticEvent);
+    expect(parsed.restorePreamble).to.be.undefined;
+  });
+})

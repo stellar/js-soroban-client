@@ -121,6 +121,7 @@ export function parseRawSimulation(
 
   // shared across all responses
   let base: SorobanRpc.BaseSimulateTransactionResponse = {
+    _parsed: true,
     id: sim.id,
     latestLedger: sim.latestLedger,
     events: sim.events?.map(
@@ -171,7 +172,7 @@ function parseSuccessful(
     )
   };
 
-  if (!sim.restorePreamble) {
+  if (!sim.restorePreamble || sim.restorePreamble.transactionData === '') {
     return success;
   }
 
@@ -187,29 +188,12 @@ function parseSuccessful(
   };
 }
 
-
-function isSimulationRaw(
+export function isSimulationRaw(
   sim:
     | SorobanRpc.SimulateTransactionResponse
     | SorobanRpc.RawSimulateTransactionResponse
 ): sim is SorobanRpc.RawSimulateTransactionResponse {
-  const asGud = sim as SorobanRpc.SimulateTransactionRestoreResponse;
-  const asRaw = sim as SorobanRpc.RawSimulateTransactionResponse;
-
-  // lazy checks to determine type: check existence of parsed-only fields note
-  return (
-    asRaw.restorePreamble !== undefined ||
-    !(
-      asGud.restorePreamble !== undefined ||
-      asGud.result !== undefined ||
-      typeof asGud.transactionData !== 'string'
-    ) ||
-    (asRaw.error !== undefined && (
-      !asRaw.events?.length ||
-      typeof asRaw.events![0] === 'string'
-    )) ||
-    (asRaw.results ?? []).length > 0
-  );
+  return !(sim as SorobanRpc.SimulateTransactionResponse)._parsed;
 }
 
 function isSorobanTransaction(tx: Transaction): boolean {
