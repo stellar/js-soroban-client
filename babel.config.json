@@ -9,6 +9,18 @@
         "node": 16
     },
     "env": {
+        "esm": {
+          "presets": [
+            "@babel/preset-env",
+            "@babel/typescript"
+          ]
+        },
+        "cjs": {
+          "presets": [
+            ["@babel/preset-env", { "modules": "commonjs" }],
+            "@babel/typescript"
+          ]
+        },
         "development": {
             "plugins": [ "istanbul" ]   // for code coverage
         },

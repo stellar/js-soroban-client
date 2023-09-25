@@ -1,0 +1,14 @@
+{
+  "extends": "@stellar/tsconfig",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationDir": "lib",
+    "removeComments": false,
+    "lib": ["es2015"],
+    "moduleResolution": "node",
+    "rootDir": "src",
+    "target": "es5"
+  },
+  "include": ["src"]
+}
