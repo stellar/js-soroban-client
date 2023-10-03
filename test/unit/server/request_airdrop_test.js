@@ -1,7 +1,6 @@
 const { Account, Keypair, StrKey, Networks, xdr } = SorobanClient;
 
 describe('Server#requestAirdrop', function () {
-
   function accountLedgerEntryData(accountId, sequence) {
     return new xdr.LedgerEntryData.account(
       new xdr.AccountEntry({
@@ -72,11 +71,13 @@ describe('Server#requestAirdrop', function () {
       'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNMADI';
     mockGetNetwork.call(this, friendbotUrl);
 
-    const result_meta = transactionMetaFor(accountId, '1234').toXDR('base64');
+    const result_meta_xdr = transactionMetaFor(accountId, '1234').toXDR(
+      'base64'
+    );
     this.axiosMock
       .expects('post')
       .withArgs(`${friendbotUrl}?addr=${accountId}`)
-      .returns(Promise.resolve({ data: { result_meta } }));
+      .returns(Promise.resolve({ data: { result_meta_xdr } }));
 
     this.server
       .requestAirdrop(accountId)
@@ -120,7 +121,7 @@ describe('Server#requestAirdrop', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [ [ accountKey ] ]
+        params: [[accountKey]]
       })
       .returns(
         Promise.resolve({

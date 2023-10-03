@@ -12,7 +12,7 @@ describe('Server#getContractData', function () {
   });
 
   const address = 'CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5';
-  const key = nativeToScVal([ 'Admin' ]);
+  const key = nativeToScVal(['Admin']);
 
   const ledgerEntry = xdr.LedgerEntryData.contractData(
     new xdr.ContractDataEntry({
@@ -20,7 +20,7 @@ describe('Server#getContractData', function () {
       contract: new SorobanClient.Address(address).toScAddress(),
       durability: xdr.ContractDataDurability.persistent(),
       key,
-      val: key, // lazy
+      val: key // lazy
     })
   );
 
@@ -29,7 +29,7 @@ describe('Server#getContractData', function () {
     new xdr.LedgerKeyContractData({
       contract: ledgerEntry.contractData().contract(),
       durability: ledgerEntry.contractData().durability(),
-      key: ledgerEntry.contractData().key(),
+      key: ledgerEntry.contractData().key()
     })
   );
 
@@ -37,7 +37,7 @@ describe('Server#getContractData', function () {
     let result = {
       lastModifiedLedgerSeq: 1,
       key: ledgerKey,
-      val: ledgerEntry,
+      val: ledgerEntry
     };
 
     this.axiosMock
@@ -46,18 +46,20 @@ describe('Server#getContractData', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [ [ ledgerKey.toXDR('base64') ] ]
+        params: [[ledgerKey.toXDR('base64')]]
       })
       .returns(
         Promise.resolve({
           data: {
             result: {
               latestLedger: 420,
-              entries: [{
-                lastModifiedLedgerSeq: result.lastModifiedLedgerSeq,
-                key: result.key.toXDR('base64'),
-                xdr: result.val.toXDR('base64'),
-              }],
+              entries: [
+                {
+                  lastModifiedLedgerSeq: result.lastModifiedLedgerSeq,
+                  key: result.key.toXDR('base64'),
+                  xdr: result.val.toXDR('base64')
+                }
+              ]
             }
           }
         })
@@ -66,8 +68,12 @@ describe('Server#getContractData', function () {
     this.server
       .getContractData(address, key, Durability.Persistent)
       .then(function (response) {
-        expect(response.key.toXDR('base64')).to.be.deep.equal(result.key.toXDR('base64'));
-        expect(response.val.toXDR('base64')).to.be.deep.equal(result.val.toXDR('base64'));
+        expect(response.key.toXDR('base64')).to.be.deep.equal(
+          result.key.toXDR('base64')
+        );
+        expect(response.val.toXDR('base64')).to.be.deep.equal(
+          result.val.toXDR('base64')
+        );
         done();
       })
       .catch((err) => done(err));
@@ -76,9 +82,9 @@ describe('Server#getContractData', function () {
   it('key not found', function (done) {
     // clone and change durability to test this case
     const ledgerKeyDupe = xdr.LedgerKey.fromXDR(ledgerKey.toXDR());
-    ledgerKeyDupe.contractData().durability(
-      xdr.ContractDataDurability.temporary()
-    );
+    ledgerKeyDupe
+      .contractData()
+      .durability(xdr.ContractDataDurability.temporary());
 
     this.axiosMock
       .expects('post')
@@ -86,7 +92,7 @@ describe('Server#getContractData', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [ [ ledgerKeyDupe.toXDR('base64') ] ]
+        params: [[ledgerKeyDupe.toXDR('base64')]]
       })
       .returns(Promise.resolve({ data: { result: { entries: [] } } }));
 

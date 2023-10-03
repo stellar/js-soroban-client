@@ -98,6 +98,10 @@ export function parseLedgerEntries(
     return {
       latestLedger: raw.latestLedger,
       entries: (raw.entries ?? []).map(rawEntry => {
+        if (!rawEntry.key || !rawEntry.xdr) {
+          throw new TypeError(`invalid ledger entry: ${rawEntry}`);
+        }
+
         return {
           lastModifiedLedgerSeq: rawEntry.lastModifiedLedgerSeq,
           key: xdr.LedgerKey.fromXDR(rawEntry.key, 'base64'),
