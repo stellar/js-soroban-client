@@ -118,12 +118,7 @@ export class Server {
       });
     }
 
-    const ledgerEntryData = entries[0].xdr;
-    const accountEntry = xdr.LedgerEntryData.fromXDR(
-      ledgerEntryData,
-      "base64",
-    ).account();
-
+    const accountEntry = entries[0].val.account();
     return new Account(address, accountEntry.seqNum().toString());
   }
 
