@@ -8,7 +8,6 @@ export { ContractSpec } from "./contract_spec";
 export { Server, Durability } from "./server";
 export { AxiosClient, version } from "./axios";
 export * from "./transaction";
-export * from "./parsers";
 
 // expose classes and functions from stellar-base
 export * from "stellar-base";

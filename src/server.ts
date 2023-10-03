@@ -274,7 +274,6 @@ export class Server {
     );
   }
 
-
   /**
    * Fetch the details of a submitted transaction.
    *
