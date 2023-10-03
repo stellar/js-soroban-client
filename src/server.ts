@@ -6,7 +6,7 @@ import {
   Address,
   Contract,
   FeeBumpTransaction,
-  StrKey,
+  Keypair,
   Transaction,
   xdr,
 } from "stellar-base";
@@ -103,22 +103,19 @@ export class Server {
   public async getAccount(address: string): Promise<Account> {
     const ledgerKey = xdr.LedgerKey.account(
       new xdr.LedgerKeyAccount({
-        accountId: xdr.PublicKey.publicKeyTypeEd25519(
-          StrKey.decodeEd25519PublicKey(address),
-        ),
+        accountId: Keypair.fromPublicKey(address).xdrPublicKey(),
       }),
     );
-    const resp = await this.getLedgerEntries(ledgerKey);
 
-    const entries = resp.entries ?? [];
-    if (entries.length === 0) {
+    const resp = await this.getLedgerEntries(ledgerKey);
+    if (resp.entries.length === 0) {
       return Promise.reject({
         code: 404,
         message: `Account not found: ${address}`,
       });
     }
 
-    const accountEntry = entries[0].val.account();
+    const accountEntry = resp.entries[0].val.account();
     return new Account(address, accountEntry.seqNum().toString());
   }
 
@@ -166,8 +163,8 @@ export class Server {
    * @example
    * const contractId = "CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5";
    * const key = xdr.ScVal.scvSymbol("counter");
-   * server.getContractData(contractId, key, 'temporary').then(data => {
-   *   console.log("value:", data.xdr);
+   * server.getContractData(contractId, key, Durability.Temporary).then(data => {
+   *   console.log("value:", data.val);
    *   console.log("lastModified:", data.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", data.latestLedger);
    * });
@@ -213,9 +210,8 @@ export class Server {
 
     return this
       .getLedgerEntries(contractKey)
-      .then((response) => {
-        const entries = response.entries ?? [];
-        if (entries.length === 0) {
+      .then((r: SorobanRpc.GetLedgerEntriesResponse) => {
+        if (r.entries.length === 0) {
           return Promise.reject({
             code: 404,
             message: `Contract data not found. Contract: ${Address.fromScAddress(
@@ -226,7 +222,7 @@ export class Server {
           });
         }
 
-        return entries[0];
+        return r.entries[0];
       });
   }
 
@@ -265,11 +261,11 @@ export class Server {
   public async getLedgerEntries(
     ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.GetLedgerEntriesResponse> {
-    return this._getLedgerEntries(keys).then(parseLedgerEntries);
+    return this._getLedgerEntries(...keys).then(r => parseLedgerEntries(r));
   }
 
   public async _getLedgerEntries(
-    keys: xdr.LedgerKey[]
+    ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.RawGetLedgerEntriesResponse> {
     return jsonrpc.post<SorobanRpc.RawGetLedgerEntriesResponse>(
       this.serverURL.toString(),
