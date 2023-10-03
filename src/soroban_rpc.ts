@@ -163,11 +163,17 @@ export namespace SorobanRpc {
 
   export interface SendTransactionResponse {
     status: SendTransactionStatus;
-    // errorResultXdr is only set when status is ERROR
-    errorResultXdr?: string;
     hash: string;
     latestLedger: number;
     latestLedgerCloseTime: number;
+
+    /**
+     * This is a base64-encoded instance of {@link xdr.TransactionResult}, set
+     * only when `status` is `"ERROR"`.
+     *
+     * It contains details on why the network rejected the transaction.
+     */
+    errorResultXdr?: string;
   }
 
   export interface SimulateHostFunctionResult {
