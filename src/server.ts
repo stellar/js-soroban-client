@@ -388,14 +388,18 @@ export class Server {
     // is an ScSymbol and the last is a U32.
     //
     // The difficulty comes in matching up the correct integer primitives.
-    return jsonrpc.postObject(this.serverURL.toString(), "getEvents", {
-      filters: request.filters ?? [],
-      pagination: {
-        ...(request.cursor && { cursor: request.cursor }), // add if defined
-        ...(request.limit && { limit: request.limit }),
-      },
-      ...(request.startLedger && { startLedger: request.startLedger.toString() }),
-    });
+    return jsonrpc.postObject<SorobanRpc.RawGetEventsResponse>(
+      this.serverURL.toString(),
+      "getEvents",
+      {
+        filters: request.filters ?? [],
+        pagination: {
+          ...(request.cursor && { cursor: request.cursor }), // add if defined
+          ...(request.limit && { limit: request.limit }),
+        },
+        ...(request.startLedger && { startLedger: request.startLedger.toString() }),
+      }
+    ).then(r => parseEvents(r));
   }
 
   /**
@@ -727,4 +731,18 @@ function findCreatedAccountSequenceInTransactionMeta(
   }
 
   throw new Error("No account created in transaction");
+}
+
+function parseEvents(r: SorobanRpc.RawGetEventsResponse): SorobanRpc.GetEventsResponse {
+  return {
+    latestLedger: r.latestLedger,
+    events: r.events.map(evt => {
+      return {
+        ...evt,
+        contractId: new Contract(evt.contractId),
+        topic: evt.topic.map(topic => xdr.ScVal.fromXDR(topic, 'base64')),
+        value: xdr.DiagnosticEvent.fromXDR(evt.value.xdr, 'base64')
+      };
+    }),
+  };
 }
