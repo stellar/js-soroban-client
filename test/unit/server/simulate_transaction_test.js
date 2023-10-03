@@ -1,12 +1,10 @@
-// not exported but needed for testing
-import parseRawSimulation from '../../../lib/parsers';
-
 const {
   Account,
   Keypair,
   Networks,
   SorobanDataBuilder,
   authorizeInvocation,
+  parseRawSimulation,
   xdr
 } = SorobanClient;
 
