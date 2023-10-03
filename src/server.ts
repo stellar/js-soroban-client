@@ -15,7 +15,8 @@ import AxiosClient from "./axios";
 import { Friendbot } from "./friendbot";
 import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
-import { assembleTransaction, parseRawSimulation } from "./transaction";
+import { assembleTransaction } from "./transaction";
+import { parseRawSimulation, parseLedgerEntries } from "./parsers";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -269,7 +270,7 @@ export class Server {
   public async getLedgerEntries(
     ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.GetLedgerEntriesResponse> {
-    return this._getLedgerEntries(keys).then(SorobanRpc.parseLedgerEntries);
+    return this._getLedgerEntries(keys).then(parseLedgerEntries);
   }
 
   public async _getLedgerEntries(

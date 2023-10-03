@@ -50,21 +50,6 @@ export namespace SorobanRpc {
     latestLedger: number;
   }
 
-  export function parseLedgerEntries(
-    raw: RawGetLedgerEntriesResponse
-  ): GetLedgerEntriesResponse {
-    return {
-      latestLedger: raw.latestLedger,
-      entries: (raw.entries ?? []).map(rawEntry => {
-        return {
-          lastModifiedLedgerSeq: rawEntry.lastModifiedLedgerSeq,
-          key: xdr.LedgerKey.fromXDR(rawEntry.key, 'base64'),
-          val: xdr.LedgerEntryData.fromXDR(rawEntry.xdr, 'base64'),
-        };
-      })
-    };
-  }
-
   /* Response for jsonrpc method `getNetwork`
    */
   export interface GetNetworkResponse {
@@ -276,6 +261,14 @@ export namespace SorobanRpc {
     sim is SimulateTransactionRestoreResponse {
     return isSimulationSuccess(sim) && 'restorePreamble' in sim &&
       !!sim.restorePreamble.transactionData;
+  }
+
+  export function isSimulationRaw(
+    sim:
+      | SorobanRpc.SimulateTransactionResponse
+      | SorobanRpc.RawSimulateTransactionResponse
+  ): sim is SorobanRpc.RawSimulateTransactionResponse {
+    return !(sim as SorobanRpc.SimulateTransactionResponse)._parsed;
   }
 
   interface RawSimulateHostFunctionResult {
