@@ -249,6 +249,7 @@ export class Server {
    * @returns {Promise<SorobanRpc.GetLedgerEntriesResponse>}  the current
    *    on-chain values for the given ledger keys
    *
+   * @see Server._getLedgerEntries
    * @see https://soroban.stellar.org/api/methods/getLedgerEntries
    * @example
    * const contractId = "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM";
@@ -260,7 +261,7 @@ export class Server {
    * server.getLedgerEntries([key]).then(response => {
    *   const ledgerData = response.entries[0];
    *   console.log("key:", ledgerData.key);
-   *   console.log("value:", ledgerData.xdr);
+   *   console.log("value:", ledgerData.val);
    *   console.log("lastModified:", ledgerData.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", response.latestLedger);
    * });
@@ -268,12 +269,19 @@ export class Server {
   public async getLedgerEntries(
     ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.GetLedgerEntriesResponse> {
-    return await jsonrpc.post(
+    return this._getLedgerEntries(keys).then(SorobanRpc.parseLedgerEntries);
+  }
+
+  public async _getLedgerEntries(
+    keys: xdr.LedgerKey[]
+  ): Promise<SorobanRpc.RawGetLedgerEntriesResponse> {
+    return jsonrpc.post<SorobanRpc.RawGetLedgerEntriesResponse>(
       this.serverURL.toString(),
       "getLedgerEntries",
       keys.map((k) => k.toXDR("base64")),
     );
   }
+
 
   /**
    * Fetch the details of a submitted transaction.

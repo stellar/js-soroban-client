@@ -26,6 +26,12 @@ export namespace SorobanRpc {
 
   export interface LedgerEntryResult {
     lastModifiedLedgerSeq?: number;
+    key: xdr.LedgerKey;
+    val: xdr.LedgerEntryData;
+  }
+
+  export interface RawLedgerEntryResult {
+    lastModifiedLedgerSeq?: number;
     /** a base-64 encoded {@link xdr.LedgerKey} instance */
     key: string;
     /** a base-64 encoded {@link xdr.LedgerEntryData} instance */
@@ -35,8 +41,28 @@ export namespace SorobanRpc {
   /* Response for jsonrpc method `getLedgerEntries`
    */
   export interface GetLedgerEntriesResponse {
-    entries: LedgerEntryResult[] | null;
+    entries: LedgerEntryResult[];
     latestLedger: number;
+  }
+
+  export interface RawGetLedgerEntriesResponse {
+    entries?: RawLedgerEntryResult[];
+    latestLedger: number;
+  }
+
+  export function parseLedgerEntries(
+    raw: RawGetLedgerEntriesResponse
+  ): GetLedgerEntriesResponse {
+    return {
+      latestLedger: raw.latestLedger,
+      entries: (raw.entries ?? []).map(rawEntry => {
+        return {
+          lastModifiedLedgerSeq: rawEntry.lastModifiedLedgerSeq,
+          key: xdr.LedgerKey.fromXDR(rawEntry.key, 'base64'),
+          val: xdr.LedgerEntryData.fromXDR(rawEntry.xdr, 'base64'),
+        };
+      })
+    };
   }
 
   /* Response for jsonrpc method `getNetwork`
