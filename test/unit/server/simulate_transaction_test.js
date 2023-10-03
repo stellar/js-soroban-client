@@ -265,7 +265,7 @@ describe('works with real responses', function () {
   };
 
   it('parses the schema', function () {
-    expect(SorobanClient.isSimulationRaw(schema)).to.be.true;
+    expect(SorobanClient.SorobanRpc.isSimulationRaw(schema)).to.be.true;
 
     const parsed = SorobanClient.parseRawSimulation(schema);
 
