@@ -1,3 +1,6 @@
+// not exported but needed for testing
+import parseRawSimulation from '../../../lib/parsers';
+
 const {
   Account,
   Keypair,
@@ -98,7 +101,7 @@ describe('Server#simulateTransaction', function () {
     const parsedCopy = cloneSimulation(parsedSimulationResponse);
     delete parsedCopy.result;
 
-    const parsed = SorobanClient.parseRawSimulation(simResponse);
+    const parsed = parseRawSimulation(simResponse);
     expect(parsed).to.deep.equal(parsedCopy);
     expect(SorobanClient.SorobanRpc.isSimulationSuccess(parsed)).to.be.true;
   });
@@ -109,7 +112,7 @@ describe('Server#simulateTransaction', function () {
 
     const parsedCopy = cloneSimulation(parsedSimulationResponse);
     parsedCopy.result.auth = [];
-    const parsed = SorobanClient.parseRawSimulation(simResponse);
+    const parsed = parseRawSimulation(simResponse);
 
     // FIXME: This is a workaround for an xdrgen bug that does not allow you to
     // build "perfectly-equal" xdr.ExtensionPoint instances (but they're still
@@ -130,7 +133,7 @@ describe('Server#simulateTransaction', function () {
       transactionData: new SorobanDataBuilder()
     };
 
-    const parsed = SorobanClient.parseRawSimulation(simResponse);
+    const parsed = parseRawSimulation(simResponse);
     expect(parsed).to.be.deep.equal(expected);
     expect(SorobanClient.SorobanRpc.isSimulationRestore(parsed)).to.be.true;
   });
@@ -147,7 +150,7 @@ describe('Server#simulateTransaction', function () {
     expected.error = 'This is an error';
     expected.events = [];
 
-    const parsed = SorobanClient.parseRawSimulation(simResponse);
+    const parsed = parseRawSimulation(simResponse);
     expect(parsed).to.be.deep.equal(expected);
     expect(SorobanClient.SorobanRpc.isSimulationError(parsed)).to.be.true;
   });
@@ -267,7 +270,7 @@ describe('works with real responses', function () {
   it('parses the schema', function () {
     expect(SorobanClient.SorobanRpc.isSimulationRaw(schema)).to.be.true;
 
-    const parsed = SorobanClient.parseRawSimulation(schema);
+    const parsed = parseRawSimulation(schema);
 
     expect(parsed.results).to.be.undefined;
     expect(parsed.result.auth).to.be.empty;
