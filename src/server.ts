@@ -733,10 +733,10 @@ function findCreatedAccountSequenceInTransactionMeta(
   throw new Error("No account created in transaction");
 }
 
-function parseEvents(r: SorobanRpc.RawGetEventsResponse): SorobanRpc.GetEventsResponse {
+export function parseEvents(r: SorobanRpc.RawGetEventsResponse): SorobanRpc.GetEventsResponse {
   return {
     latestLedger: r.latestLedger,
-    events: r.events.map(evt => {
+    events: (r.events ?? []).map(evt => {
       return {
         ...evt,
         contractId: new Contract(evt.contractId),
