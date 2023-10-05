@@ -8,6 +8,13 @@ A breaking change should be clearly marked in this log.
 ## Unreleased
 
 
+## v1.0.0-beta.3
+
+### Fixed
+* The underlying `stellar-base` library has been updated; see the [release notes]() for any breaking changes ([]()).
+* Misc. developer dependencies have been updated as well as `axios` ([]()).
+
+
 ## v1.0.0-beta.2
 
 ### Fixed
