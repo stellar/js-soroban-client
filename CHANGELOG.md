@@ -11,8 +11,8 @@ A breaking change should be clearly marked in this log.
 ## v1.0.0-beta.3
 
 ### Fixed
-* The underlying `stellar-base` library has been updated; see the [release notes]() for any breaking changes ([]()).
-* Misc. developer dependencies have been updated as well as `axios` ([]()).
+* The underlying `stellar-base` library has been updated; see the [release notes](https://github.com/stellar/js-stellar-base/releases/tag/v10.0.0-beta.2) for any breaking changes ([#155](https://github.com/stellar/js-soroban-client/pull/155)).
+* Misc. developer dependencies have been updated as well as `axios` ([#155](https://github.com/stellar/js-soroban-client/pull/155)).
 
 
 ## v1.0.0-beta.2
