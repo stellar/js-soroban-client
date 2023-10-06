@@ -162,7 +162,7 @@ export namespace SorobanRpc {
     topic: string[];
     value: {
       xdr: string;
-    }
+    };
   }
 
   export interface RequestAirdropResponse {

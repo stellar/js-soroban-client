@@ -37,7 +37,7 @@ describe('Server#getEvents', function () {
   it('can build wildcard filters', function (done) {
     let result = {
       latestLedger: 1,
-      events: filterEvents(getEventsResponseFixture, '*/*'),
+      events: filterEvents(getEventsResponseFixture, '*/*')
     };
 
     setupMock(
@@ -110,12 +110,12 @@ describe('Server#getEvents', function () {
   });
 
   it('can build mixed filters', function (done) {
-    let result =  {
+    let result = {
       latestLedger: 1,
       events: filterEventsByLedger(
         filterEvents(getEventsResponseFixture, 'AAAABQAAAAh0cmFuc2Zlcg==/*'),
         1
-      ),
+      )
     };
 
     setupMock(
@@ -220,7 +220,7 @@ function setupMock(axiosMock, params, result) {
 function parseEvents(result) {
   return {
     ...result,
-    events: result.events.map(SorobanClient.parseRawEvents),
+    events: result.events.map(SorobanClient.parseRawEvents)
   };
 }
 
