@@ -6,7 +6,7 @@ import {
   Address,
   Contract,
   FeeBumpTransaction,
-  StrKey,
+  Keypair,
   Transaction,
   xdr,
 } from "stellar-base";
@@ -15,7 +15,8 @@ import AxiosClient from "./axios";
 import { Friendbot } from "./friendbot";
 import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
-import { assembleTransaction, parseRawSimulation } from "./transaction";
+import { assembleTransaction } from "./transaction";
+import { parseRawSimulation, parseRawLedgerEntries } from "./parsers";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -102,27 +103,19 @@ export class Server {
   public async getAccount(address: string): Promise<Account> {
     const ledgerKey = xdr.LedgerKey.account(
       new xdr.LedgerKeyAccount({
-        accountId: xdr.PublicKey.publicKeyTypeEd25519(
-          StrKey.decodeEd25519PublicKey(address),
-        ),
+        accountId: Keypair.fromPublicKey(address).xdrPublicKey(),
       }),
     );
-    const resp = await this.getLedgerEntries(ledgerKey);
 
-    const entries = resp.entries ?? [];
-    if (entries.length === 0) {
+    const resp = await this.getLedgerEntries(ledgerKey);
+    if (resp.entries.length === 0) {
       return Promise.reject({
         code: 404,
         message: `Account not found: ${address}`,
       });
     }
 
-    const ledgerEntryData = entries[0].xdr;
-    const accountEntry = xdr.LedgerEntryData.fromXDR(
-      ledgerEntryData,
-      "base64",
-    ).account();
-
+    const accountEntry = resp.entries[0].val.account();
     return new Account(address, accountEntry.seqNum().toString());
   }
 
@@ -170,8 +163,8 @@ export class Server {
    * @example
    * const contractId = "CCJZ5DGASBWQXR5MPFCJXMBI333XE5U3FSJTNQU7RIKE3P5GN2K2WYD5";
    * const key = xdr.ScVal.scvSymbol("counter");
-   * server.getContractData(contractId, key, 'temporary').then(data => {
-   *   console.log("value:", data.xdr);
+   * server.getContractData(contractId, key, Durability.Temporary).then(data => {
+   *   console.log("value:", data.val);
    *   console.log("lastModified:", data.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", data.latestLedger);
    * });
@@ -217,9 +210,8 @@ export class Server {
 
     return this
       .getLedgerEntries(contractKey)
-      .then((response) => {
-        const entries = response.entries ?? [];
-        if (entries.length === 0) {
+      .then((r: SorobanRpc.GetLedgerEntriesResponse) => {
+        if (r.entries.length === 0) {
           return Promise.reject({
             code: 404,
             message: `Contract data not found. Contract: ${Address.fromScAddress(
@@ -230,7 +222,7 @@ export class Server {
           });
         }
 
-        return entries[0];
+        return r.entries[0];
       });
   }
 
@@ -249,6 +241,7 @@ export class Server {
    * @returns {Promise<SorobanRpc.GetLedgerEntriesResponse>}  the current
    *    on-chain values for the given ledger keys
    *
+   * @see Server._getLedgerEntries
    * @see https://soroban.stellar.org/api/methods/getLedgerEntries
    * @example
    * const contractId = "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM";
@@ -260,7 +253,7 @@ export class Server {
    * server.getLedgerEntries([key]).then(response => {
    *   const ledgerData = response.entries[0];
    *   console.log("key:", ledgerData.key);
-   *   console.log("value:", ledgerData.xdr);
+   *   console.log("value:", ledgerData.val);
    *   console.log("lastModified:", ledgerData.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", response.latestLedger);
    * });
@@ -268,7 +261,13 @@ export class Server {
   public async getLedgerEntries(
     ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.GetLedgerEntriesResponse> {
-    return await jsonrpc.post(
+    return this._getLedgerEntries(...keys).then(r => parseRawLedgerEntries(r));
+  }
+
+  public async _getLedgerEntries(
+    ...keys: xdr.LedgerKey[]
+  ): Promise<SorobanRpc.RawGetLedgerEntriesResponse> {
+    return jsonrpc.post<SorobanRpc.RawGetLedgerEntriesResponse>(
       this.serverURL.toString(),
       "getLedgerEntries",
       keys.map((k) => k.toXDR("base64")),

@@ -26,16 +26,27 @@ export namespace SorobanRpc {
 
   export interface LedgerEntryResult {
     lastModifiedLedgerSeq?: number;
+    key: xdr.LedgerKey;
+    val: xdr.LedgerEntryData;
+  }
+
+  export interface RawLedgerEntryResult {
+    lastModifiedLedgerSeq?: number;
     /** a base-64 encoded {@link xdr.LedgerKey} instance */
     key: string;
     /** a base-64 encoded {@link xdr.LedgerEntryData} instance */
     xdr: string;
   }
 
-  /* Response for jsonrpc method `getLedgerEntries`
-   */
+  /** An XDR-parsed version of {@link RawLedgerEntryResult} */
   export interface GetLedgerEntriesResponse {
-    entries: LedgerEntryResult[] | null;
+    entries: LedgerEntryResult[];
+    latestLedger: number;
+  }
+
+  /** @see https://soroban.stellar.org/api/methods/getLedgerEntries */
+  export interface RawGetLedgerEntriesResponse {
+    entries?: RawLedgerEntryResult[];
     latestLedger: number;
   }
 
@@ -152,11 +163,17 @@ export namespace SorobanRpc {
 
   export interface SendTransactionResponse {
     status: SendTransactionStatus;
-    // errorResultXdr is only set when status is ERROR
-    errorResultXdr?: string;
     hash: string;
     latestLedger: number;
     latestLedgerCloseTime: number;
+
+    /**
+     * This is a base64-encoded instance of {@link xdr.TransactionResult}, set
+     * only when `status` is `"ERROR"`.
+     *
+     * It contains details on why the network rejected the transaction.
+     */
+    errorResultXdr?: string;
   }
 
   export interface SimulateHostFunctionResult {
@@ -250,6 +267,14 @@ export namespace SorobanRpc {
     sim is SimulateTransactionRestoreResponse {
     return isSimulationSuccess(sim) && 'restorePreamble' in sim &&
       !!sim.restorePreamble.transactionData;
+  }
+
+  export function isSimulationRaw(
+    sim:
+      | SorobanRpc.SimulateTransactionResponse
+      | SorobanRpc.RawSimulateTransactionResponse
+  ): sim is SorobanRpc.RawSimulateTransactionResponse {
+    return !(sim as SorobanRpc.SimulateTransactionResponse)._parsed;
   }
 
   interface RawSimulateHostFunctionResult {

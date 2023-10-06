@@ -7,6 +7,14 @@ A breaking change should be clearly marked in this log.
 
 ## Unreleased
 
+### Breaking Changes
+* The fields with XDR structures are now automatically decoded for the `Server.getLedgerEntries` response ([#154](https://github.com/stellar/js-soroban-client/pull/154)). Namely,
+ - `entries` is now guaranteed to exist, but it may be empty
+ - `entries[i].key` is an instance of `xdr.LedgerKey`
+ - the `entries[i].xdr` field is now `val`, instead
+ - `entries[i].val` is an instance of `xdr.LedgerEntryData`
+* If you want to continue to use the raw RPC response, you can use `Server._getLedgerEntries` method, instead.
+
 
 ## v1.0.0-beta.2
 

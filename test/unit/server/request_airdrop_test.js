@@ -1,8 +1,6 @@
-const MockAdapter = require('axios-mock-adapter');
+const { Account, Keypair, StrKey, Networks, xdr } = SorobanClient;
 
 describe('Server#requestAirdrop', function () {
-  const { Account, StrKey, xdr } = SorobanClient;
-
   function accountLedgerEntryData(accountId, sequence) {
     return new xdr.LedgerEntryData.account(
       new xdr.AccountEntry({
@@ -25,7 +23,7 @@ describe('Server#requestAirdrop', function () {
 
   // Create a mock transaction meta for the account we're going to request an airdrop for
   function transactionMetaFor(accountId, sequence) {
-    const meta = new xdr.TransactionMeta(0, [
+    return new xdr.TransactionMeta(0, [
       new xdr.OperationMeta({
         changes: [
           xdr.LedgerEntryChange.ledgerEntryCreated(
@@ -38,7 +36,6 @@ describe('Server#requestAirdrop', function () {
         ]
       })
     ]);
-    return meta;
   }
 
   beforeEach(function () {
@@ -54,7 +51,7 @@ describe('Server#requestAirdrop', function () {
   function mockGetNetwork(friendbotUrl) {
     const result = {
       friendbotUrl,
-      passphrase: 'Soroban Testnet ; December 2018',
+      passphrase: Networks.FUTURENET,
       protocolVersion: 20
     };
     this.axiosMock
@@ -112,23 +109,19 @@ describe('Server#requestAirdrop', function () {
         })
       );
 
+    const accountKey = xdr.LedgerKey.account(
+      new xdr.LedgerKeyAccount({
+        accountId: Keypair.fromPublicKey(accountId).xdrPublicKey()
+      })
+    ).toXDR('base64');
+
     this.axiosMock
       .expects('post')
       .withArgs(serverUrl, {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [
-          [
-            xdr.LedgerKey.account(
-              new xdr.LedgerKeyAccount({
-                accountId: xdr.PublicKey.publicKeyTypeEd25519(
-                  StrKey.decodeEd25519PublicKey(accountId)
-                )
-              })
-            ).toXDR('base64')
-          ]
-        ]
+        params: [[accountKey]]
       })
       .returns(
         Promise.resolve({
@@ -136,6 +129,7 @@ describe('Server#requestAirdrop', function () {
             result: {
               entries: [
                 {
+                  key: accountKey,
                   xdr: accountLedgerEntryData(accountId, '1234').toXDR('base64')
                 }
               ]
