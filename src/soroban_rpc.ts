@@ -161,12 +161,11 @@ export namespace SorobanRpc {
     | "TRY_AGAIN_LATER"
     | "ERROR";
 
-  export interface SendTransactionResponse {
-    status: SendTransactionStatus;
-    hash: string;
-    latestLedger: number;
-    latestLedgerCloseTime: number;
+  export interface SendTransactionResponse extends BaseSendTransactionResponse {
+    errorResultXdr?: xdr.TransactionResult;
+  }
 
+  export interface RawSendTransactionResponse extends BaseSendTransactionResponse {
     /**
      * This is a base64-encoded instance of {@link xdr.TransactionResult}, set
      * only when `status` is `"ERROR"`.
@@ -174,6 +173,13 @@ export namespace SorobanRpc {
      * It contains details on why the network rejected the transaction.
      */
     errorResultXdr?: string;
+  }
+
+  export interface BaseSendTransactionResponse {
+    status: SendTransactionStatus;
+    hash: string;
+    latestLedger: number;
+    latestLedgerCloseTime: number;
   }
 
   export interface SimulateHostFunctionResult {

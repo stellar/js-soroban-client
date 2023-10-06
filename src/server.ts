@@ -16,7 +16,11 @@ import { Friendbot } from "./friendbot";
 import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
 import { assembleTransaction } from "./transaction";
-import { parseRawSimulation, parseRawLedgerEntries } from "./parsers";
+import {
+  parseRawSendTransaction,
+  parseRawSimulation,
+  parseRawLedgerEntries
+} from "./parsers";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -626,11 +630,11 @@ export class Server {
   public async sendTransaction(
     transaction: Transaction | FeeBumpTransaction,
   ): Promise<SorobanRpc.SendTransactionResponse> {
-    return await jsonrpc.post(
+    return jsonrpc.post<SorobanRpc.RawSendTransactionResponse>(
       this.serverURL.toString(),
       "sendTransaction",
       transaction.toXDR(),
-    );
+    ).then(parseRawSendTransaction)
   }
 
   /**
