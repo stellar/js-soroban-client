@@ -28,6 +28,9 @@ export function parseRawLedgerEntries(
  *    detected, and returned untouched)
  *
  * @returns the original parameter (if already parsed), parsed otherwise
+ *
+ * @warning This API is only exported for testing purposes and should not be
+ *          relied on or considered "stable".
  */
 export function parseRawSimulation(
   sim:
