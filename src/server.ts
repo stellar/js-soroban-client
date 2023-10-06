@@ -630,11 +630,17 @@ export class Server {
   public async sendTransaction(
     transaction: Transaction | FeeBumpTransaction,
   ): Promise<SorobanRpc.SendTransactionResponse> {
-    return jsonrpc.post<SorobanRpc.RawSendTransactionResponse>(
+    return this._sendTransaction(transaction).then(parseRawSendTransaction);
+  }
+
+  public async _sendTransaction(
+    transaction: Transaction | FeeBumpTransaction,
+  ): Promise<SorobanRpc.RawSendTransactionResponse> {
+    return jsonrpc.post(
       this.serverURL.toString(),
       "sendTransaction",
       transaction.toXDR(),
-    ).then(parseRawSendTransaction)
+    );
   }
 
   /**
