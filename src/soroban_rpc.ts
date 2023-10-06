@@ -38,13 +38,13 @@ export namespace SorobanRpc {
     xdr: string;
   }
 
-  /* Response for jsonrpc method `getLedgerEntries`
-   */
+  /** An XDR-parsed version of {@link RawLedgerEntryResult} */
   export interface GetLedgerEntriesResponse {
     entries: LedgerEntryResult[];
     latestLedger: number;
   }
 
+  /** @see https://soroban.stellar.org/api/methods/getLedgerEntries */
   export interface RawGetLedgerEntriesResponse {
     entries?: RawLedgerEntryResult[];
     latestLedger: number;

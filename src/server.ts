@@ -16,7 +16,7 @@ import { Friendbot } from "./friendbot";
 import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
 import { assembleTransaction } from "./transaction";
-import { parseRawSimulation, parseLedgerEntries } from "./parsers";
+import { parseRawSimulation, parseRawLedgerEntries } from "./parsers";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -261,7 +261,7 @@ export class Server {
   public async getLedgerEntries(
     ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.GetLedgerEntriesResponse> {
-    return this._getLedgerEntries(...keys).then(r => parseLedgerEntries(r));
+    return this._getLedgerEntries(...keys).then(r => parseRawLedgerEntries(r));
   }
 
   public async _getLedgerEntries(

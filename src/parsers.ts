@@ -1,7 +1,7 @@
 import { xdr, SorobanDataBuilder } from 'stellar-base';
 import { SorobanRpc } from './soroban_rpc';
 
-export function parseLedgerEntries(
+export function parseRawLedgerEntries(
   raw: SorobanRpc.RawGetLedgerEntriesResponse
 ): SorobanRpc.GetLedgerEntriesResponse {
   return {
