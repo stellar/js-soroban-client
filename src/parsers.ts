@@ -1,5 +1,21 @@
-import { xdr, SorobanDataBuilder } from 'stellar-base';
+import { xdr, Contract, SorobanDataBuilder } from 'stellar-base';
 import { SorobanRpc } from './soroban_rpc';
+
+
+export function parseRawEvents(r: SorobanRpc.RawGetEventsResponse): SorobanRpc.GetEventsResponse {
+  return {
+    latestLedger: r.latestLedger,
+    events: (r.events ?? []).map(evt => {
+      return {
+        ...evt,
+        contractId: new Contract(evt.contractId),
+        topic: evt.topic.map(topic => xdr.ScVal.fromXDR(topic, 'base64')),
+        value: xdr.DiagnosticEvent.fromXDR(evt.value.xdr, 'base64')
+      };
+    }),
+  };
+}
+
 
 export function parseRawLedgerEntries(
   raw: SorobanRpc.RawGetLedgerEntriesResponse

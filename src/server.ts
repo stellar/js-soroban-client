@@ -16,7 +16,11 @@ import { Friendbot } from "./friendbot";
 import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
 import { assembleTransaction } from "./transaction";
-import { parseRawSimulation, parseRawLedgerEntries } from "./parsers";
+import {
+  parseRawSimulation,
+  parseRawLedgerEntries,
+  parseRawEvents
+} from "./parsers";
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -399,7 +403,7 @@ export class Server {
         },
         ...(request.startLedger && { startLedger: request.startLedger.toString() }),
       }
-    ).then(r => parseEvents(r));
+    ).then(parseRawEvents);
   }
 
   /**
@@ -731,18 +735,4 @@ function findCreatedAccountSequenceInTransactionMeta(
   }
 
   throw new Error("No account created in transaction");
-}
-
-export function parseEvents(r: SorobanRpc.RawGetEventsResponse): SorobanRpc.GetEventsResponse {
-  return {
-    latestLedger: r.latestLedger,
-    events: (r.events ?? []).map(evt => {
-      return {
-        ...evt,
-        contractId: new Contract(evt.contractId),
-        topic: evt.topic.map(topic => xdr.ScVal.fromXDR(topic, 'base64')),
-        value: xdr.DiagnosticEvent.fromXDR(evt.value.xdr, 'base64')
-      };
-    }),
-  };
 }

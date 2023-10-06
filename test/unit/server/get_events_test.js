@@ -220,7 +220,7 @@ function setupMock(axiosMock, params, result) {
 function parseEvents(result) {
   return {
     ...result,
-    events: result.events.map(SorobanClient.parseEvents),
+    events: result.events.map(SorobanClient.parseRawEvents),
   };
 }
 
