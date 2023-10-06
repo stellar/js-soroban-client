@@ -162,7 +162,7 @@ export namespace SorobanRpc {
     | "ERROR";
 
   export interface SendTransactionResponse extends BaseSendTransactionResponse {
-    errorResultXdr?: xdr.TransactionResult;
+    errorResult?: xdr.TransactionResult;
   }
 
   export interface RawSendTransactionResponse extends BaseSendTransactionResponse {

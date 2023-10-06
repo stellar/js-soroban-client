@@ -8,7 +8,7 @@ export function parseRawSendTransaction(
   if (!!r.errorResultXdr) {
     return {
       ...r,
-      errorResultXdr: xdr.TransactionResult.fromXDR(
+      errorResult: xdr.TransactionResult.fromXDR(
         r.errorResultXdr, 'base64'
       )
     };
