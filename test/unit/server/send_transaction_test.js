@@ -62,7 +62,7 @@ describe('Server#sendTransaction', function () {
       });
   });
 
-  it('encodes the error result', function(done) {
+  it('encodes the error result', function (done) {
     const txResult = new xdr.TransactionResult({
       feeCharged: new xdr.Int64(1),
       result: xdr.TransactionResultResult.txSorobanInvalid(),
@@ -79,11 +79,14 @@ describe('Server#sendTransaction', function () {
       })
       .returns(
         Promise.resolve({
-          data: { id: 1, result: {
-            id: this.hash,
-            status: 'ERROR',
-            errorResultXdr: txResult.toXDR('base64')
-          }}
+          data: {
+            id: 1,
+            result: {
+              id: this.hash,
+              status: 'ERROR',
+              errorResultXdr: txResult.toXDR('base64')
+            }
+          }
         })
       );
 
