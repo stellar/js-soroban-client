@@ -67,7 +67,7 @@
     ],
     "sort": true,
     "recursive": true,
-    "timeout": 60000
+    "timeout": 10000
   },
   "nyc": {
     "instrument": false,
@@ -139,7 +139,7 @@
     "axios": "^1.4.0",
     "bignumber.js": "^9.1.1",
     "buffer": "^6.0.3",
-    "stellar-base": "v10.0.0-beta.2",
+    "stellar-base": "v10.0.0-beta.3",
     "urijs": "^1.19.1"
   }
 }

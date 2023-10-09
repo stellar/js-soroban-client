@@ -8,6 +8,8 @@ const {
   xdr
 } = SorobanClient;
 
+const randomSecret = Keypair.random().secret();
+
 describe('Server#simulateTransaction', async function (done) {
   let keypair = Keypair.random();
   let contractId = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
@@ -104,38 +106,50 @@ describe('Server#simulateTransaction', async function (done) {
     expect(SorobanClient.SorobanRpc.isSimulationSuccess(parsed)).to.be.true;
   });
 
-  it('works with no auth', function () {
-    const simResponse = invokeSimulationResponse(address);
-    delete simResponse.results[0].auth;
+  it('works with no auth', async function () {
+    return invokeSimulationResponse(address).then((simResponse) => {
+      delete simResponse.results[0].auth;
 
-    const parsedCopy = cloneSimulation(parsedSimulationResponse);
-    parsedCopy.result.auth = [];
-    const parsed = parseRawSimulation(simResponse);
+      const parsedCopy = cloneSimulation(parsedSimulationResponse);
+      parsedCopy.result.auth = [];
+      const parsed = parseRawSimulation(simResponse);
 
-    // FIXME: This is a workaround for an xdrgen bug that does not allow you to
-    // build "perfectly-equal" xdr.ExtensionPoint instances (but they're still
-    // binary-equal, so the test passes).
-    parsedCopy.transactionData = parsedCopy.transactionData.build();
-    parsed.transactionData = parsed.transactionData.build();
+      // FIXME: This is a workaround for an xdrgen bug that does not allow you to
+      // build "perfectly-equal" xdr.ExtensionPoint instances (but they're still
+      // binary-equal, so the test passes).
+      parsedCopy.transactionData = parsedCopy.transactionData.build();
+      parsed.transactionData = parsed.transactionData.build();
 
-    expect(parsed).to.be.deep.equal(parsedCopy);
-    expect(SorobanClient.SorobanRpc.isSimulationSuccess(parsed)).to.be.true;
+      expect(parsed).to.be.deep.equal(parsedCopy);
+      expect(SorobanClient.SorobanRpc.isSimulationSuccess(parsed)).to.be.true;
+    });
   });
 
-  xit('works with restoration', async function (done) {
-    const simResponse = await invokeSimulationResponseWithRestoration(address);
+  it('works with restoration', async function () {
+    return invokeSimulationResponseWithRestoration(address).then(
+      (simResponse) => {
+        const expected = cloneSimulation(parsedSimulationResponse);
+        expected.restorePreamble = {
+          minResourceFee: '51',
+          transactionData: new SorobanDataBuilder()
+        };
 
-    const expected = cloneSimulation(parsedSimulationResponse);
-    expected.restorePreamble = {
-      minResourceFee: '51',
-      transactionData: new SorobanDataBuilder()
-    };
+        const parsed = parseRawSimulation(simResponse);
 
-    const parsed = parseRawSimulation(simResponse);
-    expect(parsed).to.be.deep.equal(expected);
-    expect(SorobanClient.SorobanRpc.isSimulationRestore(parsed)).to.be.true;
+        // expected.transactionData = expected.transactionData.build().toXDR('base64');
+        // expected.result.auth[0] = expected.result.auth[0].toXDR('base64');
+        // expected.restorePreamble.transactionData = expected.restorePreamble.transactionData.build().toXDR('base64');
+        // parsed.transactionData = parsed.transactionData.build().toXDR('base64');
+        // parsed.result.auth[0] = parsed.result.auth[0].toXDR('base64');
+        // parsed.restorePreamble.transactionData = parsed.restorePreamble.transactionData.build().toXDR('base64');
 
-    done();
+        console.info(JSON.stringify(expected.result.auth[0], null, 2));
+        console.info(JSON.stringify(parsed.result.auth[0], null, 2));
+
+        expect(SorobanClient.SorobanRpc.isSimulationRestore(parsed)).to.be.true;
+        expect(parsed).to.be.deep.equal(expected);
+      }
+    );
   });
 
   it('works with errors', function () {
@@ -196,8 +210,12 @@ async function buildAuthEntry(address) {
       )
   });
 
-  const kp = Keypair.random();
-  return authorizeInvocation(kp, Networks.FUTURENET, 1, root);
+  // do some voodoo to make this return a deterministic auth entry
+  const kp = Keypair.fromSecret(randomSecret);
+  let entry = authorizeInvocation(kp, 1, root);
+  entry.credentials().address().nonce(new xdr.Int64(0xdeadbeef));
+
+  return authorizeEntry(entry, kp, 1); // overwrites signature w/ above nonce
 }
 
 async function invokeSimulationResponse(address) {
