@@ -1,4 +1,4 @@
-import { AssetType, SorobanDataBuilder, xdr } from "stellar-base";
+import { AssetType, Contract, SorobanDataBuilder, xdr } from "stellar-base";
 
 // TODO: Better parsing for hashes
 
@@ -137,14 +137,28 @@ export namespace SorobanRpc {
     events: EventResponse[];
   }
 
-  export interface EventResponse {
+  interface EventResponse extends BaseEventResponse {
+    contractId: Contract,
+    topic: xdr.ScVal[];
+    value: xdr.DiagnosticEvent;
+  }
+
+  export interface RawGetEventsResponse {
+    latestLedger: string;
+    events: RawEventResponse[];
+  }
+
+  interface BaseEventResponse {
+    id: string;
     type: EventType;
     ledger: string;
     ledgerClosedAt: string;
-    contractId: string;
-    id: string;
     pagingToken: string;
     inSuccessfulContractCall: boolean;
+  }
+
+  interface RawEventResponse extends BaseEventResponse {
+    contractId: string;
     topic: string[];
     value: {
       xdr: string;
