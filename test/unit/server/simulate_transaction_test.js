@@ -114,12 +114,6 @@ describe('Server#simulateTransaction', async function (done) {
       parsedCopy.result.auth = [];
       const parsed = parseRawSimulation(simResponse);
 
-      // FIXME: This is a workaround for an xdrgen bug that does not allow you to
-      // build "perfectly-equal" xdr.ExtensionPoint instances (but they're still
-      // binary-equal, so the test passes).
-      parsedCopy.transactionData = parsedCopy.transactionData.build();
-      parsed.transactionData = parsed.transactionData.build();
-
       expect(parsed).to.be.deep.equal(parsedCopy);
       expect(SorobanClient.SorobanRpc.isSimulationSuccess(parsed)).to.be.true;
     });
@@ -135,17 +129,6 @@ describe('Server#simulateTransaction', async function (done) {
         };
 
         const parsed = parseRawSimulation(simResponse);
-
-        // expected.transactionData = expected.transactionData.build().toXDR('base64');
-        // expected.result.auth[0] = expected.result.auth[0].toXDR('base64');
-        // expected.restorePreamble.transactionData = expected.restorePreamble.transactionData.build().toXDR('base64');
-        // parsed.transactionData = parsed.transactionData.build().toXDR('base64');
-        // parsed.result.auth[0] = parsed.result.auth[0].toXDR('base64');
-        // parsed.restorePreamble.transactionData = parsed.restorePreamble.transactionData.build().toXDR('base64');
-
-        console.info(JSON.stringify(expected.result.auth[0], null, 2));
-        console.info(JSON.stringify(parsed.result.auth[0], null, 2));
-
         expect(SorobanClient.SorobanRpc.isSimulationRestore(parsed)).to.be.true;
         expect(parsed).to.be.deep.equal(expected);
       }
