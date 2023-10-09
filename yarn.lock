@@ -3150,9 +3150,9 @@ ee-first@1.1.1:
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
 electron-to-chromium@^1.4.535:
-  version "1.4.545"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.545.tgz#ab55fcd18796f26e2d124181792ca8b3f013c4b1"
-  integrity sha512-G1HKumUw+y5yxMjewGfKz0XrqG6O+Tb4zrlC/Vs1+9riRXBuFlO0hOEXP3xeI+ltlJkbVUuLkYdmjHYH6Jkiow==
+  version "1.4.546"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.546.tgz#673ff64862859b1593cebfbacc5fb6aebef7c457"
+  integrity sha512-cz9bBM26ZqoEmGHkdHXU3LP7OofVyEzRoMqfALQ9Au9WlB4rogAHzqj/NkNvw2JJjy4xuxS1me+pP2lbCD5Mfw==
 
 elliptic@^6.5.3:
   version "6.5.4"
@@ -6643,10 +6643,10 @@ statuses@~1.5.0:
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.5.0.tgz#161c7dac177659fd9811f43771fa99381478628c"
   integrity sha512-OpZ3zP+jT1PI7I8nemJX4AKmAX070ZkYPVWV/AaKTJl+tXCTGyVdC1a4SL8RUQYEwk/f34ZX8UTykN68FwrqAA==
 
-stellar-base@v10.0.0-beta.1:
-  version "10.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/stellar-base/-/stellar-base-10.0.0-beta.1.tgz#5b4209fbc44b8af82dd3ee8b7f6f4397126d8c3b"
-  integrity sha512-zXC5AsbUsLi57JruyeIMv23s3iUxq/P2ZFrSJ+FerLIZjSAjY8EDs4zwY4LCuu7swUu46Lm8GK6sqxUZCPekHw==
+stellar-base@v10.0.0-beta.3:
+  version "10.0.0-beta.3"
+  resolved "https://registry.yarnpkg.com/stellar-base/-/stellar-base-10.0.0-beta.3.tgz#c90e261945c58e2176b0a50b9a7b96003ecb0768"
+  integrity sha512-+B1fOdsDWJEnYSYkKSAVHVngzaqDtD8wdDMT/FC+11MrohP3uGY1OmrEeVn34jiBmUlpYZVudDnpDMSXD4RqDA==
   dependencies:
     base32.js "^0.1.0"
     bignumber.js "^9.1.2"
