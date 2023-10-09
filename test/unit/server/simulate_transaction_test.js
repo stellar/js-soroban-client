@@ -203,7 +203,9 @@ async function buildAuthEntry(address) {
 async function invokeSimulationResponse(address) {
   return baseSimulationResponse([
     {
-      auth: [await buildAuthEntry(address)].map((entry) => entry.toXDR('base64')),
+      auth: [await buildAuthEntry(address)].map((entry) =>
+        entry.toXDR('base64')
+      ),
       xdr: xdr.ScVal.scvU32(0).toXDR('base64')
     }
   ]);
@@ -235,7 +237,7 @@ function baseSimulationResponse(results) {
 
 async function invokeSimulationResponseWithRestoration(address) {
   return {
-    ...await invokeSimulationResponse(address),
+    ...(await invokeSimulationResponse(address)),
     restorePreamble: {
       minResourceFee: '51',
       transactionData: new SorobanDataBuilder().build().toXDR('base64')
