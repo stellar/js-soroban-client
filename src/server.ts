@@ -272,7 +272,7 @@ export class Server {
   public async _getLedgerEntries(
     ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.RawGetLedgerEntriesResponse> {
-    return jsonrpc.post<SorobanRpc.RawGetLedgerEntriesResponse>(
+    return jsonrpc.post(
       this.serverURL.toString(),
       "getLedgerEntries",
       keys.map((k) => k.toXDR("base64")),
@@ -345,7 +345,7 @@ export class Server {
   public async _getTransaction(
     hash: string,
   ): Promise<SorobanRpc.RawGetTransactionResponse> {
-    return jsonrpc.post<SorobanRpc.RawGetTransactionResponse>(
+    return jsonrpc.post(
       this.serverURL.toString(),
       "getTransaction",
       hash,
@@ -399,7 +399,7 @@ export class Server {
   public async _getEvents(
     request: Server.GetEventsRequest,
   ): Promise<SorobanRpc.RawGetEventsResponse> {
-    return jsonrpc.postObject<SorobanRpc.RawGetEventsResponse>(
+    return jsonrpc.postObject(
       this.serverURL.toString(),
       "getEvents",
       {
@@ -495,13 +495,17 @@ export class Server {
   public async simulateTransaction(
     transaction: Transaction | FeeBumpTransaction,
   ): Promise<SorobanRpc.SimulateTransactionResponse> {
-    return jsonrpc
-      .post<SorobanRpc.RawSimulateTransactionResponse>(
-        this.serverURL.toString(),
-        "simulateTransaction",
-        transaction.toXDR(),
-      )
-      .then(parseRawSimulation);
+    return this._simulateTransaction(transaction).then(parseRawSimulation);
+  }
+
+  public async _simulateTransaction(
+    transaction: Transaction | FeeBumpTransaction,
+  ): Promise<SorobanRpc.RawSimulateTransactionResponse> {
+    return jsonrpc.post(
+      this.serverURL.toString(),
+      "simulateTransaction",
+      transaction.toXDR(),
+    );
   }
 
   /**
