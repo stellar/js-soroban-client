@@ -302,47 +302,53 @@ export class Server {
   public async getTransaction(
     hash: string,
   ): Promise<SorobanRpc.GetTransactionResponse> {
-    const raw = await jsonrpc.post<SorobanRpc.RawGetTransactionResponse>(
+    return this._getTransaction(hash).then(raw => {
+      let successInfo: Omit<
+        SorobanRpc.GetSuccessfulTransactionResponse,
+        keyof SorobanRpc.GetFailedTransactionResponse
+      > = {} as any;
+
+      if (raw.status === SorobanRpc.GetTransactionStatus.SUCCESS) {
+        const meta = xdr.TransactionMeta.fromXDR(raw.resultMetaXdr!, "base64");
+        successInfo = {
+          ledger: raw.ledger!,
+          createdAt: raw.createdAt!,
+          applicationOrder: raw.applicationOrder!,
+          feeBump: raw.feeBump!,
+          envelopeXdr: xdr.TransactionEnvelope.fromXDR(
+            raw.envelopeXdr!,
+            "base64",
+          ),
+          resultXdr: xdr.TransactionResult.fromXDR(raw.resultXdr!, "base64"),
+          resultMetaXdr: meta,
+          ...(meta.switch() === 3 &&
+            meta.v3().sorobanMeta() !== null && {
+              returnValue: meta.v3().sorobanMeta()?.returnValue(),
+            }),
+        };
+      }
+
+      const result: SorobanRpc.GetTransactionResponse = {
+        status: raw.status,
+        latestLedger: raw.latestLedger,
+        latestLedgerCloseTime: raw.latestLedgerCloseTime,
+        oldestLedger: raw.oldestLedger,
+        oldestLedgerCloseTime: raw.oldestLedgerCloseTime,
+        ...successInfo,
+      };
+
+      return result;
+    });
+  }
+
+  public async _getTransaction(
+    hash: string,
+  ): Promise<SorobanRpc.RawGetTransactionResponse> {
+    return jsonrpc.post<SorobanRpc.RawGetTransactionResponse>(
       this.serverURL.toString(),
       "getTransaction",
       hash,
     );
-
-    let successInfo: Omit<
-      SorobanRpc.GetSuccessfulTransactionResponse,
-      keyof SorobanRpc.GetFailedTransactionResponse
-    > = {} as any;
-
-    if (raw.status === SorobanRpc.GetTransactionStatus.SUCCESS) {
-      const meta = xdr.TransactionMeta.fromXDR(raw.resultMetaXdr!, "base64");
-      successInfo = {
-        ledger: raw.ledger!,
-        createdAt: raw.createdAt!,
-        applicationOrder: raw.applicationOrder!,
-        feeBump: raw.feeBump!,
-        envelopeXdr: xdr.TransactionEnvelope.fromXDR(
-          raw.envelopeXdr!,
-          "base64",
-        ),
-        resultXdr: xdr.TransactionResult.fromXDR(raw.resultXdr!, "base64"),
-        resultMetaXdr: meta,
-        ...(meta.switch() === 3 &&
-          meta.v3().sorobanMeta() !== null && {
-            returnValue: meta.v3().sorobanMeta()?.returnValue(),
-          }),
-      };
-    }
-
-    const result: SorobanRpc.GetTransactionResponse = {
-      status: raw.status,
-      latestLedger: raw.latestLedger,
-      latestLedgerCloseTime: raw.latestLedgerCloseTime,
-      oldestLedger: raw.oldestLedger,
-      oldestLedgerCloseTime: raw.oldestLedgerCloseTime,
-      ...successInfo,
-    };
-
-    return result;
   }
 
   /**
@@ -392,12 +398,6 @@ export class Server {
   public async _getEvents(
     request: Server.GetEventsRequest,
   ): Promise<SorobanRpc.RawGetEventsResponse> {
-    // TODO: It'd be nice if we could do something to infer the types of filter
-    // arguments a user wants, e.g. converting something like "transfer/*/42"
-    // into the base64-encoded `ScVal` equivalents by inferring that the first
-    // is an ScSymbol and the last is a U32.
-    //
-    // The difficulty comes in matching up the correct integer primitives.
     return jsonrpc.postObject<SorobanRpc.RawGetEventsResponse>(
       this.serverURL.toString(),
       "getEvents",
