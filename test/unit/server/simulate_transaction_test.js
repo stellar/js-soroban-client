@@ -8,13 +8,13 @@ const {
   xdr
 } = SorobanClient;
 
-describe('Server#simulateTransaction', function () {
+describe('Server#simulateTransaction', async function (done) {
   let keypair = Keypair.random();
   let contractId = 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM';
   let contract = new SorobanClient.Contract(contractId);
   let address = contract.address().toScAddress();
 
-  const simulationResponse = invokeSimulationResponse(address);
+  const simulationResponse = await invokeSimulationResponse(address);
   const parsedSimulationResponse = {
     id: simulationResponse.id,
     events: simulationResponse.events,
