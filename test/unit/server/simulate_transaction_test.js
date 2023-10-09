@@ -122,8 +122,8 @@ describe('Server#simulateTransaction', async function (done) {
     expect(SorobanClient.SorobanRpc.isSimulationSuccess(parsed)).to.be.true;
   });
 
-  xit('works with restoration', function () {
-    const simResponse = invokeSimulationResponseWithRestoration(address);
+  xit('works with restoration', async function (done) {
+    const simResponse = await invokeSimulationResponseWithRestoration(address);
 
     const expected = cloneSimulation(parsedSimulationResponse);
     expected.restorePreamble = {
@@ -134,6 +134,8 @@ describe('Server#simulateTransaction', async function (done) {
     const parsed = parseRawSimulation(simResponse);
     expect(parsed).to.be.deep.equal(expected);
     expect(SorobanClient.SorobanRpc.isSimulationRestore(parsed)).to.be.true;
+
+    done();
   });
 
   it('works with errors', function () {
@@ -154,6 +156,8 @@ describe('Server#simulateTransaction', async function (done) {
   });
 
   xit('simulates fee bump transactions');
+
+  done();
 });
 
 function cloneSimulation(sim) {
@@ -174,7 +178,7 @@ function cloneSimulation(sim) {
   };
 }
 
-function buildAuthEntry(address) {
+async function buildAuthEntry(address) {
   if (!address) {
     throw new Error('where address?');
   }
@@ -196,10 +200,10 @@ function buildAuthEntry(address) {
   return authorizeInvocation(kp, Networks.FUTURENET, 1, root);
 }
 
-function invokeSimulationResponse(address) {
+async function invokeSimulationResponse(address) {
   return baseSimulationResponse([
     {
-      auth: [buildAuthEntry(address)].map((entry) => entry.toXDR('base64')),
+      auth: [await buildAuthEntry(address)].map((entry) => entry.toXDR('base64')),
       xdr: xdr.ScVal.scvU32(0).toXDR('base64')
     }
   ]);
@@ -229,9 +233,9 @@ function baseSimulationResponse(results) {
   };
 }
 
-function invokeSimulationResponseWithRestoration(address) {
+async function invokeSimulationResponseWithRestoration(address) {
   return {
-    ...invokeSimulationResponse(address),
+    ...await invokeSimulationResponse(address),
     restorePreamble: {
       minResourceFee: '51',
       transactionData: new SorobanDataBuilder().build().toXDR('base64')
