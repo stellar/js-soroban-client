@@ -5,16 +5,16 @@ import { SorobanRpc } from './soroban_rpc';
 export function parseRawSendTransaction(
   r: SorobanRpc.RawSendTransactionResponse
 ): SorobanRpc.SendTransactionResponse {
-  if (!!r.errorResultXdr) {
+  const errResult = r.errorResultXdr;
+  delete r.errorResultXdr;
+
+  if (!!errResult) {
     return {
       ...r,
-      errorResult: xdr.TransactionResult.fromXDR(
-        r.errorResultXdr, 'base64'
-      )
+      errorResult: xdr.TransactionResult.fromXDR(errResult, 'base64')
     };
   }
 
-  delete r.errorResultXdr;
   return { ...r } as SorobanRpc.BaseSendTransactionResponse;
 }
 
