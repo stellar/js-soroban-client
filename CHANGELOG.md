@@ -5,7 +5,7 @@
 A breaking change should be clearly marked in this log.
 
 
-## Unreleased
+## v1.0.0-beta.3
 
 ### Breaking Changes
 * The `stellar-base` dependency has been upgraded to [v10.0.0-beta.2](https://github.com/stellar/js-stellar-base/releases/tag/v10.0.0-beta.2) which contains breaking changes related to auth helpers ([#158](https://github.com/stellar/js-soroban-client/pull/158)).
