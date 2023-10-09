@@ -386,6 +386,12 @@ export class Server {
   public async getEvents(
     request: Server.GetEventsRequest,
   ): Promise<SorobanRpc.GetEventsResponse> {
+    return this._getEvents(request).then(parseRawEvents);
+  }
+
+  public async _getEvents(
+    request: Server.GetEventsRequest,
+  ): Promise<SorobanRpc.RawGetEventsResponse> {
     // TODO: It'd be nice if we could do something to infer the types of filter
     // arguments a user wants, e.g. converting something like "transfer/*/42"
     // into the base64-encoded `ScVal` equivalents by inferring that the first
@@ -403,7 +409,7 @@ export class Server {
         },
         ...(request.startLedger && { startLedger: request.startLedger.toString() }),
       }
-    ).then(parseRawEvents);
+    );
   }
 
   /**
