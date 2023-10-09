@@ -1,6 +1,21 @@
 import { xdr, Contract, SorobanDataBuilder } from 'stellar-base';
 import { SorobanRpc } from './soroban_rpc';
 
+export function parseRawSendTransaction(
+  r: SorobanRpc.RawSendTransactionResponse
+): SorobanRpc.SendTransactionResponse {
+  const errResult = r.errorResultXdr;
+  delete r.errorResultXdr;
+
+  if (!!errResult) {
+    return {
+      ...r,
+      errorResult: xdr.TransactionResult.fromXDR(errResult, 'base64')
+    };
+  }
+
+  return { ...r } as SorobanRpc.BaseSendTransactionResponse;
+}
 
 export function parseRawEvents(r: SorobanRpc.RawGetEventsResponse): SorobanRpc.GetEventsResponse {
   return {
@@ -15,7 +30,6 @@ export function parseRawEvents(r: SorobanRpc.RawGetEventsResponse): SorobanRpc.G
     }),
   };
 }
-
 
 export function parseRawLedgerEntries(
   raw: SorobanRpc.RawGetLedgerEntriesResponse

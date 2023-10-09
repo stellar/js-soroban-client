@@ -17,6 +17,7 @@ import * as jsonrpc from "./jsonrpc";
 import { SorobanRpc } from "./soroban_rpc";
 import { assembleTransaction } from "./transaction";
 import {
+  parseRawSendTransaction,
   parseRawSimulation,
   parseRawLedgerEntries,
   parseRawEvents
@@ -640,7 +641,13 @@ export class Server {
   public async sendTransaction(
     transaction: Transaction | FeeBumpTransaction,
   ): Promise<SorobanRpc.SendTransactionResponse> {
-    return await jsonrpc.post(
+    return this._sendTransaction(transaction).then(parseRawSendTransaction);
+  }
+
+  public async _sendTransaction(
+    transaction: Transaction | FeeBumpTransaction,
+  ): Promise<SorobanRpc.RawSendTransactionResponse> {
+    return jsonrpc.post(
       this.serverURL.toString(),
       "sendTransaction",
       transaction.toXDR(),
