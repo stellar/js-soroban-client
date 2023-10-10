@@ -6,6 +6,7 @@ A breaking change should be clearly marked in this log.
 
 
 ## Unreleased
+* Include `expiration` attribute on ledger data entries in `getContractData` and `getLedgerEntries` responses ([#153](https://github.com/stellar/js-soroban-client/pull/153)).
 
 ### Breaking Changes
 * All endpoints will now automatically decode XDR structures whenever possible. In particular,
