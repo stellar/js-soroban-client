@@ -28,6 +28,7 @@ export namespace SorobanRpc {
     lastModifiedLedgerSeq?: number;
     key: xdr.LedgerKey;
     val: xdr.LedgerEntryData;
+    expiration?: xdr.ExpirationEntry;
   }
 
   export interface RawLedgerEntryResult {
@@ -36,6 +37,8 @@ export namespace SorobanRpc {
     key: string;
     /** a base-64 encoded {@link xdr.LedgerEntryData} instance */
     xdr: string;
+    /** an optional base-64 endoded  {@link xdr.ExpirationEntry} instance*/
+    expiration?: string;
   }
 
   /** An XDR-parsed version of {@link RawLedgerEntryResult} */

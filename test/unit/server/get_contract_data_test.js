@@ -1,4 +1,4 @@
-const { xdr, nativeToScVal, Durability } = SorobanClient;
+const { xdr, nativeToScVal, Durability, hash } = SorobanClient;
 
 describe('Server#getContractData', function () {
   beforeEach(function () {
@@ -33,7 +33,75 @@ describe('Server#getContractData', function () {
     })
   );
 
-  it('key found', function (done) {
+  const ledgerExpirationKey = xdr.LedgerKey.expiration(
+    new xdr.LedgerKeyExpiration({ keyHash: hash(ledgerKey.toXDR()) })
+  );
+
+  const ledgerExpirationEntry = xdr.LedgerEntryData.expiration(
+    new xdr.ExpirationEntry({
+      keyHash: hash(ledgerKey.toXDR()),
+      expirationLedgerSeq: 1000
+    })
+  );
+
+  it('contract data key found', function (done) {
+    let result = {
+      lastModifiedLedgerSeq: 1,
+      key: ledgerKey,
+      val: ledgerEntry,
+      expiration: ledgerExpirationEntry
+    };
+
+    this.axiosMock
+      .expects('post')
+      .withArgs(serverUrl, {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getLedgerEntries',
+        params: [
+          [ledgerExpirationKey.toXDR('base64'), ledgerKey.toXDR('base64')]
+        ]
+      })
+      .returns(
+        Promise.resolve({
+          data: {
+            result: {
+              latestLedger: 420,
+              entries: [
+                {
+                  lastModifiedLedgerSeq: result.lastModifiedLedgerSeq,
+                  key: ledgerKey.toXDR('base64'),
+                  xdr: ledgerEntry.toXDR('base64')
+                },
+                {
+                  lastModifiedLedgerSeq: result.lastModifiedLedgerSeq,
+                  key: ledgerExpirationKey.toXDR('base64'),
+                  xdr: ledgerExpirationEntry.toXDR('base64')
+                }
+              ]
+            }
+          }
+        })
+      );
+
+    this.server
+      .getContractData(address, key, Durability.Persistent)
+      .then(function (response) {
+        expect(response.key.toXDR('base64')).to.be.deep.equal(
+          result.key.toXDR('base64')
+        );
+        expect(response.val.toXDR('base64')).to.be.deep.equal(
+          result.val.toXDR('base64')
+        );
+        expect(response.expiration.toXDR('base64')).to.be.deep.equal(
+          result.expiration.expiration().toXDR('base64')
+        );
+        done();
+      })
+      .catch((err) => done(err));
+  });
+
+  it('expiration entry not present for contract data key in server response', function (done) {
     let result = {
       lastModifiedLedgerSeq: 1,
       key: ledgerKey,
@@ -46,7 +114,9 @@ describe('Server#getContractData', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [[ledgerKey.toXDR('base64')]]
+        params: [
+          [ledgerExpirationKey.toXDR('base64'), ledgerKey.toXDR('base64')]
+        ]
       })
       .returns(
         Promise.resolve({
@@ -74,17 +144,22 @@ describe('Server#getContractData', function () {
         expect(response.val.toXDR('base64')).to.be.deep.equal(
           result.val.toXDR('base64')
         );
+        expect(response.expiration).to.be.undefined;
         done();
       })
       .catch((err) => done(err));
   });
 
-  it('key not found', function (done) {
+  it('contract data key not found', function (done) {
     // clone and change durability to test this case
     const ledgerKeyDupe = xdr.LedgerKey.fromXDR(ledgerKey.toXDR());
     ledgerKeyDupe
       .contractData()
       .durability(xdr.ContractDataDurability.temporary());
+
+    const ledgerExpirationKeyDupe = xdr.LedgerKey.expiration(
+      new xdr.LedgerKeyExpiration({ keyHash: hash(ledgerKeyDupe.toXDR()) })
+    );
 
     this.axiosMock
       .expects('post')
@@ -92,7 +167,12 @@ describe('Server#getContractData', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [[ledgerKeyDupe.toXDR('base64')]]
+        params: [
+          [
+            ledgerExpirationKeyDupe.toXDR('base64'),
+            ledgerKeyDupe.toXDR('base64')
+          ]
+        ]
       })
       .returns(Promise.resolve({ data: { result: { entries: [] } } }));
 

@@ -1,4 +1,4 @@
-const { Account, Keypair, StrKey, xdr } = SorobanClient;
+const { Account, Keypair, StrKey, xdr, hash } = SorobanClient;
 
 describe('Server#getAccount', function () {
   beforeEach(function () {
@@ -16,6 +16,9 @@ describe('Server#getAccount', function () {
   const key = xdr.LedgerKey.account(new xdr.LedgerKeyAccount({ accountId }));
   const accountEntry =
     'AAAAAAAAAABzdv3ojkzWHMD7KUoXhrPx0GH18vHKV0ZfqpMiEblG1g3gtpoE608YAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAQAAAAAY9D8iA';
+  const ledgerExpirationKey = xdr.LedgerKey.expiration(
+    new xdr.LedgerKeyExpiration({ keyHash: hash(key.toXDR()) })
+  );
 
   it('requests the correct method', function (done) {
     this.axiosMock
@@ -24,7 +27,7 @@ describe('Server#getAccount', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [[key.toXDR('base64')]]
+        params: [[ledgerExpirationKey.toXDR('base64'), key.toXDR('base64')]]
       })
       .returns(
         Promise.resolve({
@@ -64,7 +67,7 @@ describe('Server#getAccount', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [[key.toXDR('base64')]]
+        params: [[ledgerExpirationKey.toXDR('base64'), key.toXDR('base64')]]
       })
       .returns(
         Promise.resolve({

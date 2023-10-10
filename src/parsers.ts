@@ -8,13 +8,14 @@ export function parseRawLedgerEntries(
     latestLedger: raw.latestLedger,
     entries: (raw.entries ?? []).map(rawEntry => {
       if (!rawEntry.key || !rawEntry.xdr) {
-        throw new TypeError(`invalid ledger entry: ${rawEntry}`);
+        throw new TypeError(`invalid ledger entry: ${JSON.stringify(rawEntry)}`);
       }
 
       return {
         lastModifiedLedgerSeq: rawEntry.lastModifiedLedgerSeq,
         key: xdr.LedgerKey.fromXDR(rawEntry.key, 'base64'),
         val: xdr.LedgerEntryData.fromXDR(rawEntry.xdr, 'base64'),
+        expiration: rawEntry.expiration ? xdr.ExpirationEntry.fromXDR(rawEntry.expiration!, 'base64') : undefined
       };
     })
   };

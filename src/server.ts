@@ -9,6 +9,7 @@ import {
   Keypair,
   Transaction,
   xdr,
+  hash
 } from "stellar-base";
 
 import AxiosClient from "./axios";
@@ -165,6 +166,7 @@ export class Server {
    * const key = xdr.ScVal.scvSymbol("counter");
    * server.getContractData(contractId, key, Durability.Temporary).then(data => {
    *   console.log("value:", data.val);
+   *   console.log("expiration:", data.expiration);
    *   console.log("lastModified:", data.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", data.latestLedger);
    * });
@@ -254,6 +256,7 @@ export class Server {
    *   const ledgerData = response.entries[0];
    *   console.log("key:", ledgerData.key);
    *   console.log("value:", ledgerData.val);
+   *   console.log("expiration:", ledgerData.expiration);
    *   console.log("lastModified:", ledgerData.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", response.latestLedger);
    * });
@@ -267,11 +270,12 @@ export class Server {
   public async _getLedgerEntries(
     ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.RawGetLedgerEntriesResponse> {
-    return jsonrpc.post<SorobanRpc.RawGetLedgerEntriesResponse>(
+    return mergeResponseExpirationLedgers(
+      jsonrpc.post<SorobanRpc.RawGetLedgerEntriesResponse>(
       this.serverURL.toString(),
       "getLedgerEntries",
-      keys.map((k) => k.toXDR("base64")),
-    );
+      expandRequestIncludeExpirationLedgers(keys).map((k) => k.toXDR("base64")),
+    ), keys);
   }
 
   /**
@@ -727,4 +731,78 @@ function findCreatedAccountSequenceInTransactionMeta(
   }
 
   throw new Error("No account created in transaction");
+}
+
+
+// TODO - remove once rpc updated to
+// append expiration entry per data LK requested onto server-side response 
+// https://github.com/stellar/soroban-tools/issues/1010
+async function mergeResponseExpirationLedgers(response: Promise<SorobanRpc.RawGetLedgerEntriesResponse>,
+  requestedKeys: xdr.LedgerKey[]
+): Promise<SorobanRpc.RawGetLedgerEntriesResponse> {
+  let ledgerEntriesResponse = await response;
+  const expirationKeyToRawEntryResult:Map<String, SorobanRpc.RawLedgerEntryResult> = new Map();
+  const requestedKeyXdrs = new Set<String>(requestedKeys.map(requestedKey =>
+    requestedKey.toXDR('base64')));
+
+  (ledgerEntriesResponse.entries ?? []).forEach(rawEntryResult => {
+    if (!rawEntryResult.key) {
+      // don't interpret here, just pass it through to the outgoing response as-is
+      expirationKeyToRawEntryResult.set(Math.random().toString(), rawEntryResult)
+      return;
+    }
+    const parsedKey:xdr.LedgerKey = xdr.LedgerKey.fromXDR(rawEntryResult.key, 'base64');
+    
+    if (parsedKey.switch().value !== xdr.LedgerEntryType.expiration().value ||
+        requestedKeyXdrs.has(rawEntryResult.key)) {
+      let keyHash = hash(parsedKey.toXDR()).toString()
+      let rawEntryResultLookup = expirationKeyToRawEntryResult.get(keyHash);
+
+      if (!rawEntryResultLookup) {
+        rawEntryResultLookup = rawEntryResult;
+        expirationKeyToRawEntryResult.set(keyHash, rawEntryResultLookup);
+      } 
+      rawEntryResultLookup.key = rawEntryResult.key;
+      rawEntryResultLookup.xdr = rawEntryResult.xdr;
+      return;
+    } 
+
+    let keyHash = parsedKey.expiration().keyHash().toString();
+    let rawEntryResultLookup = expirationKeyToRawEntryResult.get(keyHash);
+
+    if (!rawEntryResultLookup) {
+      rawEntryResultLookup = {
+        key: "", 
+        xdr: ""
+      };
+      expirationKeyToRawEntryResult.set(keyHash, rawEntryResultLookup);
+    }
+    rawEntryResultLookup.expiration = xdr.LedgerEntryData
+      .fromXDR(rawEntryResult.xdr, 'base64')
+      .expiration()
+      .toXDR('base64');
+  });
+  
+  ledgerEntriesResponse.entries = [...expirationKeyToRawEntryResult.values()];
+  return ledgerEntriesResponse;
+}
+
+// TODO - remove once rpc updated to
+// include expiration entry on responses for any data LK's requested  
+// https://github.com/stellar/soroban-tools/issues/1010
+function expandRequestIncludeExpirationLedgers(
+  keys: Array<xdr.LedgerKey>
+): Array<xdr.LedgerKey> {
+  let includingExpiryKeys: Array<xdr.LedgerKey> = new Array()
+  keys.forEach(key => {
+    if (key.switch().value !== xdr.LedgerEntryType.expiration().value) {
+      const expirationKey = xdr.LedgerKey.expiration(
+        new xdr.LedgerKeyExpiration(
+          { keyHash: hash(key.toXDR())}
+      ));
+      includingExpiryKeys.push(expirationKey);
+    }
+    includingExpiryKeys.push(key);
+  });
+  return includingExpiryKeys;
 }
