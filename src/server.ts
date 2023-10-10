@@ -275,12 +275,11 @@ export class Server {
   public async _getLedgerEntries(
     ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.RawGetLedgerEntriesResponse> {
-    return mergeResponseExpirationLedgers(
-      jsonrpc.post<SorobanRpc.RawGetLedgerEntriesResponse>(
+    return jsonrpc.post<SorobanRpc.RawGetLedgerEntriesResponse>(
       this.serverURL.toString(),
       "getLedgerEntries",
       expandRequestIncludeExpirationLedgers(keys).map((k) => k.toXDR("base64")),
-    ), keys);
+    ).then(response => mergeResponseExpirationLedgers(response, keys));
   }
 
   /**
@@ -758,10 +757,9 @@ function findCreatedAccountSequenceInTransactionMeta(
 // TODO - remove once rpc updated to
 // append expiration entry per data LK requested onto server-side response 
 // https://github.com/stellar/soroban-tools/issues/1010
-async function mergeResponseExpirationLedgers(response: Promise<SorobanRpc.RawGetLedgerEntriesResponse>,
+function mergeResponseExpirationLedgers(ledgerEntriesResponse: SorobanRpc.RawGetLedgerEntriesResponse,
   requestedKeys: xdr.LedgerKey[]
-): Promise<SorobanRpc.RawGetLedgerEntriesResponse> {
-  let ledgerEntriesResponse = await response;
+): SorobanRpc.RawGetLedgerEntriesResponse {
   const expirationKeyToRawEntryResult:Map<String, SorobanRpc.RawLedgerEntryResult> = new Map();
   const requestedKeyXdrs = new Set<String>(requestedKeys.map(requestedKey =>
     requestedKey.toXDR('base64')));
