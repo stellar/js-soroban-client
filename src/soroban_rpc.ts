@@ -1,4 +1,4 @@
-import { AssetType, SorobanDataBuilder, xdr } from "stellar-base";
+import { AssetType, Contract, SorobanDataBuilder, xdr } from "stellar-base";
 
 // TODO: Better parsing for hashes
 
@@ -140,14 +140,28 @@ export namespace SorobanRpc {
     events: EventResponse[];
   }
 
-  export interface EventResponse {
+  interface EventResponse extends BaseEventResponse {
+    contractId: Contract,
+    topic: xdr.ScVal[];
+    value: xdr.DiagnosticEvent;
+  }
+
+  export interface RawGetEventsResponse {
+    latestLedger: string;
+    events: RawEventResponse[];
+  }
+
+  interface BaseEventResponse {
+    id: string;
     type: EventType;
     ledger: string;
     ledgerClosedAt: string;
-    contractId: string;
-    id: string;
     pagingToken: string;
     inSuccessfulContractCall: boolean;
+  }
+
+  interface RawEventResponse extends BaseEventResponse {
+    contractId: string;
     topic: string[];
     value: {
       xdr: string;
@@ -164,12 +178,11 @@ export namespace SorobanRpc {
     | "TRY_AGAIN_LATER"
     | "ERROR";
 
-  export interface SendTransactionResponse {
-    status: SendTransactionStatus;
-    hash: string;
-    latestLedger: number;
-    latestLedgerCloseTime: number;
+  export interface SendTransactionResponse extends BaseSendTransactionResponse {
+    errorResult?: xdr.TransactionResult;
+  }
 
+  export interface RawSendTransactionResponse extends BaseSendTransactionResponse {
     /**
      * This is a base64-encoded instance of {@link xdr.TransactionResult}, set
      * only when `status` is `"ERROR"`.
@@ -177,6 +190,13 @@ export namespace SorobanRpc {
      * It contains details on why the network rejected the transaction.
      */
     errorResultXdr?: string;
+  }
+
+  export interface BaseSendTransactionResponse {
+    status: SendTransactionStatus;
+    hash: string;
+    latestLedger: number;
+    latestLedgerCloseTime: number;
   }
 
   export interface SimulateHostFunctionResult {
