@@ -59,7 +59,7 @@ describe('Server#getContractData', function () {
         id: 1,
         method: 'getLedgerEntries',
         params: [
-          [ledgerExpirationKey.toXDR('base64'), ledgerKey.toXDR('base64')]
+          [ledgerKey.toXDR('base64'), ledgerExpirationKey.toXDR('base64')]
         ]
       })
       .returns(
@@ -115,7 +115,7 @@ describe('Server#getContractData', function () {
         id: 1,
         method: 'getLedgerEntries',
         params: [
-          [ledgerExpirationKey.toXDR('base64'), ledgerKey.toXDR('base64')]
+          [ledgerKey.toXDR('base64'), ledgerExpirationKey.toXDR('base64')]
         ]
       })
       .returns(
@@ -169,8 +169,8 @@ describe('Server#getContractData', function () {
         method: 'getLedgerEntries',
         params: [
           [
-            ledgerExpirationKeyDupe.toXDR('base64'),
-            ledgerKeyDupe.toXDR('base64')
+            ledgerKeyDupe.toXDR('base64'),
+            ledgerExpirationKeyDupe.toXDR('base64')
           ]
         ]
       })

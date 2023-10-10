@@ -126,7 +126,7 @@ describe('Server#requestAirdrop', function () {
         id: 1,
         method: 'getLedgerEntries',
         params: [
-          [ledgerExpirationKey.toXDR('base64'), accountKey.toXDR('base64')]
+          [accountKey.toXDR('base64'), ledgerExpirationKey.toXDR('base64')]
         ]
       })
       .returns(

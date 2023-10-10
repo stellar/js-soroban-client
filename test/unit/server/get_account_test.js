@@ -27,7 +27,7 @@ describe('Server#getAccount', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [[ledgerExpirationKey.toXDR('base64'), key.toXDR('base64')]]
+        params: [[key.toXDR('base64'), ledgerExpirationKey.toXDR('base64')]]
       })
       .returns(
         Promise.resolve({
@@ -67,7 +67,7 @@ describe('Server#getAccount', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [[ledgerExpirationKey.toXDR('base64'), key.toXDR('base64')]]
+        params: [[key.toXDR('base64'), ledgerExpirationKey.toXDR('base64')]]
       })
       .returns(
         Promise.resolve({

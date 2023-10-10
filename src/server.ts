@@ -760,17 +760,17 @@ function findCreatedAccountSequenceInTransactionMeta(
 function mergeResponseExpirationLedgers(ledgerEntriesResponse: SorobanRpc.RawGetLedgerEntriesResponse,
   requestedKeys: xdr.LedgerKey[]
 ): SorobanRpc.RawGetLedgerEntriesResponse {
-  const expirationKeyToRawEntryResult:Map<String, SorobanRpc.RawLedgerEntryResult> = new Map();
+  const expirationKeyToRawEntryResult = new Map<String, SorobanRpc.RawLedgerEntryResult>();
   const requestedKeyXdrs = new Set<String>(requestedKeys.map(requestedKey =>
     requestedKey.toXDR('base64')));
 
   (ledgerEntriesResponse.entries ?? []).forEach(rawEntryResult => {
     if (!rawEntryResult.key) {
-      // don't interpret here, just pass it through to the outgoing response as-is
+      // don't interpret raw ledger entry data here, just pass it through to the outgoing response as-is
       expirationKeyToRawEntryResult.set(Math.random().toString(), rawEntryResult)
       return;
     }
-    const parsedKey:xdr.LedgerKey = xdr.LedgerKey.fromXDR(rawEntryResult.key, 'base64');
+    const parsedKey = xdr.LedgerKey.fromXDR(rawEntryResult.key, 'base64');
     
     if (parsedKey.switch().value !== xdr.LedgerEntryType.expiration().value ||
         requestedKeyXdrs.has(rawEntryResult.key)) {
@@ -812,16 +812,8 @@ function mergeResponseExpirationLedgers(ledgerEntriesResponse: SorobanRpc.RawGet
 function expandRequestIncludeExpirationLedgers(
   keys: Array<xdr.LedgerKey>
 ): Array<xdr.LedgerKey> {
-  let includingExpiryKeys: Array<xdr.LedgerKey> = new Array()
-  keys.forEach(key => {
-    if (key.switch().value !== xdr.LedgerEntryType.expiration().value) {
-      const expirationKey = xdr.LedgerKey.expiration(
-        new xdr.LedgerKeyExpiration(
-          { keyHash: hash(key.toXDR())}
-      ));
-      includingExpiryKeys.push(expirationKey);
-    }
-    includingExpiryKeys.push(key);
-  });
-  return includingExpiryKeys;
+  return keys.concat(keys
+      .filter(key => key.switch().value !== xdr.LedgerEntryType.expiration().value )
+      .map(key => xdr.LedgerKey.expiration(new xdr.LedgerKeyExpiration({ keyHash: hash(key.toXDR())})))
+    );  
 }
