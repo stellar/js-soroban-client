@@ -783,6 +783,7 @@ function mergeResponseExpirationLedgers(ledgerEntriesResponse: SorobanRpc.RawGet
       } 
       rawEntryResultLookup.key = rawEntryResult.key;
       rawEntryResultLookup.xdr = rawEntryResult.xdr;
+      rawEntryResultLookup.lastModifiedLedgerSeq = rawEntryResult.lastModifiedLedgerSeq;
       return;
     } 
 
