@@ -1,4 +1,4 @@
-import { AssetType, Contract, SorobanDataBuilder, xdr } from "stellar-base";
+import { AssetType, Contract, SorobanDataBuilder, xdr } from 'stellar-base';
 
 // TODO: Better parsing for hashes
 
@@ -21,7 +21,7 @@ export namespace SorobanRpc {
   }
 
   export interface GetHealthResponse {
-    status: "healthy";
+    status: 'healthy';
   }
 
   export interface LedgerEntryResult {
@@ -67,9 +67,9 @@ export namespace SorobanRpc {
   }
 
   export enum GetTransactionStatus {
-    SUCCESS = "SUCCESS",
-    NOT_FOUND = "NOT_FOUND",
-    FAILED = "FAILED"
+    SUCCESS = 'SUCCESS',
+    NOT_FOUND = 'NOT_FOUND',
+    FAILED = 'FAILED'
   }
 
   export type GetTransactionResponse =
@@ -85,15 +85,18 @@ export namespace SorobanRpc {
     oldestLedgerCloseTime: number;
   }
 
-  export interface GetMissingTransactionResponse extends GetAnyTransactionResponse {
+  export interface GetMissingTransactionResponse
+    extends GetAnyTransactionResponse {
     status: GetTransactionStatus.NOT_FOUND;
   }
 
-  export interface GetFailedTransactionResponse extends GetAnyTransactionResponse {
+  export interface GetFailedTransactionResponse
+    extends GetAnyTransactionResponse {
     status: GetTransactionStatus.FAILED;
   }
 
-  export interface GetSuccessfulTransactionResponse extends GetAnyTransactionResponse {
+  export interface GetSuccessfulTransactionResponse
+    extends GetAnyTransactionResponse {
     status: GetTransactionStatus.SUCCESS;
 
     ledger: number;
@@ -104,7 +107,7 @@ export namespace SorobanRpc {
     resultXdr: xdr.TransactionResult;
     resultMetaXdr: xdr.TransactionMeta;
 
-    returnValue?: xdr.ScVal;  // present iff resultMeta is a v3
+    returnValue?: xdr.ScVal; // present iff resultMeta is a v3
   }
 
   export interface RawGetTransactionResponse {
@@ -124,7 +127,7 @@ export namespace SorobanRpc {
     createdAt?: number;
   }
 
-  export type EventType = "contract" | "system" | "diagnostic";
+  export type EventType = 'contract' | 'system' | 'diagnostic';
 
   export interface EventFilter {
     type?: EventType;
@@ -138,7 +141,7 @@ export namespace SorobanRpc {
   }
 
   interface EventResponse extends BaseEventResponse {
-    contractId: Contract,
+    contractId: Contract;
     topic: xdr.ScVal[];
     value: xdr.DiagnosticEvent;
   }
@@ -170,16 +173,17 @@ export namespace SorobanRpc {
   }
 
   export type SendTransactionStatus =
-    | "PENDING"
-    | "DUPLICATE"
-    | "TRY_AGAIN_LATER"
-    | "ERROR";
+    | 'PENDING'
+    | 'DUPLICATE'
+    | 'TRY_AGAIN_LATER'
+    | 'ERROR';
 
   export interface SendTransactionResponse extends BaseSendTransactionResponse {
     errorResult?: xdr.TransactionResult;
   }
 
-  export interface RawSendTransactionResponse extends BaseSendTransactionResponse {
+  export interface RawSendTransactionResponse
+    extends BaseSendTransactionResponse {
     /**
      * This is a base64-encoded instance of {@link xdr.TransactionResult}, set
      * only when `status` is `"ERROR"`.
@@ -270,23 +274,29 @@ export namespace SorobanRpc {
     restorePreamble: {
       minResourceFee: string;
       transactionData: SorobanDataBuilder;
-    }
+    };
   }
 
-  export function isSimulationError(sim: SimulateTransactionResponse):
-    sim is SimulateTransactionErrorResponse {
+  export function isSimulationError(
+    sim: SimulateTransactionResponse
+  ): sim is SimulateTransactionErrorResponse {
     return 'error' in sim;
   }
 
-  export function isSimulationSuccess(sim: SimulateTransactionResponse):
-    sim is SimulateTransactionSuccessResponse {
+  export function isSimulationSuccess(
+    sim: SimulateTransactionResponse
+  ): sim is SimulateTransactionSuccessResponse {
     return 'transactionData' in sim;
   }
 
-  export function isSimulationRestore(sim: SimulateTransactionResponse):
-    sim is SimulateTransactionRestoreResponse {
-    return isSimulationSuccess(sim) && 'restorePreamble' in sim &&
-      !!sim.restorePreamble.transactionData;
+  export function isSimulationRestore(
+    sim: SimulateTransactionResponse
+  ): sim is SimulateTransactionRestoreResponse {
+    return (
+      isSimulationSuccess(sim) &&
+      'restorePreamble' in sim &&
+      !!sim.restorePreamble.transactionData
+    );
   }
 
   export function isSimulationRaw(
@@ -322,6 +332,6 @@ export namespace SorobanRpc {
     restorePreamble?: {
       minResourceFee: string;
       transactionData: string;
-    }
+    };
   }
 }

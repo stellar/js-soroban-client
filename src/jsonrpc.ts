@@ -1,22 +1,22 @@
-import axios from "./axios";
+import axios from './axios';
 
 export type Id = string | number;
 
 export interface Request<T> {
-  jsonrpc: "2.0";
+  jsonrpc: '2.0';
   id: Id;
   method: string;
   params: T;
 }
 
 export interface Notification<T> {
-  jsonrpc: "2.0";
+  jsonrpc: '2.0';
   method: string;
   params?: T;
 }
 
 export type Response<T, E = any> = {
-  jsonrpc: "2.0";
+  jsonrpc: '2.0';
   id: Id;
 } & ({ error: Error<E> } | { result: T });
 
@@ -38,13 +38,13 @@ export async function post<T>(
     params = null;
   }
   const response = await axios.post<Response<T>>(url, {
-    jsonrpc: "2.0",
+    jsonrpc: '2.0',
     // TODO: Generate a unique request id
     id: 1,
     method,
-    params,
+    params
   });
-  if (hasOwnProperty(response.data, "error")) {
+  if (hasOwnProperty(response.data, 'error')) {
     throw response.data.error;
   } else {
     return response.data?.result;
@@ -57,16 +57,16 @@ export async function post<T>(
 export async function postObject<T>(
   url: string,
   method: string,
-  param: any,
+  param: any
 ): Promise<T> {
   const response = await axios.post<Response<T>>(url, {
-    jsonrpc: "2.0",
+    jsonrpc: '2.0',
     // TODO: Generate a unique request id
     id: 1,
     method,
-    params: param,
+    params: param
   });
-  if (hasOwnProperty(response.data, "error")) {
+  if (hasOwnProperty(response.data, 'error')) {
     throw response.data.error;
   } else {
     return response.data?.result;
@@ -77,7 +77,7 @@ export async function postObject<T>(
 // typescript typing.
 function hasOwnProperty<X extends {}, Y extends PropertyKey>(
   obj: X,
-  prop: Y,
+  prop: Y
 ): obj is X & Record<Y, unknown> {
   return obj.hasOwnProperty(prop);
 }
