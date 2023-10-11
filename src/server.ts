@@ -760,45 +760,30 @@ function findCreatedAccountSequenceInTransactionMeta(
 function mergeResponseExpirationLedgers(ledgerEntriesResponse: SorobanRpc.RawGetLedgerEntriesResponse,
   requestedKeys: xdr.LedgerKey[]
 ): SorobanRpc.RawGetLedgerEntriesResponse {
-  const expirationKeyToRawEntryResult = new Map<String, SorobanRpc.RawLedgerEntryResult>();
   const requestedKeyXdrs = new Set<String>(requestedKeys.map(requestedKey =>
     requestedKey.toXDR('base64')));
-
+  const expirationKeyToRawEntryResult = new Map<String, SorobanRpc.RawLedgerEntryResult>();
   (ledgerEntriesResponse.entries ?? []).forEach(rawEntryResult => {
     if (!rawEntryResult.key || !rawEntryResult.xdr) {
       throw new TypeError(`invalid ledger entry: ${JSON.stringify(rawEntryResult)}`);
     }
-    
     const parsedKey = xdr.LedgerKey.fromXDR(rawEntryResult.key, 'base64');
+    const isExpirationMeta = parsedKey.switch().value === xdr.LedgerEntryType.expiration().value && 
+                             !requestedKeyXdrs.has(rawEntryResult.key);
+    const keyHash = (isExpirationMeta) 
+      ? parsedKey.expiration().keyHash().toString()
+      : hash(parsedKey.toXDR()).toString();
     
-    if (parsedKey.switch().value !== xdr.LedgerEntryType.expiration().value ||
-        requestedKeyXdrs.has(rawEntryResult.key)) {
-      let keyHash = hash(parsedKey.toXDR()).toString()
-      let rawEntryResultLookup = expirationKeyToRawEntryResult.get(keyHash);
-
-      if (!rawEntryResultLookup) {
-        rawEntryResultLookup = rawEntryResult;
-        expirationKeyToRawEntryResult.set(keyHash, rawEntryResultLookup);
-      } 
-      rawEntryResultLookup.key = rawEntryResult.key;
-      rawEntryResultLookup.xdr = rawEntryResult.xdr;
-      rawEntryResultLookup.lastModifiedLedgerSeq = rawEntryResult.lastModifiedLedgerSeq;
-      return;
-    } 
-
-    let keyHash = parsedKey.expiration().keyHash().toString();
-    let rawEntryResultLookup = expirationKeyToRawEntryResult.get(keyHash);
-
-    if (!rawEntryResultLookup) {
-      rawEntryResultLookup = {
-        key: "", 
-        xdr: ""
-      };
-      expirationKeyToRawEntryResult.set(keyHash, rawEntryResultLookup);
+    const rawEntry = expirationKeyToRawEntryResult.get(keyHash) ?? rawEntryResult;
+    
+    if (isExpirationMeta) {
+      const expirationLedgerSeq = xdr.LedgerEntryData
+          .fromXDR(rawEntryResult.xdr, 'base64')
+          .expiration().expirationLedgerSeq();
+      expirationKeyToRawEntryResult.set(keyHash, { ...rawEntry, expirationLedgerSeq});
+    } else {
+      expirationKeyToRawEntryResult.set(keyHash, { ...rawEntry, ...rawEntryResult});
     }
-    rawEntryResultLookup.expirationLedgerSeq = xdr.LedgerEntryData
-      .fromXDR(rawEntryResult.xdr, 'base64')
-      .expiration().expirationLedgerSeq();
   });
   
   ledgerEntriesResponse.entries = [...expirationKeyToRawEntryResult.values()];
