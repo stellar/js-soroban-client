@@ -796,10 +796,9 @@ function mergeResponseExpirationLedgers(ledgerEntriesResponse: SorobanRpc.RawGet
       };
       expirationKeyToRawEntryResult.set(keyHash, rawEntryResultLookup);
     }
-    rawEntryResultLookup.expiration = xdr.LedgerEntryData
+    rawEntryResultLookup.expirationLedgerSeq = xdr.LedgerEntryData
       .fromXDR(rawEntryResult.xdr, 'base64')
-      .expiration()
-      .toXDR('base64');
+      .expiration().expirationLedgerSeq();
   });
   
   ledgerEntriesResponse.entries = [...expirationKeyToRawEntryResult.values()];
@@ -810,8 +809,8 @@ function mergeResponseExpirationLedgers(ledgerEntriesResponse: SorobanRpc.RawGet
 // include expiration entry on responses for any data LK's requested  
 // https://github.com/stellar/soroban-tools/issues/1010
 function expandRequestIncludeExpirationLedgers(
-  keys: Array<xdr.LedgerKey>
-): Array<xdr.LedgerKey> {
+  keys: xdr.LedgerKey[]
+): xdr.LedgerKey[] {
   return keys.concat(keys
       .filter(key => key.switch().value !== xdr.LedgerEntryType.expiration().value )
       .map(key => xdr.LedgerKey.expiration(new xdr.LedgerKeyExpiration({ keyHash: hash(key.toXDR())})))

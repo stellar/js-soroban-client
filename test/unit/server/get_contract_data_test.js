@@ -49,7 +49,7 @@ describe('Server#getContractData', function () {
       lastModifiedLedgerSeq: 1,
       key: ledgerKey,
       val: ledgerEntry,
-      expiration: ledgerExpirationEntry
+      expirationLedgerSeq: 1000
     };
 
     this.axiosMock
@@ -87,15 +87,9 @@ describe('Server#getContractData', function () {
     this.server
       .getContractData(address, key, Durability.Persistent)
       .then(function (response) {
-        expect(response.key.toXDR('base64')).to.be.deep.equal(
-          result.key.toXDR('base64')
-        );
-        expect(response.val.toXDR('base64')).to.be.deep.equal(
-          result.val.toXDR('base64')
-        );
-        expect(response.expiration.toXDR('base64')).to.be.deep.equal(
-          result.expiration.expiration().toXDR('base64')
-        );
+        expect(response.key.toXDR('base64')).to.eql(result.key.toXDR('base64'));
+        expect(response.val.toXDR('base64')).to.eql(result.val.toXDR('base64'));
+        expect(response.expirationLedgerSeq).to.eql(1000);
         done();
       })
       .catch((err) => done(err));
@@ -138,13 +132,9 @@ describe('Server#getContractData', function () {
     this.server
       .getContractData(address, key, Durability.Persistent)
       .then(function (response) {
-        expect(response.key.toXDR('base64')).to.be.deep.equal(
-          result.key.toXDR('base64')
-        );
-        expect(response.val.toXDR('base64')).to.be.deep.equal(
-          result.val.toXDR('base64')
-        );
-        expect(response.expiration).to.be.undefined;
+        expect(response.key.toXDR('base64')).to.eql(result.key.toXDR('base64'));
+        expect(response.val.toXDR('base64')).to.eql(result.val.toXDR('base64'));
+        expect(response.expirationLedgerSeq).to.be.undefined;
         done();
       })
       .catch((err) => done(err));

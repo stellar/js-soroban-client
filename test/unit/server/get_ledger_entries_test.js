@@ -94,9 +94,7 @@ describe('Server#getLedgerEntries', function () {
         expect(result.lastModifiedLedgerSeq).to.eql(1);
         expect(result.key.toXDR('base64')).to.eql(ledgerKeyXDR);
         expect(result.val.toXDR('base64')).to.eql(ledgerEntryXDR);
-        expect(result.expiration.toXDR('base64')).to.eql(
-          ledgerExpirationEntryXDR
-        );
+        expect(result.expirationLedgerSeq).to.eql(1000);
         done();
       })
       .catch((err) => done(err));
@@ -123,7 +121,7 @@ describe('Server#getLedgerEntries', function () {
         expect(result.lastModifiedLedgerSeq).to.eql(1);
         expect(result.key.toXDR('base64')).to.eql(ledgerKeyXDR);
         expect(result.val.toXDR('base64')).to.eql(ledgerEntryXDR);
-        expect(result.expiration).to.be.undefined;
+        expect(result.expirationLedgerSeq).to.be.undefined;
         done();
       })
       .catch((err) => done(err));
@@ -155,9 +153,7 @@ describe('Server#getLedgerEntries', function () {
         expect(result.lastModifiedLedgerSeq).to.eql(1);
         expect(result.key.toXDR('base64')).to.eql(ledgerKeyXDR);
         expect(result.val.toXDR('base64')).to.eql(ledgerEntryXDR);
-        expect(result.expiration.toXDR('base64')).to.eql(
-          ledgerExpirationEntryXDR
-        );
+        expect(result.expirationLedgerSeq).to.eql(1000);
         done();
       })
       .catch((err) => done(err));
@@ -184,7 +180,7 @@ describe('Server#getLedgerEntries', function () {
         expect(result.lastModifiedLedgerSeq).to.eql(2);
         expect(result.key.toXDR('base64')).to.eql(ledgerExpirationKeyXDR);
         expect(result.val.toXDR('base64')).to.eql(ledgerExpirationEntryDataXDR);
-        expect(result.expiration).to.be.undefined;
+        expect(result.expirationLedgerSeq).to.be.undefined;
         done();
       })
       .catch((err) => done(err));
