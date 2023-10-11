@@ -765,11 +765,10 @@ function mergeResponseExpirationLedgers(ledgerEntriesResponse: SorobanRpc.RawGet
     requestedKey.toXDR('base64')));
 
   (ledgerEntriesResponse.entries ?? []).forEach(rawEntryResult => {
-    if (!rawEntryResult.key) {
-      // don't interpret raw ledger entry data here, just pass it through to the outgoing response as-is
-      expirationKeyToRawEntryResult.set(Math.random().toString(), rawEntryResult)
-      return;
+    if (!rawEntryResult.key || !rawEntryResult.xdr) {
+      throw new TypeError(`invalid ledger entry: ${JSON.stringify(rawEntryResult)}`);
     }
+    
     const parsedKey = xdr.LedgerKey.fromXDR(rawEntryResult.key, 'base64');
     
     if (parsedKey.switch().value !== xdr.LedgerEntryType.expiration().value ||

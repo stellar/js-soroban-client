@@ -189,4 +189,28 @@ describe('Server#getLedgerEntries', function () {
       })
       .catch((err) => done(err));
   });
+
+  it('throws when invalid rpc response', function (done) {
+    // these are simulating invalid json, missing `xdr` and `key`
+    mockRPC(
+      this.axiosMock,
+      [ledgerKeyXDR, ledgerExpirationKeyXDR],
+      [
+        {
+          lastModifiedLedgerSeq: 2
+        },
+        {
+          lastModifiedLedgerSeq: 1
+        }
+      ]
+    );
+
+    this.server
+      .getLedgerEntries(ledgerKey)
+      .then((reply) => done(new Error(`should have failed, got: ${reply}`)))
+      .catch((error) => {
+        expect(error).to.contain(/invalid ledger entry/i);
+        done();
+      });
+  });
 });
