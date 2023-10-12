@@ -2,11 +2,11 @@ import {
   FeeBumpTransaction,
   Operation,
   Transaction,
-  TransactionBuilder,
-} from "stellar-base";
+  TransactionBuilder
+} from 'stellar-base';
 
-import { SorobanRpc } from "./soroban_rpc";
-import { parseRawSimulation } from "./parsers";
+import { SorobanRpc } from './soroban_rpc';
+import { parseRawSimulation } from './parsers';
 
 /**
  * Combines the given raw transaction alongside the simulation results.
@@ -34,7 +34,7 @@ export function assembleTransaction(
     | SorobanRpc.SimulateTransactionResponse
     | SorobanRpc.RawSimulateTransactionResponse
 ): TransactionBuilder {
-  if ("innerTransaction" in raw) {
+  if ('innerTransaction' in raw) {
     // TODO: Handle feebump transactions
     return assembleTransaction(
       raw.innerTransaction,
@@ -45,9 +45,9 @@ export function assembleTransaction(
 
   if (!isSorobanTransaction(raw)) {
     throw new TypeError(
-      "unsupported transaction: must contain exactly one " +
-        "invokeHostFunction, bumpFootprintExpiration, or restoreFootprint " +
-        "operation"
+      'unsupported transaction: must contain exactly one ' +
+        'invokeHostFunction, bumpFootprintExpiration, or restoreFootprint ' +
+        'operation'
     );
   }
 
@@ -74,7 +74,7 @@ export function assembleTransaction(
   });
 
   switch (raw.operations[0].type) {
-    case "invokeHostFunction":
+    case 'invokeHostFunction':
       // In this case, we don't want to clone the operation, so we drop it.
       txnBuilder.clearOperations();
 
@@ -89,7 +89,7 @@ export function assembleTransaction(
           //
           // the intuition is "if auth exists, this tx has probably been
           // simulated before"
-          auth: existingAuth.length > 0 ? existingAuth : success.result!.auth,
+          auth: existingAuth.length > 0 ? existingAuth : success.result!.auth
         })
       );
       break;
@@ -104,10 +104,10 @@ function isSorobanTransaction(tx: Transaction): boolean {
   }
 
   switch (tx.operations[0].type) {
-    case "invokeHostFunction":
-    case "bumpFootprintExpiration":
-    case "restoreFootprint":
-      return true
+    case 'invokeHostFunction':
+    case 'bumpFootprintExpiration':
+    case 'restoreFootprint':
+      return true;
 
     default:
       return false;
