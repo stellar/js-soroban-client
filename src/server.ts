@@ -9,6 +9,7 @@ import {
   Keypair,
   Transaction,
   xdr,
+  hash
 } from "stellar-base";
 
 import AxiosClient from "./axios";
@@ -170,6 +171,7 @@ export class Server {
    * const key = xdr.ScVal.scvSymbol("counter");
    * server.getContractData(contractId, key, Durability.Temporary).then(data => {
    *   console.log("value:", data.val);
+   *   console.log("expiration:", data.expiration);
    *   console.log("lastModified:", data.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", data.latestLedger);
    * });
@@ -259,6 +261,7 @@ export class Server {
    *   const ledgerData = response.entries[0];
    *   console.log("key:", ledgerData.key);
    *   console.log("value:", ledgerData.val);
+   *   console.log("expiration:", ledgerData.expiration);
    *   console.log("lastModified:", ledgerData.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", response.latestLedger);
    * });
@@ -275,8 +278,8 @@ export class Server {
     return jsonrpc.post<SorobanRpc.RawGetLedgerEntriesResponse>(
       this.serverURL.toString(),
       "getLedgerEntries",
-      keys.map((k) => k.toXDR("base64")),
-    );
+      expandRequestIncludeExpirationLedgers(keys).map((k) => k.toXDR("base64")),
+    ).then(response => mergeResponseExpirationLedgers(response, keys));
   }
 
   /**
@@ -748,4 +751,53 @@ function findCreatedAccountSequenceInTransactionMeta(
   }
 
   throw new Error("No account created in transaction");
+}
+
+
+// TODO - remove once rpc updated to
+// append expiration entry per data LK requested onto server-side response 
+// https://github.com/stellar/soroban-tools/issues/1010
+function mergeResponseExpirationLedgers(ledgerEntriesResponse: SorobanRpc.RawGetLedgerEntriesResponse,
+  requestedKeys: xdr.LedgerKey[]
+): SorobanRpc.RawGetLedgerEntriesResponse {
+  const requestedKeyXdrs = new Set<String>(requestedKeys.map(requestedKey =>
+    requestedKey.toXDR('base64')));
+  const expirationKeyToRawEntryResult = new Map<String, SorobanRpc.RawLedgerEntryResult>();
+  (ledgerEntriesResponse.entries ?? []).forEach(rawEntryResult => {
+    if (!rawEntryResult.key || !rawEntryResult.xdr) {
+      throw new TypeError(`invalid ledger entry: ${JSON.stringify(rawEntryResult)}`);
+    }
+    const parsedKey = xdr.LedgerKey.fromXDR(rawEntryResult.key, 'base64');
+    const isExpirationMeta = parsedKey.switch().value === xdr.LedgerEntryType.expiration().value && 
+                             !requestedKeyXdrs.has(rawEntryResult.key);
+    const keyHash = (isExpirationMeta) 
+      ? parsedKey.expiration().keyHash().toString()
+      : hash(parsedKey.toXDR()).toString();
+    
+    const rawEntry = expirationKeyToRawEntryResult.get(keyHash) ?? rawEntryResult;
+    
+    if (isExpirationMeta) {
+      const expirationLedgerSeq = xdr.LedgerEntryData
+          .fromXDR(rawEntryResult.xdr, 'base64')
+          .expiration().expirationLedgerSeq();
+      expirationKeyToRawEntryResult.set(keyHash, { ...rawEntry, expirationLedgerSeq});
+    } else {
+      expirationKeyToRawEntryResult.set(keyHash, { ...rawEntry, ...rawEntryResult});
+    }
+  });
+  
+  ledgerEntriesResponse.entries = [...expirationKeyToRawEntryResult.values()];
+  return ledgerEntriesResponse;
+}
+
+// TODO - remove once rpc updated to
+// include expiration entry on responses for any data LK's requested  
+// https://github.com/stellar/soroban-tools/issues/1010
+function expandRequestIncludeExpirationLedgers(
+  keys: xdr.LedgerKey[]
+): xdr.LedgerKey[] {
+  return keys.concat(keys
+      .filter(key => key.switch().value !== xdr.LedgerEntryType.expiration().value )
+      .map(key => xdr.LedgerKey.expiration(new xdr.LedgerKeyExpiration({ keyHash: hash(key.toXDR())})))
+    );  
 }

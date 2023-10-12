@@ -1,4 +1,4 @@
-const { Account, Keypair, StrKey, Networks, xdr } = SorobanClient;
+const { Account, Keypair, StrKey, Networks, xdr, hash } = SorobanClient;
 
 describe('Server#requestAirdrop', function () {
   function accountLedgerEntryData(accountId, sequence) {
@@ -113,7 +113,11 @@ describe('Server#requestAirdrop', function () {
       new xdr.LedgerKeyAccount({
         accountId: Keypair.fromPublicKey(accountId).xdrPublicKey()
       })
-    ).toXDR('base64');
+    );
+
+    const ledgerExpirationKey = xdr.LedgerKey.expiration(
+      new xdr.LedgerKeyExpiration({ keyHash: hash(accountKey.toXDR()) })
+    );
 
     this.axiosMock
       .expects('post')
@@ -121,7 +125,9 @@ describe('Server#requestAirdrop', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [[accountKey]]
+        params: [
+          [accountKey.toXDR('base64'), ledgerExpirationKey.toXDR('base64')]
+        ]
       })
       .returns(
         Promise.resolve({
@@ -129,7 +135,7 @@ describe('Server#requestAirdrop', function () {
             result: {
               entries: [
                 {
-                  key: accountKey,
+                  key: accountKey.toXDR('base64'),
                   xdr: accountLedgerEntryData(accountId, '1234').toXDR('base64')
                 }
               ]

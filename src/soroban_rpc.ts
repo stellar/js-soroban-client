@@ -27,7 +27,8 @@ export namespace SorobanRpc {
   export interface LedgerEntryResult {
     lastModifiedLedgerSeq?: number;
     key: xdr.LedgerKey;
-    val: xdr.LedgerEntryData;
+    val: xdr.LedgerEntryData; 
+    expirationLedgerSeq?: number;
   }
 
   export interface RawLedgerEntryResult {
@@ -36,6 +37,10 @@ export namespace SorobanRpc {
     key: string;
     /** a base-64 encoded {@link xdr.LedgerEntryData} instance */
     xdr: string;
+    /** optional, a future ledger number upon which this entry will expire 
+     *  based on https://github.com/stellar/soroban-tools/issues/1010 
+     */ 
+    expirationLedgerSeq?: number;
   }
 
   /** An XDR-parsed version of {@link RawLedgerEntryResult} */
