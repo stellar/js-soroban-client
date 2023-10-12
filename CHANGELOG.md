@@ -7,6 +7,9 @@ A breaking change should be clearly marked in this log.
 
 ## v1.0.0-beta.3
 
+## Added
+* Include `expiration` attribute on ledger data entries in `getContractData` and `getLedgerEntries` responses ([#153](https://github.com/stellar/js-soroban-client/pull/153)).
+
 ### Breaking Changes
 * The `stellar-base` dependency has been upgraded to [v10.0.0-beta.3](https://github.com/stellar/js-stellar-base/releases/tag/v10.0.0-beta.3) which contains breaking changes related to auth helpers and some bugfixes ([#158](https://github.com/stellar/js-soroban-client/pull/158)).
 * All endpoints will now automatically decode XDR structures whenever possible. In particular,
