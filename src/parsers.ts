@@ -17,19 +17,17 @@ export function parseRawSendTransaction(
   return { ...r } as SorobanRpc.BaseSendTransactionResponse;
 }
 
-export function parseRawEvents(
-  r: SorobanRpc.RawGetEventsResponse
-): SorobanRpc.GetEventsResponse {
+export function parseRawEvents(r: SorobanRpc.RawGetEventsResponse): SorobanRpc.GetEventsResponse {
   return {
     latestLedger: r.latestLedger,
-    events: (r.events ?? []).map((evt) => {
+    events: (r.events ?? []).map(evt => {
       return {
         ...evt,
         contractId: new Contract(evt.contractId),
-        topic: evt.topic.map((topic) => xdr.ScVal.fromXDR(topic, 'base64')),
+        topic: evt.topic.map(topic => xdr.ScVal.fromXDR(topic, 'base64')),
         value: xdr.DiagnosticEvent.fromXDR(evt.value.xdr, 'base64')
       };
-    })
+    }),
   };
 }
 
@@ -38,15 +36,16 @@ export function parseRawLedgerEntries(
 ): SorobanRpc.GetLedgerEntriesResponse {
   return {
     latestLedger: raw.latestLedger,
-    entries: (raw.entries ?? []).map((rawEntry) => {
+    entries: (raw.entries ?? []).map(rawEntry => {
       if (!rawEntry.key || !rawEntry.xdr) {
-        throw new TypeError(`invalid ledger entry: ${rawEntry}`);
+        throw new TypeError(`invalid ledger entry: ${JSON.stringify(rawEntry)}`);
       }
 
       return {
         lastModifiedLedgerSeq: rawEntry.lastModifiedLedgerSeq,
         key: xdr.LedgerKey.fromXDR(rawEntry.key, 'base64'),
-        val: xdr.LedgerEntryData.fromXDR(rawEntry.xdr, 'base64')
+        val: xdr.LedgerEntryData.fromXDR(rawEntry.xdr, 'base64'),
+        expirationLedgerSeq: rawEntry.expirationLedgerSeq
       };
     })
   };
@@ -80,15 +79,16 @@ export function parseRawSimulation(
     _parsed: true,
     id: sim.id,
     latestLedger: sim.latestLedger,
-    events:
-      sim.events?.map((evt) => xdr.DiagnosticEvent.fromXDR(evt, 'base64')) ?? []
+    events: sim.events?.map(
+      evt => xdr.DiagnosticEvent.fromXDR(evt, 'base64')
+    ) ?? [],
   };
 
   // error type: just has error string
   if (typeof sim.error === 'string') {
     return {
       ...base,
-      error: sim.error
+      error: sim.error,
     };
   }
 
@@ -101,27 +101,30 @@ function parseSuccessful(
 ):
   | SorobanRpc.SimulateTransactionRestoreResponse
   | SorobanRpc.SimulateTransactionSuccessResponse {
+
   // success type: might have a result (if invoking) and...
   const success: SorobanRpc.SimulateTransactionSuccessResponse = {
     ...partial,
     transactionData: new SorobanDataBuilder(sim.transactionData!),
     minResourceFee: sim.minResourceFee!,
     cost: sim.cost!,
-    ...// coalesce 0-or-1-element results[] list into a single result struct
-    // with decoded fields if present
-    ((sim.results?.length ?? 0 > 0) && {
-      result: sim.results!.map((row) => {
-        return {
-          auth: (row.auth ?? []).map((entry) =>
-            xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')
-          ),
-          // if return value is missing ("falsy") we coalesce to void
-          retval: !!row.xdr
-            ? xdr.ScVal.fromXDR(row.xdr, 'base64')
-            : xdr.ScVal.scvVoid()
-        };
-      })[0]
-    })
+    ...(
+      // coalesce 0-or-1-element results[] list into a single result struct
+      // with decoded fields if present
+      (sim.results?.length ?? 0 > 0) &&
+      {
+        result: sim.results!.map(row => {
+          return {
+            auth: (row.auth ?? []).map((entry) =>
+              xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')),
+            // if return value is missing ("falsy") we coalesce to void
+            retval: !!row.xdr
+              ? xdr.ScVal.fromXDR(row.xdr, 'base64')
+              : xdr.ScVal.scvVoid()
+          }
+        })[0],
+      }
+    )
   };
 
   if (!sim.restorePreamble || sim.restorePreamble.transactionData === '') {
@@ -135,7 +138,7 @@ function parseSuccessful(
       minResourceFee: sim.restorePreamble!.minResourceFee,
       transactionData: new SorobanDataBuilder(
         sim.restorePreamble!.transactionData
-      )
+      ),
     }
   };
 }
