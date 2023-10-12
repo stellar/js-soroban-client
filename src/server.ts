@@ -171,7 +171,7 @@ export class Server {
    * const key = xdr.ScVal.scvSymbol("counter");
    * server.getContractData(contractId, key, Durability.Temporary).then(data => {
    *   console.log("value:", data.val);
-   *   console.log("expiration:", data.expiration);
+   *   console.log("expirationLedgerSeq:", data.expirationLedgerSeq);
    *   console.log("lastModified:", data.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", data.latestLedger);
    * });
@@ -261,7 +261,7 @@ export class Server {
    *   const ledgerData = response.entries[0];
    *   console.log("key:", ledgerData.key);
    *   console.log("value:", ledgerData.val);
-   *   console.log("expiration:", ledgerData.expiration);
+   *   console.log("expirationLedgerSeq:", ledgerData.expirationLedgerSeq);
    *   console.log("lastModified:", ledgerData.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", response.latestLedger);
    * });
