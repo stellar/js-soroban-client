@@ -269,21 +269,19 @@ export class Server {
   public async getLedgerEntries(
     ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.GetLedgerEntriesResponse> {
-    return this._getLedgerEntries(
-      ...expandRequestIncludeExpirationLedgers(keys)
-    )
-      .then((response) => mergeResponseExpirationLedgers(response, keys))
-      .then(parseRawLedgerEntries);
+    return this._getLedgerEntries(...keys).then(parseRawLedgerEntries);
   }
 
-  public async _getLedgerEntries(
-    ...keys: xdr.LedgerKey[]
-  ): Promise<SorobanRpc.RawGetLedgerEntriesResponse> {
-    return jsonrpc.post(
-      this.serverURL.toString(),
-      'getLedgerEntries',
-      keys.map((k) => k.toXDR('base64'))
-    );
+  public async _getLedgerEntries(...keys: xdr.LedgerKey[]) {
+    return jsonrpc
+      .post<SorobanRpc.RawGetLedgerEntriesResponse>(
+        this.serverURL.toString(),
+        'getLedgerEntries',
+        expandRequestIncludeExpirationLedgers(keys).map((k) =>
+          k.toXDR('base64')
+        )
+      )
+      .then((response) => mergeResponseExpirationLedgers(response, keys));
   }
 
   /**
