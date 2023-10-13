@@ -9,5 +9,6 @@ module.exports = {
   tabWidth: 2,
   parser: 'babel',
   trailingComma: 'none',
-  useTabs: false
+  useTabs: false,
+  parser: 'typescript'
 };
