@@ -1029,7 +1029,7 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@definitelytyped/dts-critic@^0.0.178":
+"@definitelytyped/dts-critic@0.0.178":
   version "0.0.178"
   resolved "https://registry.yarnpkg.com/@definitelytyped/dts-critic/-/dts-critic-0.0.178.tgz#79e82ef35615b1534da979eb925a6130e1977d94"
   integrity sha512-1JiY6giD2qLYxDPSWPbZiICzmTX+cHBNMXf09SeY6CJX0kZPcAkX+Uhc64HSqlhutECRWy7SdQCp/NP3xVOt4Q==
@@ -1041,15 +1041,15 @@
     tmp "^0.2.1"
     yargs "^15.3.1"
 
-"@definitelytyped/dtslint@^0.0.178":
-  version "0.0.178"
-  resolved "https://registry.yarnpkg.com/@definitelytyped/dtslint/-/dtslint-0.0.178.tgz#9e76093ed0913d3b0e78fefb834d2e3d86bb6246"
-  integrity sha512-IK4IqJSIY6wS+8Tg0hIuwAltPs0ZIWibMd3CSurQ8E1gNvuXaR48xjsjFVh2R8pxGrIR75mJ5o6H1GjxFZwK1A==
+"@definitelytyped/dtslint@^0.0.182":
+  version "0.0.182"
+  resolved "https://registry.yarnpkg.com/@definitelytyped/dtslint/-/dtslint-0.0.182.tgz#7b8cffcccbcd8725cdfeac916f757e3cbfd305d2"
+  integrity sha512-88t3yXrqXQbw+KmAY7D+PHJnC2BTzEZPxy7UvtksqrDL1RWLUxXKuG33/+0w36T3qDsdQTiqNBdLbAI+uzxsEA==
   dependencies:
-    "@definitelytyped/dts-critic" "^0.0.178"
-    "@definitelytyped/header-parser" "^0.0.178"
-    "@definitelytyped/typescript-versions" "^0.0.178"
-    "@definitelytyped/utils" "^0.0.178"
+    "@definitelytyped/dts-critic" "0.0.178"
+    "@definitelytyped/header-parser" "0.0.178"
+    "@definitelytyped/typescript-versions" "0.0.178"
+    "@definitelytyped/utils" "0.0.178"
     "@typescript-eslint/eslint-plugin" "^5.55.0"
     "@typescript-eslint/parser" "^5.55.0"
     "@typescript-eslint/types" "^5.56.0"
@@ -1062,7 +1062,7 @@
     tslint "5.14.0"
     yargs "^15.1.0"
 
-"@definitelytyped/header-parser@^0.0.178":
+"@definitelytyped/header-parser@0.0.178", "@definitelytyped/header-parser@^0.0.178":
   version "0.0.178"
   resolved "https://registry.yarnpkg.com/@definitelytyped/header-parser/-/header-parser-0.0.178.tgz#2cfd170a33b014d686135673fa7fac837cfe5556"
   integrity sha512-16FFuaWW2Hq+a0Abyt+9gvPAT0w/ezy4eph3RbtLSqxH3T/UHDla1jgnp1DMvfNeBWaIqHxcr+Vrr7BPquw7mw==
@@ -1071,12 +1071,12 @@
     "@types/parsimmon" "^1.10.1"
     parsimmon "^1.13.0"
 
-"@definitelytyped/typescript-versions@^0.0.178":
+"@definitelytyped/typescript-versions@0.0.178", "@definitelytyped/typescript-versions@^0.0.178":
   version "0.0.178"
   resolved "https://registry.yarnpkg.com/@definitelytyped/typescript-versions/-/typescript-versions-0.0.178.tgz#98a92f2251f18b32122e808b968ca8e009d3b123"
   integrity sha512-pPXy3z5gE4xnVgqIRApFcQ6M6kqtRK1gnqyGx/I0Yo1CH8RAsRvumCDB/KiZmQDpCHiy//E9dOIUFdquvC5t7g==
 
-"@definitelytyped/utils@^0.0.178":
+"@definitelytyped/utils@0.0.178":
   version "0.0.178"
   resolved "https://registry.yarnpkg.com/@definitelytyped/utils/-/utils-0.0.178.tgz#f403be41816690246a4e0244d125a0084b16462a"
   integrity sha512-nYg3E51XpTodS0/5w5r1wM/DhPYhyqa9BP8ili4XgB5s9j4v4mDPX9Jwjns2q24derBvyhdUpzshKDh43aqwZw==
@@ -1470,7 +1470,7 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-10.0.2.tgz#96d63314255540a36bf24da094cce7a13668d73b"
   integrity sha512-NaHL0+0lLNhX6d9rs+NSt97WH/gIlRHmszXbQ/8/MV/eVcFNdeJ/GYhrFuUc8K7WuPhRhTSdMkCp8VMzhUq85w==
 
-"@types/node@*", "@types/node@>=10.0.0", "@types/node@^20.6.0":
+"@types/node@*", "@types/node@>=10.0.0", "@types/node@^20.8.4":
   version "20.8.4"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.8.4.tgz#0e9ebb2ff29d5c3302fc84477d066fa7c6b441aa"
   integrity sha512-ZVPnqU58giiCjSxjVUESDtdPk4QR5WQhhINbc9UBrKLU68MX5BF6kbQzTrkwbolyr0X8ChBpXfavr5mZFKZQ5A==
@@ -1492,7 +1492,7 @@
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.3.tgz#9a726e116beb26c24f1ccd6850201e1246122e04"
   integrity sha512-OxepLK9EuNEIPxWNME+C6WwbRAOOI2o2BaQEGzz5Lu2e4Z5eDnEo+/aVEDMIXywoJitJ7xWd641wrGLZdtwRyw==
 
-"@types/sinon@^10.0.16":
+"@types/sinon@^10.0.19":
   version "10.0.19"
   resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-10.0.19.tgz#752b752bc40bb5af0bb1aec29bde49b139b91d35"
   integrity sha512-MWZNGPSchIdDfb5FL+VFi4zHsHbNOTQEgjqFQk7HazXSXwUU9PAX3z9XBqb3AJGYr9YwrtCtaSMsT3brYsN/jQ==
@@ -1555,7 +1555,7 @@
     "@typescript-eslint/typescript-estree" "5.62.0"
     debug "^4.3.4"
 
-"@typescript-eslint/parser@^6.7.0":
+"@typescript-eslint/parser@^6.7.5":
   version "6.7.5"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/parser/-/parser-6.7.5.tgz#8d7ca3d1fbd9d5a58cc4d30b2aa797a760137886"
   integrity sha512-bIZVSGx2UME/lmhLcjdVc7ePBwn7CLqKarUBL4me1C5feOd663liTGjMBGVcGr+BhnSLeP4SgwdvNnnkbIdkCw==
