@@ -14,21 +14,21 @@ A breaking change should be clearly marked in this log.
 ### Breaking Changes
 * The `stellar-base` dependency has been upgraded to [v10.0.0-beta.3](https://github.com/stellar/js-stellar-base/releases/tag/v10.0.0-beta.3) which contains breaking changes related to auth helpers and some bugfixes ([#158](https://github.com/stellar/js-soroban-client/pull/158)).
 * All endpoints will now automatically decode XDR structures whenever possible. In particular,
- - For the `Server.getLedgerEntries` response ([#154](https://github.com/stellar/js-soroban-client/pull/154)), we parse:
-   * `entries` is now guaranteed to exist, but it may be empty
-   * `entries[i].key` is an instance of `xdr.LedgerKey`
-   * the `entries[i].xdr` field is now `val`, instead
-   * `entries[i].val` is an instance of `xdr.LedgerEntryData`
- - For the `Server.sendTransaction` response ([#157](https://github.com/stellar/js-soroban-client/pull/157)), we parse:
-   * `errorResultXdr` is renamed to `errorResult`
-   * If it's present, it's an instance of `xdr.TransactionResult`
- - For the `Server.getEvents` response ([#156](https://github.com/stellar/js-soroban-client/pull/156)), we parse:
-   * `events[i].contractId` is now an instance of [`Contract`](https://stellar.github.io/js-soroban-client/Contract.html)
-   * `events[i].topic` is now a list of decoded `xdr.ScVal` instances
-   * `events[i].value.xdr` is now remapped directly to `events.value`
-   * `events[i].value` is a decoded `xdr.ScVal` instance
- - For the `Server.sendTransaction` response ([#157](https://github.com/stellar/js-soroban-client/pull/157)), we parse:
-   * `errorResultXdr` is now `errorResult`, a parsed instance of `xdr.TransactionResult`
+  - For the `Server.getLedgerEntries` response ([#154](https://github.com/stellar/js-soroban-client/pull/154)), we parse:
+    * `entries` is now guaranteed to exist, but it may be empty
+    * `entries[i].key` is an instance of `xdr.LedgerKey`
+    * the `entries[i].xdr` field is now `val`, instead
+    * `entries[i].val` is an instance of `xdr.LedgerEntryData`
+  - For the `Server.sendTransaction` response ([#157](https://github.com/stellar/js-soroban-client/pull/157)), we parse:
+    * `errorResultXdr` is renamed to `errorResult`
+    * If it's present, it's an instance of `xdr.TransactionResult`
+  - For the `Server.getEvents` response ([#156](https://github.com/stellar/js-soroban-client/pull/156)), we parse:
+    * `events[i].contractId` is now an instance of [`Contract`](https://stellar.github.io/js-soroban-client/Contract.html)
+    * `events[i].topic` is now a list of decoded `xdr.ScVal` instances
+    * `events[i].value.xdr` is now remapped directly to `events.value`
+    * `events[i].value` is a decoded `xdr.ScVal` instance
+  - For the `Server.sendTransaction` response ([#157](https://github.com/stellar/js-soroban-client/pull/157)), we parse:
+    * `errorResultXdr` is now `errorResult`, a parsed instance of `xdr.TransactionResult`
 * If you want to continue to use the raw RPC responses, you can use the `_`-prefixed methods which will return the response directly:
   - `Server._getLedgerEntries`
   - `Server._sendTransaction`
