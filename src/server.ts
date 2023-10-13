@@ -269,14 +269,10 @@ export class Server {
   public async getLedgerEntries(
     ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.GetLedgerEntriesResponse> {
-    return this._getLedgerEntries(...keys).then((r) =>
-      parseRawLedgerEntries(r)
-    );
+    return this._getLedgerEntries(...keys).then(parseRawLedgerEntries);
   }
 
-  public async _getLedgerEntries(
-    ...keys: xdr.LedgerKey[]
-  ): Promise<SorobanRpc.RawGetLedgerEntriesResponse> {
+  public async _getLedgerEntries(...keys: xdr.LedgerKey[]) {
     return jsonrpc
       .post<SorobanRpc.RawGetLedgerEntriesResponse>(
         this.serverURL.toString(),
@@ -354,11 +350,7 @@ export class Server {
   public async _getTransaction(
     hash: string
   ): Promise<SorobanRpc.RawGetTransactionResponse> {
-    return jsonrpc.post<SorobanRpc.RawGetTransactionResponse>(
-      this.serverURL.toString(),
-      'getTransaction',
-      hash
-    );
+    return jsonrpc.post(this.serverURL.toString(), 'getTransaction', hash);
   }
 
   /**
@@ -408,20 +400,16 @@ export class Server {
   public async _getEvents(
     request: Server.GetEventsRequest
   ): Promise<SorobanRpc.RawGetEventsResponse> {
-    return jsonrpc.postObject<SorobanRpc.RawGetEventsResponse>(
-      this.serverURL.toString(),
-      'getEvents',
-      {
-        filters: request.filters ?? [],
-        pagination: {
-          ...(request.cursor && { cursor: request.cursor }), // add if defined
-          ...(request.limit && { limit: request.limit })
-        },
-        ...(request.startLedger && {
-          startLedger: request.startLedger.toString()
-        })
-      }
-    );
+    return jsonrpc.postObject(this.serverURL.toString(), 'getEvents', {
+      filters: request.filters ?? [],
+      pagination: {
+        ...(request.cursor && { cursor: request.cursor }), // add if defined
+        ...(request.limit && { limit: request.limit })
+      },
+      ...(request.startLedger && {
+        startLedger: request.startLedger.toString()
+      })
+    });
   }
 
   /**
@@ -506,13 +494,17 @@ export class Server {
   public async simulateTransaction(
     transaction: Transaction | FeeBumpTransaction
   ): Promise<SorobanRpc.SimulateTransactionResponse> {
-    return jsonrpc
-      .post<SorobanRpc.RawSimulateTransactionResponse>(
-        this.serverURL.toString(),
-        'simulateTransaction',
-        transaction.toXDR()
-      )
-      .then(parseRawSimulation);
+    return this._simulateTransaction(transaction).then(parseRawSimulation);
+  }
+
+  public async _simulateTransaction(
+    transaction: Transaction | FeeBumpTransaction
+  ): Promise<SorobanRpc.RawSimulateTransactionResponse> {
+    return jsonrpc.post(
+      this.serverURL.toString(),
+      'simulateTransaction',
+      transaction.toXDR()
+    );
   }
 
   /**
