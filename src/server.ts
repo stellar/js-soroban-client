@@ -1,5 +1,5 @@
 /* tslint:disable:variable-name no-namespace */
-import URI from "urijs";
+import URI from 'urijs';
 
 import {
   Account,
@@ -10,19 +10,19 @@ import {
   Transaction,
   xdr,
   hash
-} from "stellar-base";
+} from 'stellar-base';
 
-import AxiosClient from "./axios";
-import { Friendbot } from "./friendbot";
-import * as jsonrpc from "./jsonrpc";
-import { SorobanRpc } from "./soroban_rpc";
-import { assembleTransaction } from "./transaction";
+import AxiosClient from './axios';
+import { Friendbot } from './friendbot';
+import * as jsonrpc from './jsonrpc';
+import { SorobanRpc } from './soroban_rpc';
+import { assembleTransaction } from './transaction';
 import {
   parseRawSendTransaction,
   parseRawSimulation,
   parseRawLedgerEntries,
   parseRawEvents
-} from "./parsers";
+} from './parsers';
 
 export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
 
@@ -30,8 +30,8 @@ export const SUBMIT_TRANSACTION_TIMEOUT = 60 * 1000;
  * Specifies the durability namespace of contract-related ledger entries.
  */
 export enum Durability {
-  Temporary = "temporary",
-  Persistent = "persistent",
+  Temporary = 'temporary',
+  Persistent = 'persistent'
 }
 
 export namespace Server {
@@ -39,7 +39,7 @@ export namespace Server {
   export interface GetEventsRequest {
     filters: SorobanRpc.EventFilter[];
     startLedger?: number; // either this or cursor
-    cursor?: string;      // either this or startLedger
+    cursor?: string; // either this or startLedger
     limit?: number;
   }
 
@@ -81,7 +81,7 @@ export class Server {
       });
     }
 
-    if (this.serverURL.protocol() !== "https" && !opts.allowHttp) {
+    if (this.serverURL.protocol() !== 'https' && !opts.allowHttp) {
       throw new Error(
         "Cannot connect to insecure Soroban RPC server if `allowHttp` isn't set"
       );
@@ -109,15 +109,15 @@ export class Server {
   public async getAccount(address: string): Promise<Account> {
     const ledgerKey = xdr.LedgerKey.account(
       new xdr.LedgerKeyAccount({
-        accountId: Keypair.fromPublicKey(address).xdrPublicKey(),
-      }),
+        accountId: Keypair.fromPublicKey(address).xdrPublicKey()
+      })
     );
 
     const resp = await this.getLedgerEntries(ledgerKey);
     if (resp.entries.length === 0) {
       return Promise.reject({
         code: 404,
-        message: `Account not found: ${address}`,
+        message: `Account not found: ${address}`
       });
     }
 
@@ -141,7 +141,7 @@ export class Server {
   public async getHealth(): Promise<SorobanRpc.GetHealthResponse> {
     return jsonrpc.post<SorobanRpc.GetHealthResponse>(
       this.serverURL.toString(),
-      "getHealth",
+      'getHealth'
     );
   }
 
@@ -171,7 +171,7 @@ export class Server {
    * const key = xdr.ScVal.scvSymbol("counter");
    * server.getContractData(contractId, key, Durability.Temporary).then(data => {
    *   console.log("value:", data.val);
-   *   console.log("expiration:", data.expiration);
+   *   console.log("expirationLedgerSeq:", data.expirationLedgerSeq);
    *   console.log("lastModified:", data.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", data.latestLedger);
    * });
@@ -179,11 +179,11 @@ export class Server {
   public async getContractData(
     contract: string | Address | Contract,
     key: xdr.ScVal,
-    durability: Durability = Durability.Persistent,
+    durability: Durability = Durability.Persistent
   ): Promise<SorobanRpc.LedgerEntryResult> {
     // coalesce `contract` param variants to an ScAddress
     let scAddress: xdr.ScAddress;
-    if (typeof contract === "string") {
+    if (typeof contract === 'string') {
       scAddress = new Contract(contract).address().toScAddress();
     } else if (contract instanceof Address) {
       scAddress = contract.toScAddress();
@@ -212,25 +212,25 @@ export class Server {
         key,
         contract: scAddress,
         durability: xdrDurability
-      }),
+      })
     );
 
-    return this
-      .getLedgerEntries(contractKey)
-      .then((r: SorobanRpc.GetLedgerEntriesResponse) => {
+    return this.getLedgerEntries(contractKey).then(
+      (r: SorobanRpc.GetLedgerEntriesResponse) => {
         if (r.entries.length === 0) {
           return Promise.reject({
             code: 404,
             message: `Contract data not found. Contract: ${Address.fromScAddress(
-              scAddress,
+              scAddress
             ).toString()}, Key: ${key.toXDR(
-              "base64",
-            )}, Durability: ${durability}`,
+              'base64'
+            )}, Durability: ${durability}`
           });
         }
 
         return r.entries[0];
-      });
+      }
+    );
   }
 
   /**
@@ -261,7 +261,7 @@ export class Server {
    *   const ledgerData = response.entries[0];
    *   console.log("key:", ledgerData.key);
    *   console.log("value:", ledgerData.val);
-   *   console.log("expiration:", ledgerData.expiration);
+   *   console.log("expirationLedgerSeq:", ledgerData.expirationLedgerSeq);
    *   console.log("lastModified:", ledgerData.lastModifiedLedgerSeq);
    *   console.log("latestLedger:", response.latestLedger);
    * });
@@ -269,7 +269,11 @@ export class Server {
   public async getLedgerEntries(
     ...keys: xdr.LedgerKey[]
   ): Promise<SorobanRpc.GetLedgerEntriesResponse> {
-    return this._getLedgerEntries(...keys).then(r => parseRawLedgerEntries(r));
+    return this._getLedgerEntries(
+      ...expandRequestIncludeExpirationLedgers(keys)
+    )
+      .then((response) => mergeResponseExpirationLedgers(response, keys))
+      .then(parseRawLedgerEntries);
   }
 
   public async _getLedgerEntries(
@@ -277,9 +281,9 @@ export class Server {
   ): Promise<SorobanRpc.RawGetLedgerEntriesResponse> {
     return jsonrpc.post(
       this.serverURL.toString(),
-      "getLedgerEntries",
-      expandRequestIncludeExpirationLedgers(keys).map((k) => k.toXDR("base64")),
-    ).then(response => mergeResponseExpirationLedgers(response, keys));
+      'getLedgerEntries',
+      keys.map((k) => k.toXDR('base64'))
+    );
   }
 
   /**
@@ -304,16 +308,16 @@ export class Server {
    * });
    */
   public async getTransaction(
-    hash: string,
+    hash: string
   ): Promise<SorobanRpc.GetTransactionResponse> {
-    return this._getTransaction(hash).then(raw => {
+    return this._getTransaction(hash).then((raw) => {
       let successInfo: Omit<
         SorobanRpc.GetSuccessfulTransactionResponse,
         keyof SorobanRpc.GetFailedTransactionResponse
       > = {} as any;
 
       if (raw.status === SorobanRpc.GetTransactionStatus.SUCCESS) {
-        const meta = xdr.TransactionMeta.fromXDR(raw.resultMetaXdr!, "base64");
+        const meta = xdr.TransactionMeta.fromXDR(raw.resultMetaXdr!, 'base64');
         successInfo = {
           ledger: raw.ledger!,
           createdAt: raw.createdAt!,
@@ -321,14 +325,14 @@ export class Server {
           feeBump: raw.feeBump!,
           envelopeXdr: xdr.TransactionEnvelope.fromXDR(
             raw.envelopeXdr!,
-            "base64",
+            'base64'
           ),
-          resultXdr: xdr.TransactionResult.fromXDR(raw.resultXdr!, "base64"),
+          resultXdr: xdr.TransactionResult.fromXDR(raw.resultXdr!, 'base64'),
           resultMetaXdr: meta,
           ...(meta.switch() === 3 &&
             meta.v3().sorobanMeta() !== null && {
-              returnValue: meta.v3().sorobanMeta()?.returnValue(),
-            }),
+              returnValue: meta.v3().sorobanMeta()?.returnValue()
+            })
         };
       }
 
@@ -338,7 +342,7 @@ export class Server {
         latestLedgerCloseTime: raw.latestLedgerCloseTime,
         oldestLedger: raw.oldestLedger,
         oldestLedgerCloseTime: raw.oldestLedgerCloseTime,
-        ...successInfo,
+        ...successInfo
       };
 
       return result;
@@ -346,13 +350,9 @@ export class Server {
   }
 
   public async _getTransaction(
-    hash: string,
+    hash: string
   ): Promise<SorobanRpc.RawGetTransactionResponse> {
-    return jsonrpc.post(
-      this.serverURL.toString(),
-      "getTransaction",
-      hash,
-    );
+    return jsonrpc.post(this.serverURL.toString(), 'getTransaction', hash);
   }
 
   /**
@@ -394,26 +394,24 @@ export class Server {
    * });
    */
   public async getEvents(
-    request: Server.GetEventsRequest,
+    request: Server.GetEventsRequest
   ): Promise<SorobanRpc.GetEventsResponse> {
     return this._getEvents(request).then(parseRawEvents);
   }
 
   public async _getEvents(
-    request: Server.GetEventsRequest,
+    request: Server.GetEventsRequest
   ): Promise<SorobanRpc.RawGetEventsResponse> {
-    return jsonrpc.postObject(
-      this.serverURL.toString(),
-      "getEvents",
-      {
-        filters: request.filters ?? [],
-        pagination: {
-          ...(request.cursor && { cursor: request.cursor }), // add if defined
-          ...(request.limit && { limit: request.limit }),
-        },
-        ...(request.startLedger && { startLedger: request.startLedger.toString() }),
-      }
-    );
+    return jsonrpc.postObject(this.serverURL.toString(), 'getEvents', {
+      filters: request.filters ?? [],
+      pagination: {
+        ...(request.cursor && { cursor: request.cursor }), // add if defined
+        ...(request.limit && { limit: request.limit })
+      },
+      ...(request.startLedger && {
+        startLedger: request.startLedger.toString()
+      })
+    });
   }
 
   /**
@@ -431,7 +429,7 @@ export class Server {
    * });
    */
   public async getNetwork(): Promise<SorobanRpc.GetNetworkResponse> {
-    return await jsonrpc.post(this.serverURL.toString(), "getNetwork");
+    return await jsonrpc.post(this.serverURL.toString(), 'getNetwork');
   }
 
   /**
@@ -450,7 +448,7 @@ export class Server {
    * });
    */
   public async getLatestLedger(): Promise<SorobanRpc.GetLatestLedgerResponse> {
-    return jsonrpc.post(this.serverURL.toString(), "getLatestLedger");
+    return jsonrpc.post(this.serverURL.toString(), 'getLatestLedger');
   }
 
   /**
@@ -496,18 +494,18 @@ export class Server {
    * });
    */
   public async simulateTransaction(
-    transaction: Transaction | FeeBumpTransaction,
+    transaction: Transaction | FeeBumpTransaction
   ): Promise<SorobanRpc.SimulateTransactionResponse> {
     return this._simulateTransaction(transaction).then(parseRawSimulation);
   }
 
   public async _simulateTransaction(
-    transaction: Transaction | FeeBumpTransaction,
+    transaction: Transaction | FeeBumpTransaction
   ): Promise<SorobanRpc.RawSimulateTransactionResponse> {
     return jsonrpc.post(
       this.serverURL.toString(),
-      "simulateTransaction",
-      transaction.toXDR(),
+      'simulateTransaction',
+      transaction.toXDR()
     );
   }
 
@@ -584,19 +582,19 @@ export class Server {
    */
   public async prepareTransaction(
     transaction: Transaction | FeeBumpTransaction,
-    networkPassphrase?: string,
+    networkPassphrase?: string
   ): Promise<Transaction | FeeBumpTransaction> {
     const [{ passphrase }, simResponse] = await Promise.all([
       networkPassphrase
         ? Promise.resolve({ passphrase: networkPassphrase })
         : this.getNetwork(),
-      this.simulateTransaction(transaction),
+      this.simulateTransaction(transaction)
     ]);
     if (SorobanRpc.isSimulationError(simResponse)) {
       throw simResponse.error;
     }
     if (!simResponse.result) {
-      throw new Error("transaction simulation failed");
+      throw new Error('transaction simulation failed');
     }
 
     return assembleTransaction(transaction, passphrase, simResponse).build();
@@ -646,18 +644,18 @@ export class Server {
    * });
    */
   public async sendTransaction(
-    transaction: Transaction | FeeBumpTransaction,
+    transaction: Transaction | FeeBumpTransaction
   ): Promise<SorobanRpc.SendTransactionResponse> {
     return this._sendTransaction(transaction).then(parseRawSendTransaction);
   }
 
   public async _sendTransaction(
-    transaction: Transaction | FeeBumpTransaction,
+    transaction: Transaction | FeeBumpTransaction
   ): Promise<SorobanRpc.RawSendTransactionResponse> {
     return jsonrpc.post(
       this.serverURL.toString(),
-      "sendTransaction",
-      transaction.toXDR(),
+      'sendTransaction',
+      transaction.toXDR()
     );
   }
 
@@ -691,29 +689,29 @@ export class Server {
    *    });
    */
   public async requestAirdrop(
-    address: string | Pick<Account, "accountId">,
-    friendbotUrl?: string,
+    address: string | Pick<Account, 'accountId'>,
+    friendbotUrl?: string
   ): Promise<Account> {
-    const account = typeof address === "string" ? address : address.accountId();
+    const account = typeof address === 'string' ? address : address.accountId();
     friendbotUrl = friendbotUrl || (await this.getNetwork()).friendbotUrl;
     if (!friendbotUrl) {
-      throw new Error("No friendbot URL configured for current network");
+      throw new Error('No friendbot URL configured for current network');
     }
 
     try {
       const response = await AxiosClient.post<Friendbot.Response>(
-        `${friendbotUrl}?addr=${encodeURIComponent(account)}`,
+        `${friendbotUrl}?addr=${encodeURIComponent(account)}`
       );
 
       const meta = xdr.TransactionMeta.fromXDR(
         response.data.result_meta_xdr,
-        "base64",
+        'base64'
       );
       const sequence = findCreatedAccountSequenceInTransactionMeta(meta);
       return new Account(account, sequence);
     } catch (error: any) {
       if (error.response?.status === 400) {
-        if (error.response.detail?.includes("createAccountAlreadyExist")) {
+        if (error.response.detail?.includes('createAccountAlreadyExist')) {
           // Account already exists, load the sequence number
           return this.getAccount(account);
         }
@@ -724,7 +722,7 @@ export class Server {
 }
 
 function findCreatedAccountSequenceInTransactionMeta(
-  meta: xdr.TransactionMeta,
+  meta: xdr.TransactionMeta
 ): string {
   let operations: xdr.OperationMeta[] = [];
   switch (meta.switch()) {
@@ -737,7 +735,7 @@ function findCreatedAccountSequenceInTransactionMeta(
       operations = (meta.value() as xdr.TransactionMetaV3).operations();
       break;
     default:
-      throw new Error("Unexpected transaction meta switch value");
+      throw new Error('Unexpected transaction meta switch value');
   }
 
   for (const op of operations) {
@@ -754,54 +752,78 @@ function findCreatedAccountSequenceInTransactionMeta(
     }
   }
 
-  throw new Error("No account created in transaction");
+  throw new Error('No account created in transaction');
 }
 
-
 // TODO - remove once rpc updated to
-// append expiration entry per data LK requested onto server-side response 
+// append expiration entry per data LK requested onto server-side response
 // https://github.com/stellar/soroban-tools/issues/1010
-function mergeResponseExpirationLedgers(ledgerEntriesResponse: SorobanRpc.RawGetLedgerEntriesResponse,
+function mergeResponseExpirationLedgers(
+  ledgerEntriesResponse: SorobanRpc.RawGetLedgerEntriesResponse,
   requestedKeys: xdr.LedgerKey[]
 ): SorobanRpc.RawGetLedgerEntriesResponse {
-  const requestedKeyXdrs = new Set<String>(requestedKeys.map(requestedKey =>
-    requestedKey.toXDR('base64')));
-  const expirationKeyToRawEntryResult = new Map<String, SorobanRpc.RawLedgerEntryResult>();
-  (ledgerEntriesResponse.entries ?? []).forEach(rawEntryResult => {
+  const requestedKeyXdrs = new Set<String>(
+    requestedKeys.map((requestedKey) => requestedKey.toXDR('base64'))
+  );
+  const expirationKeyToRawEntryResult = new Map<
+    String,
+    SorobanRpc.RawLedgerEntryResult
+  >();
+  (ledgerEntriesResponse.entries ?? []).forEach((rawEntryResult) => {
     if (!rawEntryResult.key || !rawEntryResult.xdr) {
-      throw new TypeError(`invalid ledger entry: ${JSON.stringify(rawEntryResult)}`);
+      throw new TypeError(
+        `invalid ledger entry: ${JSON.stringify(rawEntryResult)}`
+      );
     }
     const parsedKey = xdr.LedgerKey.fromXDR(rawEntryResult.key, 'base64');
-    const isExpirationMeta = parsedKey.switch().value === xdr.LedgerEntryType.expiration().value && 
-                             !requestedKeyXdrs.has(rawEntryResult.key);
-    const keyHash = (isExpirationMeta) 
+    const isExpirationMeta =
+      parsedKey.switch().value === xdr.LedgerEntryType.expiration().value &&
+      !requestedKeyXdrs.has(rawEntryResult.key);
+    const keyHash = isExpirationMeta
       ? parsedKey.expiration().keyHash().toString()
       : hash(parsedKey.toXDR()).toString();
-    
-    const rawEntry = expirationKeyToRawEntryResult.get(keyHash) ?? rawEntryResult;
-    
+
+    const rawEntry =
+      expirationKeyToRawEntryResult.get(keyHash) ?? rawEntryResult;
+
     if (isExpirationMeta) {
-      const expirationLedgerSeq = xdr.LedgerEntryData
-          .fromXDR(rawEntryResult.xdr, 'base64')
-          .expiration().expirationLedgerSeq();
-      expirationKeyToRawEntryResult.set(keyHash, { ...rawEntry, expirationLedgerSeq});
+      const expirationLedgerSeq = xdr.LedgerEntryData.fromXDR(
+        rawEntryResult.xdr,
+        'base64'
+      )
+        .expiration()
+        .expirationLedgerSeq();
+      expirationKeyToRawEntryResult.set(keyHash, {
+        ...rawEntry,
+        expirationLedgerSeq
+      });
     } else {
-      expirationKeyToRawEntryResult.set(keyHash, { ...rawEntry, ...rawEntryResult});
+      expirationKeyToRawEntryResult.set(keyHash, {
+        ...rawEntry,
+        ...rawEntryResult
+      });
     }
   });
-  
+
   ledgerEntriesResponse.entries = [...expirationKeyToRawEntryResult.values()];
   return ledgerEntriesResponse;
 }
 
 // TODO - remove once rpc updated to
-// include expiration entry on responses for any data LK's requested  
+// include expiration entry on responses for any data LK's requested
 // https://github.com/stellar/soroban-tools/issues/1010
 function expandRequestIncludeExpirationLedgers(
   keys: xdr.LedgerKey[]
 ): xdr.LedgerKey[] {
-  return keys.concat(keys
-      .filter(key => key.switch().value !== xdr.LedgerEntryType.expiration().value )
-      .map(key => xdr.LedgerKey.expiration(new xdr.LedgerKeyExpiration({ keyHash: hash(key.toXDR())})))
-    );  
+  return keys.concat(
+    keys
+      .filter(
+        (key) => key.switch().value !== xdr.LedgerEntryType.expiration().value
+      )
+      .map((key) =>
+        xdr.LedgerKey.expiration(
+          new xdr.LedgerKeyExpiration({ keyHash: hash(key.toXDR()) })
+        )
+      )
+  );
 }
