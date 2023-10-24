@@ -33,14 +33,14 @@ describe('Server#getContractData', function () {
     })
   );
 
-  const ledgerExpirationKey = xdr.LedgerKey.expiration(
-    new xdr.LedgerKeyExpiration({ keyHash: hash(ledgerKey.toXDR()) })
+  const ledgerTtlKey = xdr.LedgerKey.ttl(
+    new xdr.LedgerKeyTtl({ keyHash: hash(ledgerKey.toXDR()) })
   );
 
-  const ledgerExpirationEntry = xdr.LedgerEntryData.expiration(
-    new xdr.ExpirationEntry({
+  const ledgerTtlEntry = xdr.LedgerEntryData.ttl(
+    new xdr.TtlEntry({
       keyHash: hash(ledgerKey.toXDR()),
-      expirationLedgerSeq: 1000
+      liveUntilLedgerSeq: 1000
     })
   );
 
@@ -58,9 +58,7 @@ describe('Server#getContractData', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [
-          [ledgerKey.toXDR('base64'), ledgerExpirationKey.toXDR('base64')]
-        ]
+        params: [[ledgerKey.toXDR('base64'), ledgerTtlKey.toXDR('base64')]]
       })
       .returns(
         Promise.resolve({
@@ -75,8 +73,8 @@ describe('Server#getContractData', function () {
                 },
                 {
                   lastModifiedLedgerSeq: result.lastModifiedLedgerSeq,
-                  key: ledgerExpirationKey.toXDR('base64'),
-                  xdr: ledgerExpirationEntry.toXDR('base64')
+                  key: ledgerTtlKey.toXDR('base64'),
+                  xdr: ledgerTtlEntry.toXDR('base64')
                 }
               ]
             }
@@ -108,9 +106,7 @@ describe('Server#getContractData', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [
-          [ledgerKey.toXDR('base64'), ledgerExpirationKey.toXDR('base64')]
-        ]
+        params: [[ledgerKey.toXDR('base64'), ledgerTtlKey.toXDR('base64')]]
       })
       .returns(
         Promise.resolve({
@@ -147,8 +143,8 @@ describe('Server#getContractData', function () {
       .contractData()
       .durability(xdr.ContractDataDurability.temporary());
 
-    const ledgerExpirationKeyDupe = xdr.LedgerKey.expiration(
-      new xdr.LedgerKeyExpiration({ keyHash: hash(ledgerKeyDupe.toXDR()) })
+    const ledgerTtlKeyDupe = xdr.LedgerKey.ttl(
+      new xdr.LedgerKeyTtl({ keyHash: hash(ledgerKeyDupe.toXDR()) })
     );
 
     this.axiosMock
@@ -158,10 +154,7 @@ describe('Server#getContractData', function () {
         id: 1,
         method: 'getLedgerEntries',
         params: [
-          [
-            ledgerKeyDupe.toXDR('base64'),
-            ledgerExpirationKeyDupe.toXDR('base64')
-          ]
+          [ledgerKeyDupe.toXDR('base64'), ledgerTtlKeyDupe.toXDR('base64')]
         ]
       })
       .returns(Promise.resolve({ data: { result: { entries: [] } } }));

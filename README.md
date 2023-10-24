@@ -11,16 +11,20 @@
   <a href="https://coveralls.io/github/stellar/js-soroban-client?branch=master"><img alt="Coverage Status" src="https://coveralls.io/repos/stellar/js-soroban-client/badge.svg?branch=master&service=github" /></a>
 </p>
 
-js-soroban-client is a Javascript library for communicating with a
-[Soroban RPC server](https://github.com/stellar/go/tree/master/exp/services/soroban-rpc).
-It is used for building Stellar apps either on Node.js or in the browser.
+# Deprecation Notice
 
-It provides:
+**This repository has been deprecated** in favor of the [`stellar-sdk`](https://github.com/stellar/js-stellar-sdk) package. Please read the [migration guide]() for how to upgrade to that package. Future changes will only be made there.
 
+----------
+
+js-soroban-client is a JavaScript library for communicating with a
+[Soroban RPC server](https://soroban.stellar.org/api) and building Stellar apps. It provides:
 - a networking layer API for soroban-rpc methods.
 - facilities for building and signing transactions, for communicating with a
   soroban-rpc instance, and for submitting transactions or querying network
   state.
+
+<details>
 
 ### soroban-client vs stellar-base
 
@@ -214,3 +218,5 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for the detailed release process. Once 
 js-soroban-client is licensed under an Apache-2.0 license. See the
 [LICENSE](https://github.com/stellar/js-soroban-client/blob/master/LICENSE) file
 for details.
+
+</details>

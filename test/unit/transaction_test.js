@@ -192,9 +192,7 @@ describe('assembleTransaction', () => {
         SorobanClient.Operation.invokeHostFunction({
           func: xdr.HostFunction.hostFunctionTypeInvokeContract()
         }),
-        SorobanClient.Operation.bumpFootprintExpiration({
-          ledgersToExpire: 27
-        }),
+        SorobanClient.Operation.extendFootprintTtl({ extendTo: 27 }),
         SorobanClient.Operation.restoreFootprint()
       ].forEach((op) => {
         const txn = new SorobanClient.TransactionBuilder(source, {
