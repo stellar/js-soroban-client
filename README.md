@@ -13,7 +13,7 @@
 
 # Deprecation Notice
 
-**This repository has been deprecated** in favor of the [`stellar-sdk`](https://github.com/stellar/js-stellar-sdk) package. Please read the [migration guide]() for how to upgrade to that package. Future changes will only be made there.
+**This repository has been deprecated** in favor of the [`stellar-sdk`](https://github.com/stellar/js-stellar-sdk) package. Please read the [migration guide](https://gist.github.com/Shaptic/5ce4f16d9cce7118f391fbde398c2f30) for how to upgrade to that package. Future changes will only be made there.
 
 ----------
 
