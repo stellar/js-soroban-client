@@ -272,12 +272,11 @@ export class Server {
   }
 
   public async _getLedgerEntries(...keys: xdr.LedgerKey[]) {
-    return jsonrpc
-      .post<SorobanRpc.RawGetLedgerEntriesResponse>(
-        this.serverURL.toString(),
-        'getLedgerEntries',
-        keys.map((k) => k.toXDR('base64'))
-      );
+    return jsonrpc.post<SorobanRpc.RawGetLedgerEntriesResponse>(
+      this.serverURL.toString(),
+      'getLedgerEntries',
+      keys.map((k) => k.toXDR('base64'))
+    );
   }
 
   /**

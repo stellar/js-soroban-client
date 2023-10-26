@@ -33,10 +33,6 @@ describe('Server#getContractData', function () {
     })
   );
 
-  const ledgerTtlKey = xdr.LedgerKey.ttl(
-    new xdr.LedgerKeyTtl({ keyHash: hash(ledgerKey.toXDR()) })
-  );
-
   const ledgerTtlEntry = xdr.LedgerEntryData.ttl(
     new xdr.TtlEntry({
       keyHash: hash(ledgerKey.toXDR()),
@@ -49,7 +45,7 @@ describe('Server#getContractData', function () {
       lastModifiedLedgerSeq: 1,
       key: ledgerKey,
       val: ledgerEntry,
-      expirationLedgerSeq: 1000
+      liveUntilLedgerSeq: 1000
     };
 
     this.axiosMock
@@ -58,7 +54,7 @@ describe('Server#getContractData', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [[ledgerKey.toXDR('base64'), ledgerTtlKey.toXDR('base64')]]
+        params: [[ledgerKey.toXDR('base64')]]
       })
       .returns(
         Promise.resolve({
@@ -67,14 +63,10 @@ describe('Server#getContractData', function () {
               latestLedger: 420,
               entries: [
                 {
+                  liveUntilLedgerSeq: ledgerTtlEntry.ttl().liveUntilLedgerSeq(),
                   lastModifiedLedgerSeq: result.lastModifiedLedgerSeq,
                   key: ledgerKey.toXDR('base64'),
                   xdr: ledgerEntry.toXDR('base64')
-                },
-                {
-                  lastModifiedLedgerSeq: result.lastModifiedLedgerSeq,
-                  key: ledgerTtlKey.toXDR('base64'),
-                  xdr: ledgerTtlEntry.toXDR('base64')
                 }
               ]
             }
@@ -87,50 +79,7 @@ describe('Server#getContractData', function () {
       .then(function (response) {
         expect(response.key.toXDR('base64')).to.eql(result.key.toXDR('base64'));
         expect(response.val.toXDR('base64')).to.eql(result.val.toXDR('base64'));
-        expect(response.expirationLedgerSeq).to.eql(1000);
-        done();
-      })
-      .catch((err) => done(err));
-  });
-
-  it('expiration entry not present for contract data key in server response', function (done) {
-    let result = {
-      lastModifiedLedgerSeq: 1,
-      key: ledgerKey,
-      val: ledgerEntry
-    };
-
-    this.axiosMock
-      .expects('post')
-      .withArgs(serverUrl, {
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'getLedgerEntries',
-        params: [[ledgerKey.toXDR('base64'), ledgerTtlKey.toXDR('base64')]]
-      })
-      .returns(
-        Promise.resolve({
-          data: {
-            result: {
-              latestLedger: 420,
-              entries: [
-                {
-                  lastModifiedLedgerSeq: result.lastModifiedLedgerSeq,
-                  key: result.key.toXDR('base64'),
-                  xdr: result.val.toXDR('base64')
-                }
-              ]
-            }
-          }
-        })
-      );
-
-    this.server
-      .getContractData(address, key, Durability.Persistent)
-      .then(function (response) {
-        expect(response.key.toXDR('base64')).to.eql(result.key.toXDR('base64'));
-        expect(response.val.toXDR('base64')).to.eql(result.val.toXDR('base64'));
-        expect(response.expirationLedgerSeq).to.be.undefined;
+        expect(response.liveUntilLedgerSeq).to.eql(1000);
         done();
       })
       .catch((err) => done(err));
@@ -143,19 +92,13 @@ describe('Server#getContractData', function () {
       .contractData()
       .durability(xdr.ContractDataDurability.temporary());
 
-    const ledgerTtlKeyDupe = xdr.LedgerKey.ttl(
-      new xdr.LedgerKeyTtl({ keyHash: hash(ledgerKeyDupe.toXDR()) })
-    );
-
     this.axiosMock
       .expects('post')
       .withArgs(serverUrl, {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [
-          [ledgerKeyDupe.toXDR('base64'), ledgerTtlKeyDupe.toXDR('base64')]
-        ]
+        params: [[ledgerKeyDupe.toXDR('base64')]]
       })
       .returns(Promise.resolve({ data: { result: { entries: [] } } }));
 
