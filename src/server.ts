@@ -8,9 +8,7 @@ import {
   FeeBumpTransaction,
   Keypair,
   Transaction,
-  xdr,
-  hash,
-  Operation
+  xdr
 } from 'stellar-base';
 
 import AxiosClient from './axios';
