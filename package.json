@@ -1,6 +1,6 @@
 {
   "name": "soroban-client",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "description": "A library for working with Stellar's Soroban RPC servers.",
   "author": "Stellar Development Foundation <hello@stellar.org>",
   "homepage": "https://github.com/stellar/js-soroban-client",
@@ -139,7 +139,7 @@
     "axios": "^1.4.0",
     "bignumber.js": "^9.1.1",
     "buffer": "^6.0.3",
-    "stellar-base": "v10.0.0-beta.3",
+    "stellar-base": "v10.0.0-beta.4",
     "urijs": "^1.19.1"
   }
 }
