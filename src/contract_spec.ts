@@ -767,14 +767,16 @@ function findCase(name: string) {
 
 const PRIMITIVE_DEFINITONS = {
   U64: {
-    type: 'integer',
-    minimum: 0,
-    maximum: 18446744073709551615
+    type: 'string',
+    pattern: '^[0-9]+$',
+    minLength: 1,
+    maxLength: 20 // 64-bit max value has 20 digits
   },
   I64: {
-    type: 'integer',
-    minimum: -9223372036854775808,
-    maximum: 9223372036854775807
+    type: 'string',
+    pattern: '^-?^[0-9]+$',
+    minLength: 1,
+    maxLength: 21 // Includes additional digit for the potential '-'
   },
   U32: {
     type: 'integer',
@@ -988,7 +990,6 @@ function args_and_required(
     if (isRequired(type_)) {
       required.push(name);
     }
-    console.log(name, type_);
   }
   let res: { properties: object; required?: string[] } = { properties };
   if (required.length > 0) {
