@@ -766,45 +766,45 @@ function findCase(name: string) {
 }
 
 const PRIMITIVE_DEFINITONS = {
-  u64: {
+  U64: {
     type: 'integer',
     minimum: 0,
     maximum: 18446744073709551615
   },
-  i64: {
+  I64: {
     type: 'integer',
     minimum: -9223372036854775808,
     maximum: 9223372036854775807
   },
-  u32: {
+  U32: {
     type: 'integer',
     minimum: 0,
     maximum: 4294967295
   },
-  i32: {
+  I32: {
     type: 'integer',
     minimum: -2147483648,
     maximum: 2147483647
   },
-  u128: {
+  U128: {
     type: 'string',
     pattern: '^[0-9]+$',
     minLength: 1,
     maxLength: 39 // 128-bit max value has 39 digits
   },
-  i128: {
+  I128: {
     type: 'string',
     pattern: '^-?[0-9]+$',
     minLength: 1,
     maxLength: 40 // Includes additional digit for the potential '-'
   },
-  u256: {
+  U256: {
     type: 'string',
     pattern: '^[0-9]+$',
     minLength: 1,
     maxLength: 78 // 256-bit max value has 78 digits
   },
-  i256: {
+  I256: {
     type: 'string',
     pattern: '^-?[0-9]+$',
     minLength: 1,
@@ -853,19 +853,19 @@ function typeRef(typeDef: xdr.ScSpecTypeDef): object {
       break;
     }
     case xdr.ScSpecType.scSpecTypeU32().value: {
-      ref = 'u32';
+      ref = 'U32';
       break;
     }
     case xdr.ScSpecType.scSpecTypeI32().value: {
-      ref = 'i32';
+      ref = 'I32';
       break;
     }
     case xdr.ScSpecType.scSpecTypeU64().value: {
-      ref = 'u64';
+      ref = 'U64';
       break;
     }
     case xdr.ScSpecType.scSpecTypeI64().value: {
-      ref = 'i64';
+      ref = 'I64';
       break;
     }
     case xdr.ScSpecType.scSpecTypeTimepoint().value: {
@@ -879,19 +879,19 @@ function typeRef(typeDef: xdr.ScSpecTypeDef): object {
       break;
     }
     case xdr.ScSpecType.scSpecTypeU128().value: {
-      ref = 'u128';
+      ref = 'U128';
       break;
     }
     case xdr.ScSpecType.scSpecTypeI128().value: {
-      ref = 'i128';
+      ref = 'I128';
       break;
     }
     case xdr.ScSpecType.scSpecTypeU256().value: {
-      ref = 'u256';
+      ref = 'U256';
       break;
     }
     case xdr.ScSpecType.scSpecTypeI256().value: {
-      ref = 'i256';
+      ref = 'I256';
       break;
     }
     case xdr.ScSpecType.scSpecTypeBytes().value: {
