@@ -961,7 +961,7 @@ function typeRef(typeDef: xdr.ScSpecTypeDef): object {
 }
 
 function isRequired(typeDef: xdr.ScSpecTypeDef): boolean {
-  return typeDef.switch().value == xdr.ScSpecType.scSpecTypeOption().value;
+  return typeDef.switch().value != xdr.ScSpecType.scSpecTypeOption().value;
 }
 
 function structToJsonSchema(udt: xdr.ScSpecUdtStructV0): object {
@@ -978,7 +978,7 @@ function structToJsonSchema(udt: xdr.ScSpecUdtStructV0): object {
 
 function args_and_required(
   input: { type: () => xdr.ScSpecTypeDef; name: () => string | Buffer }[]
-): { properties: object; required: string[] } {
+): { properties: object; required?: string[] } {
   let properties: any = {};
   let required: string[] = [];
   for (let arg of input) {
@@ -988,24 +988,32 @@ function args_and_required(
     if (isRequired(type_)) {
       required.push(name);
     }
+    console.log(name, type_);
   }
-  return { properties, required };
+  let res: { properties: object; required?: string[] } = { properties };
+  if (required.length > 0) {
+    res.required = required;
+  }
+  return res;
 }
 
 function functionToJsonSchema(func: xdr.ScSpecFunctionV0): object {
   let { properties, required }: any = args_and_required(func.inputs());
-  let input = {
+  let description = func.doc().toString();
+  let args: any = {
     additionalProperties: false,
-    description: func.doc().toString(),
+    properties,
+    type: 'object'
+  };
+  if (required?.length > 0) {
+    args.required = required;
+  }
+  let input: any = {
+    additionalProperties: false,
     /// Previous way of determining if this type is a function
     contractMethod: 'view',
     properties: {
-      args: {
-        additionalProperties: false,
-        properties,
-        required,
-        type: 'object'
-      }
+      args
     }
   };
   // let output: any = {};
@@ -1013,6 +1021,9 @@ function functionToJsonSchema(func: xdr.ScSpecFunctionV0): object {
   // if (outputs.length !== 0) {
   //   output[`${name}__Result`] = typeRef(func.outputs()[0]);
   // }
+  if (description.length > 0) {
+    input.description = description;
+  }
 
   return {
     ...input
@@ -1043,10 +1054,13 @@ function unionToJsonSchema(udt: xdr.ScSpecUdtUnionV0): any {
     }
   }
 
-  return {
-    description,
+  let res: any = {
     oneOf
   };
+  if (description.length > 0) {
+    res.description = description;
+  }
+  return res;
 }
 
 function enumToJsonSchema(udt: xdr.ScSpecUdtEnumV0): any {
@@ -1064,8 +1078,9 @@ function enumToJsonSchema(udt: xdr.ScSpecUdtEnumV0): any {
     });
   }
 
-  return {
-    description,
-    oneOf
-  };
+  let res: any = { oneOf };
+  if (description.length > 0) {
+    res.description = description;
+  }
+  return res;
 }
