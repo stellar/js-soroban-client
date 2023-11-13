@@ -1,19 +1,9 @@
-import { ScIntType, XdrLargeInt, xdr } from 'stellar-base';
-
-import { Address } from 'stellar-base';
-import { Contract } from 'stellar-base';
-import { scValToBigInt } from 'stellar-base';
-
-export interface Union<T> {
-  tag: string;
-  values?: T;
-}
-
 /**
  * Provides a ContractSpec class which can contains the XDR types defined by the contract.
  * This allows the class to be used to convert between native and raw `xdr.ScVal`s.
  *
  * @example
+ * ```js
  * const specEntries = [...]; // XDR spec entries of a smart contract
  * const contractSpec = new ContractSpec(specEntries);
  *
@@ -31,7 +21,54 @@ export interface Union<T> {
  * const result = contractSpec.funcResToNative('funcName', resultScv);
  *
  * console.log(result); // {success: true}
+ * ```
  */
+
+import {
+  ScIntType,
+  XdrLargeInt,
+  xdr,
+  Address,
+  Contract,
+  scValToBigInt
+} from 'stellar-base';
+
+export interface Union<T> {
+  tag: string;
+  values?: T;
+}
+
+function readObj(args: object, input: xdr.ScSpecFunctionInputV0): any {
+  let inputName = input.name().toString();
+  let entry = Object.entries(args).find(([name, _]) => name === inputName);
+  if (!entry) {
+    throw new Error(`Missing field ${inputName}`);
+  }
+  return entry[1];
+}
+
+// function getLedgerKeyContractCode(contractId: string): xdr.LedgerKey {
+//   const [ _, instance ] = new Contract(contractId).getFootprint();
+//   return instance;
+// }
+
+// function getLedgerKeyWasmId(contractCodeLedgerEntryData: string): xdr.LedgerKey {
+//   const entry = xdr.LedgerEntryData.fromXDR(
+//     contractCodeLedgerEntryData,
+//     "base64"
+//   );
+
+//   const instance = entry.contractData().val().instance();
+
+//   let ledgerKey = xdr.LedgerKey.contractCode(
+//     new xdr.LedgerKeyContractCode({
+//       hash: instance.executable().wasmHash()
+//     })
+//   );
+
+//   return ledgerKey;
+// }
+
 export class ContractSpec {
   public entries: xdr.ScSpecEntry[] = [];
 
@@ -132,7 +169,10 @@ export class ContractSpec {
     }
     let output = outputs[0];
     if (output.switch().value === xdr.ScSpecType.scSpecTypeResult().value) {
-      return this.scValToNative(val, output.result().okType());
+      return this.scValToNative(
+        val,
+        (output.value() as xdr.ScSpecTypeResult).okType()
+      );
     }
     return this.scValToNative(val, output);
   }
@@ -178,7 +218,6 @@ export class ContractSpec {
       }
       return this.nativeToScVal(val, opt.valueType());
     }
-
     switch (typeof val) {
       case 'object': {
         if (val === null) {
@@ -648,6 +687,45 @@ export class ContractSpec {
     }
     return num;
   }
+
+  /// Need to provide better typing
+  JsonSchema(): object {
+    let definitions: any = {};
+    let properties: any = {};
+    for (let entry of this.entries) {
+      switch (entry.switch().value) {
+        case xdr.ScSpecEntryKind.scSpecEntryUdtEnumV0().value: {
+          let udt = entry.value() as xdr.ScSpecUdtEnumV0;
+          definitions[udt.name().toString()] = enumToJsonSchema(udt);
+          break;
+        }
+        case xdr.ScSpecEntryKind.scSpecEntryUdtStructV0().value: {
+          let udt = entry.value() as xdr.ScSpecUdtStructV0;
+          definitions[udt.name().toString()] = structToJsonSchema(udt);
+          break;
+        }
+        case xdr.ScSpecEntryKind.scSpecEntryUdtUnionV0().value:
+          let udt = entry.value() as xdr.ScSpecUdtUnionV0;
+          definitions[udt.name().toString()] = unionToJsonSchema(udt);
+          break;
+        case xdr.ScSpecEntryKind.scSpecEntryFunctionV0().value: {
+          let fn = entry.value() as xdr.ScSpecFunctionV0;
+          definitions[fn.name().toString()] = functionToJsonSchema(fn);
+          properties[fn.name().toString()] = {
+            $ref: `#/definitions/${fn.name().toString()}`
+          };
+          break;
+        }
+        case xdr.ScSpecEntryKind.scSpecEntryUdtErrorEnumV0().value: {
+          // throw new Error('Error enums not supported yet');
+        }
+      }
+    }
+    return {
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      definitions: { ...PRIMITIVE_DEFINITONS, ...definitions }
+    };
+  }
 }
 
 function stringToScVal(str: string, ty: xdr.ScSpecType): xdr.ScVal {
@@ -687,11 +765,307 @@ function findCase(name: string) {
   };
 }
 
-function readObj(args: object, input: xdr.ScSpecFunctionInputV0): any {
-  let inputName = input.name().toString();
-  let entry = Object.entries(args).find(([name, _]) => name === inputName);
-  if (!entry) {
-    throw new Error(`Missing field ${inputName}`);
+const PRIMITIVE_DEFINITONS = {
+  u64: {
+    type: 'integer',
+    minimum: 0,
+    maximum: 18446744073709551615
+  },
+  i64: {
+    type: 'integer',
+    minimum: -9223372036854775808,
+    maximum: 9223372036854775807
+  },
+  u32: {
+    type: 'integer',
+    minimum: 0,
+    maximum: 4294967295
+  },
+  i32: {
+    type: 'integer',
+    minimum: -2147483648,
+    maximum: 2147483647
+  },
+  u128: {
+    type: 'string',
+    pattern: '^[0-9]+$',
+    minLength: 1,
+    maxLength: 39 // 128-bit max value has 39 digits
+  },
+  i128: {
+    type: 'string',
+    pattern: '^-?[0-9]+$',
+    minLength: 1,
+    maxLength: 40 // Includes additional digit for the potential '-'
+  },
+  u256: {
+    type: 'string',
+    pattern: '^[0-9]+$',
+    minLength: 1,
+    maxLength: 78 // 256-bit max value has 78 digits
+  },
+  i256: {
+    type: 'string',
+    pattern: '^-?[0-9]+$',
+    minLength: 1,
+    maxLength: 79 // Includes additional digit for the potential '-'
+  },
+  Address: {
+    type: 'string',
+    description: 'Address can be a public key or contract id'
+  },
+  ScString: {
+    type: 'string',
+    description: 'ScString is a string'
+  },
+  ScSymbol: {
+    type: 'string',
+    description: 'ScString is a string'
+  },
+  DataUrl: {
+    type: 'string',
+    format: 'data-url'
   }
-  return entry[1];
+};
+
+/**
+ *
+ * @param typeDef type to convert to json schema reference
+ * @returns
+ */
+function typeRef(typeDef: xdr.ScSpecTypeDef): object {
+  let t = typeDef.switch();
+  let value = t.value;
+  let ref;
+  switch (value) {
+    case xdr.ScSpecType.scSpecTypeVal().value: {
+      ref = 'Val';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeBool().value: {
+      return { type: 'boolean' };
+    }
+    case xdr.ScSpecType.scSpecTypeVoid().value: {
+      return { type: 'null' };
+    }
+    case xdr.ScSpecType.scSpecTypeError().value: {
+      ref = 'Error';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeU32().value: {
+      ref = 'u32';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeI32().value: {
+      ref = 'i32';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeU64().value: {
+      ref = 'u64';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeI64().value: {
+      ref = 'i64';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeTimepoint().value: {
+      throw new Error('Timepoint type not supported');
+      ref = 'Timepoint';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeDuration().value: {
+      throw new Error('Duration not supported');
+      ref = 'Duration';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeU128().value: {
+      ref = 'u128';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeI128().value: {
+      ref = 'i128';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeU256().value: {
+      ref = 'u256';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeI256().value: {
+      ref = 'i256';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeBytes().value: {
+      ref = 'DataUrl';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeString().value: {
+      ref = 'ScString';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeSymbol().value: {
+      ref = 'ScSymbol';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeAddress().value: {
+      ref = 'Address';
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeOption().value: {
+      let opt = typeDef.value() as xdr.ScSpecTypeOption;
+      return typeRef(opt.valueType());
+    }
+    case xdr.ScSpecType.scSpecTypeResult().value: {
+      // throw new Error('Result type not supported');
+      break;
+    }
+    case xdr.ScSpecType.scSpecTypeVec().value: {
+      let arr = typeDef.value() as xdr.ScSpecTypeVec;
+      let ref = typeRef(arr.elementType());
+      return {
+        type: 'array',
+        items: ref
+      };
+    }
+    case xdr.ScSpecType.scSpecTypeMap().value: {
+      let map = typeDef.value() as xdr.ScSpecTypeMap;
+      let ref = typeRef(map.valueType());
+      return {
+        type: 'object',
+        patternProperties: {
+          '^[a-zA-Z0-9]+$': ref
+        },
+        additionalProperties: false
+      };
+    }
+    case xdr.ScSpecType.scSpecTypeTuple().value: {
+      let tuple = typeDef.value() as xdr.ScSpecTypeTuple;
+      let minItems = tuple.valueTypes().length;
+      let maxItems = minItems;
+      let items = tuple.valueTypes().map(typeRef);
+      return { type: 'array', items, minItems, maxItems };
+    }
+    case xdr.ScSpecType.scSpecTypeBytesN().value: {
+      let arr = typeDef.value() as xdr.ScSpecTypeBytesN;
+      return {
+        $ref: '#/definitions/DataUrl',
+        maxLength: arr.n()
+      };
+    }
+    case xdr.ScSpecType.scSpecTypeUdt().value: {
+      let udt = typeDef.value() as xdr.ScSpecTypeUdt;
+      ref = udt.name().toString();
+      break;
+    }
+  }
+  return { $ref: `#/definitions/${ref}` };
+}
+
+function isRequired(typeDef: xdr.ScSpecTypeDef): boolean {
+  return typeDef.switch().value == xdr.ScSpecType.scSpecTypeOption().value;
+}
+
+function structToJsonSchema(udt: xdr.ScSpecUdtStructV0): object {
+  let description = udt.doc().toString();
+  let { properties, required }: any = args_and_required(udt.fields());
+  properties['additionalProperties'] = false;
+  return {
+    description,
+    properties,
+    required,
+    type: 'object'
+  };
+}
+
+function args_and_required(
+  input: { type: () => xdr.ScSpecTypeDef; name: () => string | Buffer }[]
+): { properties: object; required: string[] } {
+  let properties: any = {};
+  let required: string[] = [];
+  for (let arg of input) {
+    let type_ = arg.type();
+    let name = arg.name().toString();
+    properties[name] = typeRef(type_);
+    if (isRequired(type_)) {
+      required.push(name);
+    }
+  }
+  return { properties, required };
+}
+
+function functionToJsonSchema(func: xdr.ScSpecFunctionV0): object {
+  let { properties, required }: any = args_and_required(func.inputs());
+  let input = {
+    additionalProperties: false,
+    description: func.doc().toString(),
+    /// Previous way of determining if this type is a function
+    contractMethod: 'view',
+    properties: {
+      args: {
+        additionalProperties: false,
+        properties,
+        required,
+        type: 'object'
+      }
+    }
+  };
+  // let output: any = {};
+  // let outputs = func.outputs();
+  // if (outputs.length !== 0) {
+  //   output[`${name}__Result`] = typeRef(func.outputs()[0]);
+  // }
+
+  return {
+    ...input
+    // ...output
+  };
+}
+
+function unionToJsonSchema(udt: xdr.ScSpecUdtUnionV0): any {
+  let description = udt.doc().toString();
+  let cases = udt.cases();
+  let oneOf: any[] = [];
+  for (let case_ of cases) {
+    switch (case_.switch().value) {
+      case xdr.ScSpecUdtUnionCaseV0Kind.scSpecUdtUnionCaseVoidV0().value: {
+        let c = case_.value() as xdr.ScSpecUdtUnionCaseVoidV0;
+        oneOf.push({
+          tag: c.name().toString()
+        });
+        break;
+      }
+      case xdr.ScSpecUdtUnionCaseV0Kind.scSpecUdtUnionCaseTupleV0().value: {
+        let c = case_.value() as xdr.ScSpecUdtUnionCaseTupleV0;
+        oneOf.push({
+          tag: c.name().toString(),
+          values: c.type().map(typeRef)
+        });
+      }
+    }
+  }
+
+  return {
+    description,
+    oneOf
+  };
+}
+
+function enumToJsonSchema(udt: xdr.ScSpecUdtEnumV0): any {
+  let description = udt.doc().toString();
+  let cases = udt.cases();
+  let oneOf: any[] = [];
+  for (let case_ of cases) {
+    let title = case_.name().toString();
+    let description = case_.doc().toString();
+    oneOf.push({
+      description,
+      title,
+      enum: [case_.value()],
+      type: 'number'
+    });
+  }
+
+  return {
+    description,
+    oneOf
+  };
 }
