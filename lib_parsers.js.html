@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>js-stellar-base/src/operations/account_merge.js - Documentation</title>
+    <title>lib/parsers.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -29,7 +29,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">js-stellar-base/src/operations/account_merge.js</h1>
+    <h1 class="page-title">lib/parsers.js</h1>
     
 
     
@@ -39,36 +39,131 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import xdr from '../xdr';
-import { decodeAddressToMuxedAccount } from '../util/decode_encode_muxed_account';
+            <pre class="prettyprint source linenums"><code>"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.parseRawEvents = parseRawEvents;
+exports.parseRawLedgerEntries = parseRawLedgerEntries;
+exports.parseRawSendTransaction = parseRawSendTransaction;
+exports.parseRawSimulation = parseRawSimulation;
+var _stellarBase = require("stellar-base");
+var _soroban_rpc = require("./soroban_rpc");
+function parseRawSendTransaction(r) {
+  const errResult = r.errorResultXdr;
+  delete r.errorResultXdr;
+  if (!!errResult) {
+    return {
+      ...r,
+      errorResult: _stellarBase.xdr.TransactionResult.fromXDR(errResult, 'base64')
+    };
+  }
+  return {
+    ...r
+  };
+}
+function parseRawEvents(r) {
+  return {
+    latestLedger: r.latestLedger,
+    events: (r.events ?? []).map(evt => {
+      return {
+        ...evt,
+        contractId: new _stellarBase.Contract(evt.contractId),
+        topic: evt.topic.map(topic => _stellarBase.xdr.ScVal.fromXDR(topic, 'base64')),
+        value: _stellarBase.xdr.DiagnosticEvent.fromXDR(evt.value.xdr, 'base64')
+      };
+    })
+  };
+}
+function parseRawLedgerEntries(raw) {
+  return {
+    latestLedger: raw.latestLedger,
+    entries: (raw.entries ?? []).map(rawEntry => {
+      if (!rawEntry.key || !rawEntry.xdr) {
+        throw new TypeError(`invalid ledger entry: ${JSON.stringify(rawEntry)}`);
+      }
+      return {
+        lastModifiedLedgerSeq: rawEntry.lastModifiedLedgerSeq,
+        key: _stellarBase.xdr.LedgerKey.fromXDR(rawEntry.key, 'base64'),
+        val: _stellarBase.xdr.LedgerEntryData.fromXDR(rawEntry.xdr, 'base64'),
+        expirationLedgerSeq: rawEntry.expirationLedgerSeq
+      };
+    })
+  };
+}
 
 /**
- * Transfers native balance to destination account.
+ * Converts a raw response schema into one with parsed XDR fields and a
+ * simplified interface.
  *
- * @function
- * @alias Operation.accountMerge
+ * @param raw   the raw response schema (parsed ones are allowed, best-effort
+ *    detected, and returned untouched)
  *
- * @param {object} opts - options object
- * @param {string} opts.destination - destination to merge the source account into
- * @param {string} [opts.source]    - operation source account (defaults to
- *     transaction source)
+ * @returns the original parameter (if already parsed), parsed otherwise
  *
- * @returns {xdr.Operation} an Account Merge operation (xdr.AccountMergeOp)
+ * @warning This API is only exported for testing purposes and should not be
+ *          relied on or considered "stable".
  */
-export function accountMerge(opts) {
-  const opAttributes = {};
-  try {
-    opAttributes.body = xdr.OperationBody.accountMerge(
-      decodeAddressToMuxedAccount(opts.destination)
-    );
-  } catch (e) {
-    throw new Error('destination is invalid');
+function parseRawSimulation(sim) {
+  var _sim$events;
+  const looksRaw = _soroban_rpc.SorobanRpc.isSimulationRaw(sim);
+  if (!looksRaw) {
+    // Gordon Ramsey in shambles
+    return sim;
   }
-  this.setSourceAccount(opAttributes, opts);
 
-  return new xdr.Operation(opAttributes);
+  // shared across all responses
+  let base = {
+    _parsed: true,
+    id: sim.id,
+    latestLedger: sim.latestLedger,
+    events: ((_sim$events = sim.events) === null || _sim$events === void 0 ? void 0 : _sim$events.map(evt => _stellarBase.xdr.DiagnosticEvent.fromXDR(evt, 'base64'))) ?? []
+  };
+
+  // error type: just has error string
+  if (typeof sim.error === 'string') {
+    return {
+      ...base,
+      error: sim.error
+    };
+  }
+  return parseSuccessful(sim, base);
 }
-</code></pre>
+function parseSuccessful(sim, partial) {
+  var _sim$results;
+  // success type: might have a result (if invoking) and...
+  const success = {
+    ...partial,
+    transactionData: new _stellarBase.SorobanDataBuilder(sim.transactionData),
+    minResourceFee: sim.minResourceFee,
+    cost: sim.cost,
+    ...(
+    // coalesce 0-or-1-element results[] list into a single result struct
+    // with decoded fields if present
+    (((_sim$results = sim.results) === null || _sim$results === void 0 ? void 0 : _sim$results.length) ?? 0 > 0) &amp;&amp; {
+      result: sim.results.map(row => {
+        return {
+          auth: (row.auth ?? []).map(entry => _stellarBase.xdr.SorobanAuthorizationEntry.fromXDR(entry, 'base64')),
+          // if return value is missing ("falsy") we coalesce to void
+          retval: !!row.xdr ? _stellarBase.xdr.ScVal.fromXDR(row.xdr, 'base64') : _stellarBase.xdr.ScVal.scvVoid()
+        };
+      })[0]
+    })
+  };
+  if (!sim.restorePreamble || sim.restorePreamble.transactionData === '') {
+    return success;
+  }
+
+  // ...might have a restoration hint (if some state is expired)
+  return {
+    ...success,
+    restorePreamble: {
+      minResourceFee: sim.restorePreamble.minResourceFee,
+      transactionData: new _stellarBase.SorobanDataBuilder(sim.restorePreamble.transactionData)
+    }
+  };
+}</code></pre>
         </article>
     </section>
 
