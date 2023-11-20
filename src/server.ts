@@ -775,10 +775,10 @@ function mergeResponseExpirationLedgers(
     }
     const parsedKey = xdr.LedgerKey.fromXDR(rawEntryResult.key, 'base64');
     const isExpirationMeta =
-      parsedKey.switch().value === xdr.LedgerEntryType.expiration().value &&
+      parsedKey.switch().value === xdr.LedgerEntryType.ttl().value &&
       !requestedKeyXdrs.has(rawEntryResult.key);
     const keyHash = isExpirationMeta
-      ? parsedKey.expiration().keyHash().toString()
+      ? parsedKey.ttl().keyHash().toString()
       : hash(parsedKey.toXDR()).toString();
 
     const rawEntry =
@@ -789,8 +789,8 @@ function mergeResponseExpirationLedgers(
         rawEntryResult.xdr,
         'base64'
       )
-        .expiration()
-        .expirationLedgerSeq();
+        .ttl()
+        .liveUntilLedgerSeq();
       expirationKeyToRawEntryResult.set(keyHash, {
         ...rawEntry,
         expirationLedgerSeq
@@ -815,13 +815,9 @@ function expandRequestIncludeExpirationLedgers(
 ): xdr.LedgerKey[] {
   return keys.concat(
     keys
-      .filter(
-        (key) => key.switch().value !== xdr.LedgerEntryType.expiration().value
-      )
+      .filter((key) => key.switch().value !== xdr.LedgerEntryType.ttl().value)
       .map((key) =>
-        xdr.LedgerKey.expiration(
-          new xdr.LedgerKeyExpiration({ keyHash: hash(key.toXDR()) })
-        )
+        xdr.LedgerKey.ttl(new xdr.LedgerKeyTtl({ keyHash: hash(key.toXDR()) }))
       )
   );
 }

@@ -1,8 +1,13 @@
 # Changelog
 
-- Forked from [stellar/js-stellar-sdk](https://github.com/stellar/js-stellar-sdk).
+**This repository has been deprecated** in favor of the [`stellar-sdk`](https://github.com/stellar/js-stellar-sdk) package. Please read the [migration guide](https://gist.github.com/Shaptic/5ce4f16d9cce7118f391fbde398c2f30) for how to upgrade to that package. Future changes will only be made there.
 
-A breaking change should be clearly marked in this log.
+
+## v1.0.0-rc.1
+
+### Breaking Changes
+* See the new deprecation warning at the top of this document and in the [README](./README.md).
+* XDR has been upgraded to the latest `stellar-base` release, supporting the current stable XDR for Protocol 20 ([#167](https://github.com/stellar/js-soroban-client/pull/167)).
 
 
 ## v1.0.0-beta.3

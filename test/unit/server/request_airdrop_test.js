@@ -115,8 +115,8 @@ describe('Server#requestAirdrop', function () {
       })
     );
 
-    const ledgerExpirationKey = xdr.LedgerKey.expiration(
-      new xdr.LedgerKeyExpiration({ keyHash: hash(accountKey.toXDR()) })
+    const ledgerTtlKey = xdr.LedgerKey.ttl(
+      new xdr.LedgerKeyTtl({ keyHash: hash(accountKey.toXDR()) })
     );
 
     this.axiosMock
@@ -125,9 +125,7 @@ describe('Server#requestAirdrop', function () {
         jsonrpc: '2.0',
         id: 1,
         method: 'getLedgerEntries',
-        params: [
-          [accountKey.toXDR('base64'), ledgerExpirationKey.toXDR('base64')]
-        ]
+        params: [[accountKey.toXDR('base64'), ledgerTtlKey.toXDR('base64')]]
       })
       .returns(
         Promise.resolve({
