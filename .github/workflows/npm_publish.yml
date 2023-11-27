@@ -27,6 +27,6 @@ jobs:
         run: |
           yarn publish
           npm deprecate soroban-client@latest \
-            "⚠️ This package is now deprecated: use the stellar-sdk library! 🚚 All future updates and bug fixes will happen there. Please refer to the migration guide for details on porting your codebase: https://github.com/stellar/js-soroban-client/tree/main/docs/migration.md"
+            "⚠️ This package is now deprecated: transition to `stellar-sdk@beta`, instead! 🚚 All future updates and bug fixes will happen there. Please refer to the migration guide for details on porting your codebase: https://github.com/stellar/js-soroban-client/tree/main/docs/migration.md"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
