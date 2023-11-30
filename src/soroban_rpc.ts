@@ -146,7 +146,7 @@ export namespace SorobanRpc {
   }
 
   interface EventResponse extends BaseEventResponse {
-    contractId: Contract;
+    contractId?: Contract;
     topic: xdr.ScVal[];
     value: xdr.ScVal;
   }
