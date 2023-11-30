@@ -49,7 +49,9 @@ export function parseRawLedgerEntries(
         lastModifiedLedgerSeq: rawEntry.lastModifiedLedgerSeq,
         key: xdr.LedgerKey.fromXDR(rawEntry.key, 'base64'),
         val: xdr.LedgerEntryData.fromXDR(rawEntry.xdr, 'base64'),
-        expirationLedgerSeq: rawEntry.expirationLedgerSeq
+        ...(rawEntry.liveUntilLedgerSeq !== undefined && {
+          liveUntilLedgerSeq: rawEntry.liveUntilLedgerSeq
+        })
       };
     })
   };
