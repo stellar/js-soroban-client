@@ -10,6 +10,12 @@
 * XDR has been upgraded to the latest `stellar-base` release, supporting the current stable XDR for Protocol 20 ([#167](https://github.com/stellar/js-soroban-client/pull/167)).
 
 
+## v1.0.0-beta.4
+
+### Fixed
+* The `stellar-base` dependency has been upgraded to [v10.0.0-beta.4](https://github.com/stellar/js-stellar-base/releases/tag/v10.0.0-beta.4) which contains a bugfix related to large sequence numbers ([#170](https://github.com/stellar/js-soroban-client/pull/170)).
+
+
 ## v1.0.0-beta.3
 
 ### Added
