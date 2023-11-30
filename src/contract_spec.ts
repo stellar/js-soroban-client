@@ -814,7 +814,8 @@ const PRIMITIVE_DEFINITONS = {
   },
   Address: {
     type: 'string',
-    description: 'Address can be a public key or contract id'
+    description: 'Address can be a public key or contract id',
+    pattern: '^(G|C)[A-Z0-9]{55}$'
   },
   ScString: {
     type: 'string',
@@ -963,7 +964,7 @@ function typeRef(typeDef: xdr.ScSpecTypeDef): object {
 }
 
 function isRequired(typeDef: xdr.ScSpecTypeDef): boolean {
-  return typeDef.switch().value != xdr.ScSpecType.scSpecTypeOption().value;
+  return typeDef.switch().value !== xdr.ScSpecType.scSpecTypeOption().value;
 }
 
 function structToJsonSchema(udt: xdr.ScSpecUdtStructV0): object {
