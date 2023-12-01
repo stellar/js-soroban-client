@@ -13,8 +13,9 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
+          always-auth: true
 
       - name: Install Depencencies
         run: yarn install
@@ -23,6 +24,9 @@ jobs:
         run: yarn preversion
 
       - name: Publish npm package
-        run: yarn publish
+        run: |
+          yarn publish
+          npm deprecate soroban-client@latest \
+            "⚠️ This package is now deprecated: transition to `stellar-sdk@beta`, instead! 🚚 All future updates and bug fixes will happen there. Please refer to the migration guide for details on porting your codebase: https://github.com/stellar/js-soroban-client/tree/main/docs/migration.md"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
