@@ -3,6 +3,7 @@ const {
   Keypair,
   Networks,
   SorobanDataBuilder,
+  authorizeEntry,
   authorizeInvocation,
   authorizeEntry,
   parseRawSimulation,

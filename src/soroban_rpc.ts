@@ -141,7 +141,7 @@ export namespace SorobanRpc {
   }
 
   interface EventResponse extends BaseEventResponse {
-    contractId: Contract;
+    contractId?: Contract;
     topic: xdr.ScVal[];
     value: xdr.ScVal;
   }
@@ -160,7 +160,7 @@ export namespace SorobanRpc {
     inSuccessfulContractCall: boolean;
   }
 
-  interface RawEventResponse extends BaseEventResponse {
+  export interface RawEventResponse extends BaseEventResponse {
     contractId: string;
     topic: string[];
     value: string;

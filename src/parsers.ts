@@ -23,9 +23,15 @@ export function parseRawEvents(
   return {
     latestLedger: r.latestLedger,
     events: (r.events ?? []).map((evt) => {
+      const clone: Omit<SorobanRpc.RawEventResponse, 'contractId'> = { ...evt };
+      delete (clone as any).contractId; // `as any` hack because contractId field isn't optional
+
+      // the contractId may be empty so we omit the field in that case
       return {
-        ...evt,
-        contractId: new Contract(evt.contractId),
+        ...clone,
+        ...(evt.contractId !== '' && {
+          contractId: new Contract(evt.contractId)
+        }),
         topic: evt.topic.map((topic) => xdr.ScVal.fromXDR(topic, 'base64')),
         value: xdr.ScVal.fromXDR(evt.value, 'base64')
       };
