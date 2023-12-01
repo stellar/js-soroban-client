@@ -1,11 +1,7 @@
 import { AssetType, Contract, SorobanDataBuilder, xdr } from 'stellar-base';
 
-// TODO: Better parsing for hashes
-
 /* tslint:disable-next-line:no-namespace */
-/**
- * @namespace SorobanRpc
- */
+/** @namespace SorobanRpc */
 export namespace SorobanRpc {
   export interface Balance {
     asset_type: AssetType.credit4 | AssetType.credit12;
@@ -55,20 +51,18 @@ export namespace SorobanRpc {
     latestLedger: number;
   }
 
-  /* Response for jsonrpc method `getNetwork`
-   */
+  /** @see https://soroban.stellar.org/api/methods/getNetwork */
   export interface GetNetworkResponse {
     friendbotUrl?: string;
     passphrase: string;
-    protocolVersion: string;
+    protocolVersion: number;
   }
 
-  /* Response for jsonrpc method `getLatestLedger`
-   */
+  /** @see https://soroban.stellar.org/api/methods/getLatestLedger */
   export interface GetLatestLedgerResponse {
     id: string;
     sequence: number;
-    protocolVersion: string;
+    protocolVersion: number;
   }
 
   export enum GetTransactionStatus {
@@ -77,6 +71,7 @@ export namespace SorobanRpc {
     FAILED = 'FAILED'
   }
 
+  /** @see https://soroban.stellar.org/api/methods/getTransaction */
   export type GetTransactionResponse =
     | GetSuccessfulTransactionResponse
     | GetFailedTransactionResponse
@@ -84,9 +79,9 @@ export namespace SorobanRpc {
 
   interface GetAnyTransactionResponse {
     status: GetTransactionStatus;
-    latestLedger: string;
+    latestLedger: number;
     latestLedgerCloseTime: number;
-    oldestLedger: string;
+    oldestLedger: number;
     oldestLedgerCloseTime: number;
   }
 
@@ -117,9 +112,9 @@ export namespace SorobanRpc {
 
   export interface RawGetTransactionResponse {
     status: GetTransactionStatus;
-    latestLedger: string;
+    latestLedger: number;
     latestLedgerCloseTime: number;
-    oldestLedger: string;
+    oldestLedger: number;
     oldestLedgerCloseTime: number;
 
     // the fields below are set if status is SUCCESS
@@ -141,25 +136,25 @@ export namespace SorobanRpc {
   }
 
   export interface GetEventsResponse {
-    latestLedger: string;
+    latestLedger: number;
     events: EventResponse[];
   }
 
   interface EventResponse extends BaseEventResponse {
     contractId: Contract;
     topic: xdr.ScVal[];
-    value: xdr.DiagnosticEvent;
+    value: xdr.ScVal;
   }
 
   export interface RawGetEventsResponse {
-    latestLedger: string;
+    latestLedger: number;
     events: RawEventResponse[];
   }
 
   interface BaseEventResponse {
     id: string;
     type: EventType;
-    ledger: string;
+    ledger: number;
     ledgerClosedAt: string;
     pagingToken: string;
     inSuccessfulContractCall: boolean;
@@ -168,9 +163,7 @@ export namespace SorobanRpc {
   interface RawEventResponse extends BaseEventResponse {
     contractId: string;
     topic: string[];
-    value: {
-      xdr: string;
-    };
+    value: string;
   }
 
   export interface RequestAirdropResponse {
@@ -232,7 +225,7 @@ export namespace SorobanRpc {
     id: string;
 
     /** always present: the LCL known to the server when responding */
-    latestLedger: string;
+    latestLedger: number;
 
     /**
      * The field is always present, but may be empty in cases where:
@@ -322,7 +315,7 @@ export namespace SorobanRpc {
   /** @see https://soroban.stellar.org/api/methods/simulateTransaction#returns */
   export interface RawSimulateTransactionResponse {
     id: string;
-    latestLedger: string;
+    latestLedger: number;
     error?: string;
     // this is an xdr.SorobanTransactionData in base64
     transactionData?: string;
