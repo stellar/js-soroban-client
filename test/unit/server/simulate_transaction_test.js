@@ -5,7 +5,6 @@ const {
   SorobanDataBuilder,
   authorizeEntry,
   authorizeInvocation,
-  authorizeEntry,
   parseRawSimulation,
   xdr
 } = SorobanClient;
