@@ -22,7 +22,7 @@ jobs:
       - name: Install Node 18
         uses: actions/setup-node@v2
         with:
-          node-version: '18x'
+          node-version: '18.x'
 
       - name: Install Dependencies
         run: yarn install
