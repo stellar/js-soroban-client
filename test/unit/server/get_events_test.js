@@ -244,9 +244,7 @@ let getEventsResponseFixture = [
     pagingToken: '164090849041387521-3',
     inSuccessfulContractCall: true,
     topic: topicVals.slice(0, 2),
-    value: {
-      xdr: eventVal
-    }
+    value: eventVal
   },
   {
     type: 'contract',
@@ -257,9 +255,7 @@ let getEventsResponseFixture = [
     pagingToken: '164090849041387521-3',
     inSuccessfulContractCall: true,
     topic: topicVals.slice(0, 2),
-    value: {
-      xdr: eventVal
-    }
+    value: eventVal
   },
   {
     type: 'diagnostic',
@@ -270,9 +266,7 @@ let getEventsResponseFixture = [
     pagingToken: '164090849041387521-3',
     inSuccessfulContractCall: true,
     topic: [topicVals[0]],
-    value: {
-      xdr: eventVal
-    }
+    value: eventVal
   },
   {
     type: 'contract',
@@ -283,8 +277,6 @@ let getEventsResponseFixture = [
     pagingToken: '0000000171798695936-0000000001',
     inSuccessfulContractCall: true,
     topic: topicVals,
-    value: {
-      xdr: eventVal
-    }
+    value: eventVal
   }
 ];

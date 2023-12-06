@@ -46,7 +46,7 @@ export function assembleTransaction(
   if (!isSorobanTransaction(raw)) {
     throw new TypeError(
       'unsupported transaction: must contain exactly one ' +
-        'invokeHostFunction, bumpFootprintExpiration, or restoreFootprint ' +
+        'invokeHostFunction, extendFootprintTtl, or restoreFootprint ' +
         'operation'
     );
   }
@@ -105,7 +105,7 @@ function isSorobanTransaction(tx: Transaction): boolean {
 
   switch (tx.operations[0].type) {
     case 'invokeHostFunction':
-    case 'bumpFootprintExpiration':
+    case 'extendFootprintTtl':
     case 'restoreFootprint':
       return true;
 
