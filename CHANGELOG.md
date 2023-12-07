@@ -12,6 +12,7 @@
 ### Fixed
 * The `Server.getEvents` method now correctly parses responses without a `contractId` field set: the `events[i].contractId` field on an event will be omitted if there was no ID in the event (e.g. for system events; ([#172](https://github.com/stellar/js-soroban-client/pull/172))).
 * The `Server.getEvents()` method will correctly parse the event value as an `xdr.ScVal` rather than an `xdr.DiagnosticEvent` ([#172](https://github.com/stellar/js-soroban-client/pull/172)).
+* The `Server.getEvents()` method will correctly set `startLedger` to be a number rather than a string ([#174](https://github.com/stellar/js-soroban-client/pull/174)).
 
 
 ## v1.0.0-beta.4
