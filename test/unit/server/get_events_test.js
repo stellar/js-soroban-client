@@ -18,7 +18,7 @@ describe('Server#getEvents', function () {
       {
         filters: [],
         pagination: {},
-        startLedger: '1'
+        startLedger: 1
       },
       result
     );
@@ -44,7 +44,7 @@ describe('Server#getEvents', function () {
     setupMock(
       this.axiosMock,
       {
-        startLedger: '1',
+        startLedger: 1,
         filters: [
           {
             topics: [['*', '*']]
@@ -85,7 +85,7 @@ describe('Server#getEvents', function () {
     setupMock(
       this.axiosMock,
       {
-        startLedger: '1',
+        startLedger: 1,
         filters: [
           {
             topics: [[topicVals[0], topicVals[1]]]
@@ -125,7 +125,7 @@ describe('Server#getEvents', function () {
     setupMock(
       this.axiosMock,
       {
-        startLedger: '2',
+        startLedger: 2,
         filters: [
           {
             topics: [[topicVals[0], '*']]
