@@ -1,6 +1,6 @@
-**This library is deprecated in favor of `stellar-sdk`.**
+**This library is deprecated in favor of `@stellar/stellar-sdk`.**
 
-## Migrating to `stellar-sdk`
+## Migrating to `@stellar/stellar-sdk`
 
 This migration guide is focused towards former users of `soroban-client`, but you can refer to the [full migration guide](https://gist.github.com/Shaptic/5ce4f16d9cce7118f391fbde398c2f30/) for more details.
 
@@ -22,7 +22,7 @@ const s = SorobanClient.Server("...");
 const r: SorobanClient.SorobanRpc.GetTransactionResponse = s.getTransaction("...");
 
 // after:
-import { SorobanRpc } from 'soroban-client';
+import { SorobanRpc } from '@stellar/stellar-sdk';
 
 const s = SorobanRpc.Server("...");
 const r: SorobanRpc.Api.GetTransactionResponse = s.getTransaction("...");
@@ -35,7 +35,7 @@ import {
     Account,
     TransactionBuilder,
     SorobanDataBuilder
-} from 'stellar-sdk';
+} from '@stellar/stellar-sdk';
 ```
 
 (If you've ever imported and used `stellar-base` directly, then this distinction should be clear: anything found in `stellar-base` lives in the top-level module.)
@@ -93,23 +93,23 @@ import {
     Operation,
     scValToNative,
     SorobanRpc
-} from 'stellar-sdk';
-const { Api, assembleTransaction } = SorobanRpc;
+} from '@stellar/stellar-sdk';
+const { Api, Server, assembleTransaction } = SorobanRpc;
 
-const s = SorobanRpc.Server('https://horizon-testnet.stellar.org');
+const s = Server('https://soroban-testnet.stellar.org');
 const kp = Keypair.random();
 
 async function main() {
     return s.getAccount(kp.publicKey()).then(account => {
         const tx = new TransactionBuilder(account, { fee: BASE_FEE })
-            .addOperation(c.call("hello", scValToNative("world")))
-            .setNetworkPassphrase(Networks.FUTURENET)
+            .addOperation(c.call("hello", nativeToScVal("world")))
+            .setNetworkPassphrase(Networks.TESTNET)
             .setTimeout(30)
             .build();
 
         let sim: Api.SimulateTransactionResult;
         sim = await s.simulateTransaction(tx);
-        const readyTx = assembleTransaction(tx, Networks.FUTURENET, sim);
+        const readyTx = assembleTransaction(tx, sim);
         readyTx.sign(kp);
 
         return s.submitTransaction(readyTx);
