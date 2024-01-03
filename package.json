@@ -1,6 +1,6 @@
 {
   "name": "soroban-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A library for working with Stellar's Soroban RPC servers.",
   "author": "Stellar Development Foundation <hello@stellar.org>",
   "homepage": "https://github.com/stellar/js-soroban-client",
@@ -17,7 +17,7 @@
     "soroban"
   ],
   "main": "./lib/index.js",
-  "browser": "./dist/soroban-client.js",
+  "browser": "./dist/soroban-client.min.js",
   "types": "./lib/index.d.ts",
   "files": [
     "/types",
